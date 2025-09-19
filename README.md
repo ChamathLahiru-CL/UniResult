@@ -1,12 +1,40 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# UniResult - University Login Page
 
-Currently, two official plugins are available:
+A modern, mobile-responsive login page for the UniResult university web application built with React and TailwindCSS.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- **Split-screen layout** with login form on the left and welcome section on the right
+- **Responsive design** that stacks on mobile devices
+- **Form validation** with real-time error feedback
+- **Password visibility toggle** with eye icon
+- **Remember Me** checkbox functionality
+- **Google login integration** (demo)
+- **Modern UI** with TailwindCSS styling
+- **Accessibility features** with proper labels and focus states
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+
+- **React 18** - Functional components with hooks
+- **JavaScript** - No TypeScript
+- **TailwindCSS** - Utility-first CSS framework
+- **Heroicons** - Beautiful SVG icons
+- **Google Fonts** - Inter and Roboto fonts
+
+## 📱 Design Features
+
+### Left Side (Login Form)
+- Clean, minimalist design
+- Username input with user icon
+- Password input with lock icon and visibility toggle
+- "Remember Me" checkbox
+- "Forgot Password" link
+- Blue "Login Now" button
+- Google login button with Google branding
+- Sign-up link at the bottom
+
+### Right Side (Welcome Section)
+- UniResult logo and branding
+- Welcome message
+- Decorative elements
