@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { FcGoogle } from 'react-icons/fc';
 import Input from '../components/Input';
@@ -218,9 +218,9 @@ const Login = () => {
 
               <div className="text-center mt-8 border-t border-gray-100 pt-6">
                 <span className="text-gray-600 text-sm">Don't have an account? </span>
-                <a href="#" className="text-blue-500 hover:text-blue-600 text-sm font-medium ml-1 transition-colors duration-200 hover:underline underline-offset-2">
+                <Link to="/signup" className="text-blue-500 hover:text-blue-600 text-sm font-medium ml-1 transition-colors duration-200 hover:underline underline-offset-2">
                   Sign up
-                </a>
+                </Link>
               </div>
             </form>
           </div>

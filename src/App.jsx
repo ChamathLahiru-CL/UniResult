@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
+import SignUp from './pages/SignUp'
 import './App.css'
 
 // Placeholder dashboard components
@@ -12,6 +13,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
       <Route path="/student/*" element={<StudentDashboard />} />
       <Route path="/exam/*" element={<ExamDashboard />} />
       <Route path="/admin/*" element={<AdminDashboard />} />
