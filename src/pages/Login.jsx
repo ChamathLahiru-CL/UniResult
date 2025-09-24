@@ -90,6 +90,7 @@ const Login = () => {
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Enter your username"
+                  autoComplete="username"
                 />
               </div>
 
@@ -98,6 +99,7 @@ const Login = () => {
                   label="Password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
@@ -146,6 +148,7 @@ const Login = () => {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
+                    autoComplete="off"
                     className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-all duration-300 ease-in-out shadow-sm hover:shadow hover:border-blue-300 appearance-none"
                   >
                     <option value="student" className="py-2">Student</option>
@@ -166,6 +169,7 @@ const Login = () => {
                   checked={formData.rememberMe}
                   onChange={handleChange}
                   name="rememberMe"
+                  id="rememberMe"
                 />
                 <a href="#" className="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200 underline-offset-2 hover:underline">
                   Forgot Password?

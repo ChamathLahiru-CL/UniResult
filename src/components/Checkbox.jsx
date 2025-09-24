@@ -5,13 +5,15 @@ const Checkbox = ({
   checked,
   onChange,
   name,
-  className = ''
+  className = '',
+  id
 }) => {
   return (
-    <label className={`inline-flex items-center group ${className}`}>
+    <label htmlFor={id || name} className={`inline-flex items-center group ${className}`}>
       <div className="relative flex items-center">
         <input
           type="checkbox"
+          id={id || name}
           checked={checked}
           onChange={onChange}
           name={name}

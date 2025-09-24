@@ -107,7 +107,10 @@ const SignUp = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label htmlFor="fullName" className="block text-gray-700 text-sm font-medium mb-1">
+                  <label
+                    htmlFor="fullName"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
                     Full Name
                   </label>
                   <div className="relative">
@@ -151,7 +154,10 @@ const SignUp = () => {
               </div>
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
-                <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-gray-700 text-sm font-medium mb-1"
+                >
                   University Email
                 </label>
                 <div className="flex items-center">
@@ -189,8 +195,8 @@ const SignUp = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="username"
-                      autoComplete="username"
+                      placeholder="exp01012"
+                      autoComplete="universityEmail"
                       className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-l-md"
                     />
                   </div>
@@ -202,7 +208,10 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label htmlFor="enrollmentNumber" className="block text-gray-700 text-sm font-medium mb-1">
+                  <label
+                    htmlFor="enrollmentNumber"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
                     Enrollment Number
                   </label>
                   <div className="relative">
@@ -244,7 +253,7 @@ const SignUp = () => {
                       name="enrollmentNumber"
                       value={formData.enrollmentNumber}
                       onChange={handleChange}
-                      placeholder="Enter your enrollment number"
+                      placeholder="Enter your enrollment number (exp/01/012)"
                       autoComplete="off"
                       className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                     />
@@ -254,7 +263,10 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label htmlFor="password" className="block text-gray-700 text-sm font-medium mb-1">
+                  <label
+                    htmlFor="password"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -386,7 +398,10 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-medium mb-1">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -576,7 +591,7 @@ const SignUp = () => {
                 </div>
               )}
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -673,13 +688,13 @@ const SignUp = () => {
           {/* Content with enhanced animations */}
           <div className="relative h-full flex flex-col items-center justify-center p-4 text-center z-10">
             {/* Animated logo container with enhanced glow effect */}
-            <div className="relative transform hover:scale-105 transition-transform duration-500 cursor-pointer mb-4">
+            <div className="relative transform hover:scale-105 transition-transform duration-500 cursor-pointer mb-6">
               <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-indigo-400 opacity-30 rounded-full blur-xl"></div>
               <div className="relative">
                 <img
                   src={logo}
                   alt="UniResult Logo"
-                  className="w-36 h-36 md:w-40 md:h-40 object-contain drop-shadow-lg" // Significantly increased logo size
+                  className="w-52 h-52 md:w-64 md:h-64 object-contain drop-shadow-lg"
                 />
                 <div className="absolute -inset-0.5 bg-white rounded-full opacity-20 blur"></div>
               </div>
