@@ -75,11 +75,11 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-gray-100">
+    <div className="min-h-screen flex items-center justify-center p-2 bg-gradient-to-br from-blue-50 to-gray-100">
       {/* Combined Card with animation */}
       <div className="w-full max-w-5xl flex flex-col md:flex-row rounded-2xl overflow-hidden shadow-xl bg-white transition-all duration-700 ease-in-out transform hover:shadow-2xl">
         {/* Sign Up Form Side */}
-        <div className="w-full md:w-1/2 bg-white p-8 md:p-10 flex flex-col justify-center relative overflow-hidden">
+        <div className="w-full md:w-1/2 bg-white p-4 md:p-5 flex flex-col justify-center relative overflow-hidden">
           {/* Animated decorative elements */}
           <div className="absolute top-0 left-0 w-24 h-24 bg-blue-50 rounded-br-full opacity-50"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-50 rounded-tl-full opacity-50"></div>
@@ -88,9 +88,9 @@ const SignUp = () => {
           <div className="absolute top-1/2 -left-24 w-40 h-40 bg-indigo-100 rounded-full opacity-10"></div>
           
           <div className="relative z-10">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 mb-3 tracking-tight">Create Your Account</h1>
-              <p className="text-[15px] text-gray-600 max-w-md mx-auto">
+            <div className="text-center mb-4">
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 mb-2 tracking-tight">Create Your Account</h1>
+              <p className="text-[14px] text-gray-600 max-w-md mx-auto">
                 Join UniResult with your university ID to access exam results and academic resources.
               </p>
             </div>
@@ -98,7 +98,7 @@ const SignUp = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
+                  <label className="block text-gray-700 text-sm font-medium mb-1">Full Name</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg 
@@ -136,7 +136,7 @@ const SignUp = () => {
               </div>
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
-                <label className="block text-gray-700 text-sm font-medium mb-2">University Email</label>
+                <label className="block text-gray-700 text-sm font-medium mb-1">University Email</label>
                 <div className="flex items-center">
                   <div className="relative flex-grow">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -181,7 +181,7 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Enrollment Number</label>
+                  <label className="block text-gray-700 text-sm font-medium mb-1">Enrollment Number</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg 
@@ -226,7 +226,7 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                  <label className="block text-gray-700 text-sm font-medium mb-1">Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg 
@@ -291,7 +291,7 @@ const SignUp = () => {
 
               <div className="transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Confirm Password</label>
+                  <label className="block text-gray-700 text-sm font-medium mb-1">Confirm Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg 
@@ -430,13 +430,13 @@ const SignUp = () => {
               <button
                 type="button"
                 onClick={() => console.log('Google signup clicked')}
-                className="flex items-center justify-center w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                className="flex items-center justify-center w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
               >
                 <FcGoogle className="w-5 h-5 mr-3" />
                 <span>Sign up with Google</span>
               </button>
 
-              <div className="text-center mt-8 border-t border-gray-100 pt-6 flex flex-wrap justify-center">
+              <div className="text-center mt-4 border-t border-gray-100 pt-4 flex flex-wrap justify-center">
                 <span className="text-gray-600 text-sm">Already have an account? </span>
                 <Link to="/" className="text-blue-500 hover:text-blue-700 text-sm font-medium ml-1 transition-colors duration-200 hover:underline underline-offset-2">
                   Login
