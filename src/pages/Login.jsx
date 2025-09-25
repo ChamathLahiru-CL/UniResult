@@ -89,7 +89,7 @@ const Login = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder="Enter your username"
+                  placeholder="Enter your enrollment number"
                   autoComplete="username"
                 />
               </div>
@@ -171,9 +171,9 @@ const Login = () => {
                   name="rememberMe"
                   id="rememberMe"
                 />
-                <a href="#" className="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200 underline-offset-2 hover:underline">
+                <Link to="/forgot-password" className="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200 underline-offset-2 hover:underline">
                   Forgot Password?
-                </a>
+                </Link>
               </div>
 
               {error && (
