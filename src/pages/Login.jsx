@@ -44,7 +44,7 @@ const Login = () => {
       
       // Redirect based on selected role
       if (formData.role === 'student') {
-        navigate('/student');
+        navigate('/dash');
       } else if (formData.role === 'admin') {
         navigate('/admin');
       } else if (formData.role === 'exam') {
