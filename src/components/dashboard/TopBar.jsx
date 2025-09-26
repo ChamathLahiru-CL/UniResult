@@ -60,7 +60,7 @@ const TopBar = ({ toggleSidebar, toggleCollapse, isCollapsed, isSidebarVisible }
            <h1 className="text-3xl font-bold">
                 <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
                 <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
-              </h1>
+            </h1>
           </div>
         </div>
 
