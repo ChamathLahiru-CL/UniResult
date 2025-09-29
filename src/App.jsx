@@ -5,9 +5,9 @@ import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
 import DashboardLayout from './layouts/DashboardLayout'
 import StudentDashboard from './pages/dashboard/StudentDashboard'
+import ExamTimeTable from './pages/dashboard/ExamTimeTable'
 import './App.css'
 
-// Placeholder dashboard components for admin and exam division
 const ExamDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Exam Division Dashboard</h1></div>;
 const AdminDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Admin Dashboard</h1></div>;
 
@@ -24,7 +24,7 @@ function App() {
         <Route index element={<StudentDashboard />} />
         <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} />
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} />
-        <Route path="exam-time-table" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Schedule</h1></div>} />
+        <Route path="exam-time-table" element={<ExamTimeTable />} />
         <Route path="notifications" element={<div className="p-8"><h1 className="text-2xl font-bold">Notifications</h1></div>} />
         <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Profile</h1></div>} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Account Settings</h1></div>} />
