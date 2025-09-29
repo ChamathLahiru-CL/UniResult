@@ -77,7 +77,7 @@ const Sidebar = ({ isCollapsed }) => {
       </div>
       
       {/* Main navigation section */}
-      <nav className="flex-grow py-6 px-3 space-y-2 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-blue-100 hover:scrollbar-thumb-blue-200">
+      <nav className="flex-grow py-6 px-3 flex flex-col justify-center space-y-2">
         {navItems.map((item) => (
           <button
             key={item.name}
@@ -101,7 +101,7 @@ const Sidebar = ({ isCollapsed }) => {
       </nav>
       
       {/* Footer navigation section */}
-      <div className={`px-3 py-4 border-t border-blue-100/50 bg-gradient-to-b from-white/50 to-blue-50/30 backdrop-blur-sm relative z-10 ${isCollapsed ? 'space-y-2' : ''}`}>
+      <div className={`px-3 py-4 border-t border-blue-100/50 bg-gradient-to-b from-white/50 to-blue-50/30 backdrop-blur-sm relative z-10 flex flex-col items-center ${isCollapsed ? 'space-y-2' : ''}`}>
         {footerItems.map((item) => (
           <button
             key={item.name}
