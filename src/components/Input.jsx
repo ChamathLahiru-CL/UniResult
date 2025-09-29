@@ -10,7 +10,8 @@ const Input = ({
   error,
   icon: Icon,
   onIconClick,
-  className = ''
+  className = '',
+  autoComplete
 }) => {
   return (
     <div className="w-full space-y-2">
@@ -39,6 +40,7 @@ const Input = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete={autoComplete || (name === 'username' ? 'username' : type === 'password' ? 'current-password' : 'off')}
           className={`
             w-full pl-10 pr-10 py-2.5 border text-gray-700
             rounded-lg bg-gray-50
