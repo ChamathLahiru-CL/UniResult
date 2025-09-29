@@ -67,22 +67,26 @@ const ExamTimeTable = () => {
       </div>
 
       {/* Level Selection Tabs */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+      <div className="mb-8">
+        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-2">
+          <nav className="flex gap-2" aria-label="Tabs">
             {levels.map((level) => (
               <button
                 key={level.id}
                 onClick={() => setActiveLevel(level.id)}
                 className={`
-                  whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                  relative px-6 py-2.5 rounded-xl font-medium text-sm transition-all duration-200
+                  focus:outline-none transform
                   ${activeLevel === level.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                    : 'text-gray-600 hover:bg-white hover:shadow-sm active:scale-95'
                   }
                 `}
               >
                 {level.name}
+                {activeLevel === level.id && (
+                  <span className="absolute inset-0 rounded-xl bg-white/20 animate-pulse-slow"></span>
+                )}
               </button>
             ))}
           </nav>
@@ -90,72 +94,78 @@ const ExamTimeTable = () => {
       </div>
 
       {/* Timetable Display Section */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <img
-            src={examTables[activeLevel]}
-            alt={`${activeLevel} Level Exam Timetable`}
-            className="w-full h-auto"
-          />
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300">
+        <div className="overflow-hidden rounded-xl bg-gradient-to-b from-gray-50 to-white">
+          <div className="flex justify-center items-center p-4">
+            <img
+              src={examTables[activeLevel]}
+              alt={`${activeLevel} Level Exam Timetable`}
+              className="w-auto max-h-[1024px] object-contain rounded-lg shadow-sm transition-transform duration-300 hover:scale-[1.02]"
+              style={{ maxWidth: '90%' }}
+            />
+          </div>
         </div>
 
         {/* Download Button */}
-        <div className="mt-4 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <button
             onClick={() => handleDownload(activeLevel)}
             disabled={downloading}
             className={`
-              inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-150 ease-in-out
+              group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-xl
+              transition-all duration-200 ease-in-out focus:outline-none
               ${downloading 
-                ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-md'
+                ? 'bg-blue-400/90 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-95 active:scale-[0.98]'
               }
-              text-white shadow transform hover:-translate-y-0.5 active:translate-y-0
+              text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30
             `}
           >
-            {downloading ? (
-              <>
-                <svg 
-                  className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24"
-                >
-                  <circle 
-                    className="opacity-25" 
-                    cx="12" 
-                    cy="12" 
-                    r="10" 
-                    stroke="currentColor" 
-                    strokeWidth="4"
-                  />
-                  <path 
-                    className="opacity-75" 
-                    fill="currentColor" 
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                Downloading...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Download Timetable
-              </>
-            )}
+            <span className="relative flex items-center">
+              {downloading ? (
+                <>
+                  <svg 
+                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-white/90" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24"
+                  >
+                    <circle 
+                      className="opacity-25" 
+                      cx="12" 
+                      cy="12" 
+                      r="10" 
+                      stroke="currentColor" 
+                      strokeWidth="4"
+                    />
+                    <path 
+                      className="opacity-75" 
+                      fill="currentColor" 
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <span className="text-white/90">Downloading...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:translate-y-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  <span>Download Timetable</span>
+                </>
+              )}
+            </span>
           </button>
         </div>
       </div>
