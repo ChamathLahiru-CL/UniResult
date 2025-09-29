@@ -92,11 +92,14 @@ const ExamTimeTable = () => {
       {/* Timetable Display Section */}
       <div className="bg-white rounded-lg shadow-md p-4">
         <div className="overflow-hidden rounded-lg border border-gray-200">
-          <img
-            src={examTables[activeLevel]}
-            alt={`${activeLevel} Level Exam Timetable`}
-            className="w-full h-auto"
-          />
+          <div className="flex justify-center items-center p-2">
+            <img
+              src={examTables[activeLevel]}
+              alt={`${activeLevel} Level Exam Timetable`}
+              className="w-auto max-h-[1024px] object-contain"
+              style={{ maxWidth: '85%' }}
+            />
+          </div>
         </div>
 
         {/* Download Button */}
