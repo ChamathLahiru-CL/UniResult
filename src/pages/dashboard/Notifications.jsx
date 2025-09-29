@@ -141,9 +141,10 @@ const Notifications = () => {
   };
 
   return (
-    <div className="animate-fadeIn p-4 max-w-4xl mx-auto">
-      {/* Page Header */}
-      <div className="relative mb-8">
+    <>
+      <div className="animate-fadeIn p-4 max-w-4xl mx-auto">
+        {/* Page Header */}
+        <div className="relative mb-8">
         <div className="absolute top-0 left-0 w-16 h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
         <div className="absolute top-4 right-16 w-20 h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-0 right-0 w-16 h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
@@ -165,6 +166,7 @@ const Notifications = () => {
                 onClick={() => setFilter(tab)}
                 className={`
                   relative whitespace-nowrap py-3 px-6 rounded-lg font-medium text-sm capitalize transition-all duration-200
+                  focus:outline-none
                   ${filter === tab
                     ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md shadow-blue-200'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -185,7 +187,7 @@ const Notifications = () => {
               onClick={markAllAsRead}
               className="text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-2 px-6 rounded-lg 
                 shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-300 transition-all duration-200 
-                hover:translate-y-[-1px] active:translate-y-[1px]"
+                hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
             >
               Mark all as read
             </button>
@@ -242,7 +244,7 @@ const Notifications = () => {
                       onClick={() => handleNotificationClick(notification)}
                       className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r 
                         from-blue-500 to-indigo-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200
-                        hover:translate-y-[-1px] active:translate-y-[1px]"
+                        hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
                     >
                       View Details
                       <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +255,7 @@ const Notifications = () => {
                       <button
                         onClick={() => markAsRead(notification.id)}
                         className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 
-                          bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                          bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none"
                       >
                         <CheckCircleIcon className="w-4 h-4 mr-2" />
                         Mark as read
@@ -280,7 +282,8 @@ const Notifications = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
