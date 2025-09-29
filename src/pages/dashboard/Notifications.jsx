@@ -11,37 +11,56 @@ import {
 const Notifications = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sample notifications data (replace with actual data)
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'Semester 5 Results Released',
-      message: 'Your semester 5 examination results are now available. Click to view your results.',
-      type: 'result',
-      time: '2025-09-29T10:20:00',
-      isRead: false,
-      link: '/dash/results'
-    },
-    {
-      id: 2,
-      title: 'GPA Update',
-      message: 'Your overall GPA has been updated based on your latest results.',
-      type: 'gpa',
-      time: '2025-09-29T10:20:00',
-      isRead: false,
-      link: '/dash/gpa-trend'
-    },
-    {
-      id: 3,
-      title: 'New Exam Schedule',
-      message: 'The examination timetable for Semester II 2024/2025 has been published.',
-      type: 'exam',
-      time: '2025-09-29T10:20:00',
-      isRead: true,
-      link: '/dash/exam-time-table'
+  // Load notifications from localStorage on component mount
+  const loadNotifications = () => {
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      if (savedNotifications) {
+        return JSON.parse(savedNotifications);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
     }
-  ]);
+    return [];
+  };
+
+  // Sample notifications data with persistent storage
+  const [notifications, setNotifications] = useState(() => {
+    const saved = loadNotifications();
+    if (saved.length === 0) {
+      // Initial sample data only if no saved notifications exist
+      return [{
+        id: 1,
+        title: 'Semester 5 Results Released',
+        message: 'Your semester 5 examination results are now available. Click to view your results.',
+        type: 'result',
+        time: '2025-09-29T10:20:00',
+        isRead: false,
+        link: '/dash/results'
+      },
+      {
+        id: 2,
+        title: 'GPA Update',
+        message: 'Your overall GPA has been updated based on your latest results.',
+        type: 'gpa',
+        time: '2025-09-29T10:20:00',
+        isRead: false,
+        link: '/dash/gpa-trend'
+      },
+      {
+        id: 3,
+        title: 'New Exam Schedule',
+        message: 'The examination timetable for Semester II 2024/2025 has been published.',
+        type: 'exam',
+        time: '2025-09-29T10:20:00',
+        isRead: true,
+        link: '/dash/exam-time-table'
+      }];
+    }
+    return saved;
+  });
 
   // Get icon based on notification type
   const getIcon = (type) => {
@@ -77,9 +96,30 @@ const Notifications = () => {
 
   // Mark notification as read
   const markAsRead = (id) => {
-    setNotifications(notifications.map(notif =>
+    const updatedNotifications = notifications.map(notif =>
       notif.id === id ? { ...notif, isRead: true } : notif
-    ));
+    );
+    setNotifications(updatedNotifications);
+    saveNotifications(updatedNotifications);
+  };
+
+  // Mark all notifications as read
+  const markAllAsRead = () => {
+    const updatedNotifications = notifications.map(notif => ({
+      ...notif,
+      isRead: true
+    }));
+    setNotifications(updatedNotifications);
+    saveNotifications(updatedNotifications);
+  };
+
+  // Save notifications to localStorage
+  const saveNotifications = (notifs) => {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notifs));
+    } catch (error) {
+      console.error('Error saving notifications:', error);
+    }
   };
 
   // Filter notifications
@@ -88,6 +128,9 @@ const Notifications = () => {
     if (filter === 'unread') return !notif.isRead;
     return true;
   });
+
+  // Get unread count
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   // Handle notification click
   const handleNotificationClick = (notification) => {
@@ -113,7 +156,7 @@ const Notifications = () => {
 
       {/* Filter Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
+        <div className="flex items-center justify-between border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             {['all', 'unread', 'read'].map((tab) => (
               <button
@@ -128,14 +171,22 @@ const Notifications = () => {
                 `}
               >
                 {tab}
-                {tab === 'unread' && (
+                {tab === 'unread' && unreadCount > 0 && (
                   <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
-                    {notifications.filter(n => !n.isRead).length}
+                    {unreadCount}
                   </span>
                 )}
               </button>
             ))}
           </nav>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium py-2 px-4 rounded-md hover:bg-blue-50 transition-colors duration-150"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
       </div>
 
