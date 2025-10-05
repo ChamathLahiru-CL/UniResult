@@ -1,25 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Bars3Icon, 
   UserCircleIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
+import NotificationDropdown from './NotificationDropdown';
 
 /**
  * TopBar component for the dashboard
  * Contains mobile menu toggle button, user info, and logout functionality
  */
 const TopBar = ({ toggleSidebar, toggleCollapse, isCollapsed, isSidebarVisible }) => {
-  // State for user dropdown menu
+  // States for dropdowns
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   
   // Dummy user data - would come from auth context in a real app
   const user = {
     name: 'Lahiru',
     avatar: null, // Use null for default icon, otherwise would be a URL
   };
+
+  // Simulate fetching notifications
+  useEffect(() => {
+    // This would be replaced with actual API call
+    const dummyNotifications = [
+      {
+        id: 1,
+        type: 'result',
+        message: 'Your Programming Fundamentals results are now available',
+        timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+        isRead: false
+      },
+      {
+        id: 2,
+        type: 'gpa',
+        message: 'Your GPA has been updated for Semester 2',
+        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+        isRead: false
+      },
+      {
+        id: 3,
+        type: 'exam',
+        message: 'New exam schedule posted for Database Systems',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        isRead: true
+      }
+    ];
+    setNotifications(dummyNotifications);
+  }, []);
+
+  // Handle marking notification as read
+  const handleMarkAsRead = (notificationId) => {
+    setNotifications(notifications.map(notification =>
+      notification.id === notificationId
+        ? { ...notification, isRead: true }
+        : notification
+    ));
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.notification-dropdown') && !event.target.closest('.notification-button')) {
+        setIsNotificationOpen(false);
+      }
+      if (!event.target.closest('.user-dropdown') && !event.target.closest('.user-button')) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white border-b border-gray-100">
@@ -67,12 +124,30 @@ const TopBar = ({ toggleSidebar, toggleCollapse, isCollapsed, isSidebarVisible }
           {/* Right section with notifications and user profile */}
         <div className="flex items-center space-x-3">
           {/* Notification button */}
-          <button className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 relative">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-            </svg>
-            <span className="absolute top-0 right-0 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full -mt-1 -mr-1">3</span>
-          </button>
+          <div className="relative">
+            <button 
+              className="notification-button p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 relative"
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            >
+              <BellIcon className="h-5 w-5" />
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <span className="absolute top-0 right-0 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full -mt-1 -mr-1">
+                  {notifications.filter(n => !n.isRead).length}
+                </span>
+              )}
+            </button>
+            
+            {/* Notification Dropdown */}
+            {isNotificationOpen && (
+              <div className="notification-dropdown">
+                <NotificationDropdown 
+                  notifications={notifications}
+                  onClose={() => setIsNotificationOpen(false)}
+                  onMarkAsRead={handleMarkAsRead}
+                />
+              </div>
+            )}
+          </div>
 
           {/* User profile button */}
           <div className="relative">
