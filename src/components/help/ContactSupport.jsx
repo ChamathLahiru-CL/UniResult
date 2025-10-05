@@ -3,7 +3,7 @@
  * Contact form and support options
  */
 import React, { useState } from 'react';
-import { MailIcon, PhoneIcon } from '@heroicons/react/outline';
+import { EnvelopeIcon as MailIcon, PhoneIcon } from '@heroicons/react/24/outline';
 
 const ContactSupport = () => {
   const [formData, setFormData] = useState({

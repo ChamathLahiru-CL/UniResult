@@ -7,9 +7,9 @@ import {
   KeyIcon,
   ChartBarIcon,
   DocumentTextIcon,
-  CogIcon,
+  Cog6ToothIcon as CogIcon,
   PhoneIcon
-} from '@heroicons/react/outline';
+} from '@heroicons/react/24/outline';
 
 const QuickHelp = () => {
   const helpCards = [

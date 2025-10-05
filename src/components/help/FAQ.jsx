@@ -3,7 +3,7 @@
  * Expandable accordion sections for frequently asked questions
  */
 import React, { useState } from 'react';
-import { ChevronDownIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const FAQ = () => {
   const [openSection, setOpenSection] = useState(null);

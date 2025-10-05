@@ -3,7 +3,7 @@
  * Smart search bar with auto-suggestions for help topics
  */
 import React, { useState } from 'react';
-import { SearchIcon } from '@heroicons/react/outline';
+import { MagnifyingGlassIcon as SearchIcon } from '@heroicons/react/24/outline';
 
 const HelpSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
