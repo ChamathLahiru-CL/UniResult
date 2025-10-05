@@ -8,6 +8,7 @@ import StudentDashboard from './pages/dashboard/StudentDashboard'
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'
 import Notifications from './pages/dashboard/Notifications'
 import Profile from './pages/dashboard/Profile'
+import Help from './pages/dashboard/Help'
 import './App.css'
 
 const ExamDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Exam Division Dashboard</h1></div>;
@@ -30,7 +31,7 @@ function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Profile />} />
-        <Route path="help" element={<div className="p-8"><h1 className="text-2xl font-bold">Help & Support</h1></div>} />
+        <Route path="help" element={<Help />} />
       </Route>
 
       {/* Other Dashboard Routes */}
