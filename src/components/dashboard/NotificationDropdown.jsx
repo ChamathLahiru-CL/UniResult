@@ -1,14 +1,41 @@
+/**
+ * NotificationDropdown Component
+ * 
+ * A dropdown menu that displays user notifications with the following features:
+ * - Separates notifications into "NEW" (unread) and "EARLIER" (read) sections
+ * - Shows notification type icons with different colors (result, GPA, exam)
+ * - Displays relative timestamps (e.g., "2m ago", "1h ago")
+ * - Allows marking notifications as read
+ * - Links to the full notifications page
+ * 
+ * @param {Object[]} notifications - Array of notification objects
+ * @param {Function} onClose - Function to close the dropdown
+ * @param {Function} onMarkAsRead - Function to mark a notification as read
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BellIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
-  // Group notifications by read status
+  // Separate notifications into unread and read groups
+  // Unread notifications are shown at the top under "NEW"
   const unreadNotifications = notifications.filter(n => !n.isRead);
+  
+  // Get only the 3 most recent read notifications for the "EARLIER" section
+  // This keeps the dropdown from getting too long
   const recentReadNotifications = notifications
     .filter(n => n.isRead)
-    .slice(0, 3); // Show only 3 recent read notifications
+    .slice(0, 3);
 
+  /**
+   * Formats a timestamp into a human-readable relative time
+   * Examples: "Just now", "5m ago", "2h ago", "3d ago"
+   * Falls back to actual date for older notifications
+   * 
+   * @param {Date} timestamp - The timestamp to format
+   * @returns {string} Formatted relative time string
+   */
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -26,6 +53,17 @@ const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
     return date.toLocaleDateString();
   };
 
+  /**
+   * Returns the appropriate icon component for each notification type
+   * Each type has its own icon and color scheme:
+   * - result: Green checkmark icon
+   * - gpa: Blue chart icon
+   * - exam: Purple calendar icon
+   * - default: Gray bell icon
+   * 
+   * @param {string} type - The notification type ('result', 'gpa', 'exam')
+   * @returns {JSX.Element} Icon component with appropriate styling
+   */
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'result':
