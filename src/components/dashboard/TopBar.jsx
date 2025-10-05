@@ -10,24 +10,43 @@ import {
 import NotificationDropdown from './NotificationDropdown';
 
 /**
- * TopBar component for the dashboard
- * Contains mobile menu toggle button, user info, and logout functionality
+ * TopBar Component
+ * 
+ * Main navigation header that contains:
+ * 1. Sidebar toggle controls
+ * 2. Logo/brand
+ * 3. Notification system
+ * 4. User profile dropdown
+ * 
+ * Features:
+ * - Real-time notification updates
+ * - Unread notification counter
+ * - Interactive dropdowns for notifications and user menu
+ * - Responsive design
+ * - Click-outside behavior for dropdowns
  */
 const TopBar = ({ toggleSidebar, toggleCollapse, isCollapsed, isSidebarVisible }) => {
-  // States for dropdowns
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  // State management for dropdown menus and notifications
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);        // Controls user profile dropdown
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Controls notification dropdown
+  const [notifications, setNotifications] = useState([]);             // Stores all notifications
   
-  // Dummy user data - would come from auth context in a real app
+  // User data - In production, this would come from an authentication context or API
   const user = {
     name: 'Lahiru',
     avatar: null, // Use null for default icon, otherwise would be a URL
   };
 
-  // Simulate fetching notifications
+  /**
+   * Fetch notifications from backend
+   * Currently using dummy data, but in production would:
+   * 1. Connect to real API endpoint
+   * 2. Implement real-time updates (WebSocket/polling)
+   * 3. Handle loading states and errors
+   * 4. Include pagination for large datasets
+   */
   useEffect(() => {
-    // This would be replaced with actual API call
+    // TODO: Replace with actual API call
     const dummyNotifications = [
       {
         id: 1,
@@ -54,16 +73,27 @@ const TopBar = ({ toggleSidebar, toggleCollapse, isCollapsed, isSidebarVisible }
     setNotifications(dummyNotifications);
   }, []);
 
-  // Handle marking notification as read
+  /**
+   * Marks a notification as read
+   * Updates the notification state and would sync with backend in production
+   * 
+   * @param {string|number} notificationId - ID of the notification to mark as read
+   */
   const handleMarkAsRead = (notificationId) => {
+    // Update local state
     setNotifications(notifications.map(notification =>
       notification.id === notificationId
         ? { ...notification, isRead: true }
         : notification
     ));
+    // TODO: Sync with backend API
   };
 
-  // Close dropdowns when clicking outside
+  /**
+   * Handles clicking outside of dropdowns
+   * Automatically closes dropdowns when clicking anywhere else on the page
+   * Uses event delegation for better performance
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.notification-dropdown') && !event.target.closest('.notification-button')) {
