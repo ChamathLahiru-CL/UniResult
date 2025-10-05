@@ -1,6 +1,24 @@
 /**
- * FAQ Component
- * Expandable accordion sections for frequently asked questions
+ * FAQ (Frequently Asked Questions) Component
+ * Created on: October 5, 2025, after 10 PM
+ * 
+ * Provides an accordion-style FAQ section with categories:
+ * 1. Results & GPA - Questions about academic performance
+ * 2. Account & Security - Login and security related questions
+ * 3. Technical Support - System-related queries
+ * 
+ * Features:
+ * - Expandable/collapsible sections
+ * - Smooth animations
+ * - Category-based organization
+ * - Keyboard accessible
+ * - Only one section open at a time for better readability
+ * 
+ * Usage:
+ * <FAQ />
+ * 
+ * State:
+ * - openSection: Tracks which FAQ section is currently expanded
  */
 import React, { useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';

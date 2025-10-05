@@ -1,6 +1,22 @@
 /**
- * QuickHelp Component
- * Grid of quick help cards for common issues
+ * Quick Help Component
+ * Created on: October 5, 2025, after 10 PM
+ * 
+ * Displays a grid of quick help cards for common student issues:
+ * 1. Login & Account Issues - Password reset and account access
+ * 2. Viewing Results - How to check grades and GPA
+ * 3. Downloading Reports - Result sheet download instructions
+ * 4. System Settings - Application preferences and notifications
+ * 5. Contact Support - Ways to get help
+ * 
+ * Features:
+ * - Interactive cards with hover effects
+ * - Icons for visual recognition
+ * - Color-coded categories
+ * - Responsive grid layout
+ * 
+ * Usage:
+ * <QuickHelp />
  */
 import React from 'react';
 import {

@@ -1,6 +1,19 @@
 /**
- * HelpSearch Component
- * Smart search bar with auto-suggestions for help topics
+ * Help Search Component
+ * Created on: October 5, 2025, after 10 PM
+ * 
+ * Features:
+ * - Real-time search suggestions as user types
+ * - Search through help topics, FAQs, and documentation
+ * - Shows relevant suggestions based on user input
+ * - Keyboard accessible search interface
+ * 
+ * Usage:
+ * <HelpSearch onSearch={handleSearch} query={searchQuery} />
+ * 
+ * Props:
+ * - onSearch: Function to handle search input changes
+ * - query: Current search query string
  */
 import React, { useState } from 'react';
 import { MagnifyingGlassIcon as SearchIcon } from '@heroicons/react/24/outline';

@@ -1,15 +1,19 @@
 /**
- * Help Page Component
- * Main help and support page with all support features
+ * Help & Support Page Component
+ * Created on: October 5, 2025, after 10 PM
  * 
- * This component provides a comprehensive help and support interface including:
- * - Emergency notices
- * - Search functionality
- * - Quick help cards
- * - FAQ section
- * - Contact support
- * - User feedback system
+ * This is the main Help and Support page that provides users with:
+ * 1. Emergency Notices - Shows important system updates and maintenance notices
+ * 2. Search Bar - Allows users to search through help topics quickly
+ * 3. Quick Help Cards - Common issues and their solutions
+ * 4. FAQ Section - Frequently asked questions about results and system
+ * 5. Contact Support - Form to reach out to support team
+ * 6. Feedback Widget - Collects user feedback about the help content
  * 
+ * The page is fully responsive and accessible, with proper ARIA labels
+ * and keyboard navigation support.
+ * 
+ * Location: /dash/help
  * @module Help
  */
 
