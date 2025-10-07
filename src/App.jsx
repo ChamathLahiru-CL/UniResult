@@ -33,7 +33,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot password page */}
 
       {/* Student Dashboard Routes */}
-      <Route path="/dash" element={<DashboardLayout />}> {/* Dashboard layout */}
+      <Route path="/st-dash" element={<DashboardLayout />}> {/* Dashboard layout */}
         <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
         <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} /> {/* Results page */}
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} /> {/* GPA trend analysis page */}
