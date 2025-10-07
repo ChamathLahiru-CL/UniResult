@@ -6,9 +6,11 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import Checkbox from '../components/Checkbox';
 import logo from '../assets/images/logo.png';
+import { useAuth } from '../context/useAuth';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -36,18 +38,22 @@ const Login = () => {
       // Simulating API call with timeout
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // This would be replaced with actual API authentication
-      let user = { 
-        username: formData.username,
+      // Create user object
+      const user = { 
+        id: formData.username,
+        name: formData.username,
         role: formData.role 
       };
+      
+      // Log in the user using AuthContext
+      login(user);
       
       // Redirect based on selected role
       if (formData.role === 'student') {
         navigate('/dash');
       } else if (formData.role === 'admin') {
         navigate('/admin');
-      } else if (formData.role === 'exam') {
+      } else if (formData.role === 'examDiv') {
         navigate('/exam');
       }
       
@@ -153,7 +159,7 @@ const Login = () => {
                   >
                     <option value="student" className="py-2">Student</option>
                     <option value="admin" className="py-2">Administrator</option>
-                    <option value="exam" className="py-2">Exam Division</option>
+                    <option value="examDiv" className="py-2">Exam Division</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
