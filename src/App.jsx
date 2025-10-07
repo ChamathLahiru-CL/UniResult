@@ -11,6 +11,8 @@ import Notifications from './pages/dashboard/Notifications'; // Notifications pa
 import Profile from './pages/dashboard/Profile'; // Profile page
 import Help from './pages/dashboard/Help'; // Help and support page
 import AdminDashboard from './pages/admin/AdminDashboard'; // Admin dashboard page
+import { AuthProvider } from './context/AuthContext.jsx'; // Auth context provider
+import ProtectedRoute from './components/ProtectedRoute'; // Protected route component
 import './App.css'; // Global CSS styles
 
 // Placeholder component for exam dashboard
@@ -22,14 +24,21 @@ const ExamDashboard = () => (
 
 function App() {
   return (
-    <Routes>
-      {/* Authentication Routes */}
+    <AuthProvider>
+      <Routes>
+        {/* Authentication Routes */}
       <Route path="/" element={<Login />} /> {/* Login page */}
       <Route path="/signup" element={<SignUp />} /> {/* Sign-up page */}
       <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot password page */}
 
       {/* Student Dashboard Routes */}
-      <Route path="/dash" element={<DashboardLayout />}> {/* Dashboard layout */}
+      <Route 
+        path="/dash" 
+        element={
+          <ProtectedRoute requiredRole="student">
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
         <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
         <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} /> {/* Results page */}
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} /> {/* GPA trend analysis page */}
@@ -41,10 +50,23 @@ function App() {
       </Route>
 
       {/* Other Dashboard Routes */}
-      <Route path="/exam/*" element={<ExamDashboard />} /> {/* Exam division dashboard */}
+      <Route 
+        path="/exam/*" 
+        element={
+          <ProtectedRoute requiredRole="examDiv">
+            <ExamDashboard />
+          </ProtectedRoute>
+        }
+      />
       
       {/* Admin Dashboard Routes */}
-      <Route path="/admin" element={<AdminDashboard />}>
+      <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }>
         <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
         <Route path="update-result" element={<div className="p-8"><h1 className="text-2xl font-bold">Update Result</h1></div>} />
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
@@ -58,6 +80,7 @@ function App() {
       {/* Fallback Route */}
       <Route path="*" element={<Navigate to="/" replace />} /> {/* Redirect unknown routes to login page */}
     </Routes>
+    </AuthProvider>
   );
 }
 

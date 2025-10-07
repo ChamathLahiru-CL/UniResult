@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminTopBar from '../../components/admin/AdminTopBar';
 import LastUpdatedResults from '../../components/admin/LastUpdatedResults';
 import AdminRecentActivities from '../../components/admin/AdminRecentActivities';
+import { useAuth } from '../../context/useAuth';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/', { replace: true });
+      return;
+    }
+
+    if (user.role !== 'admin') {
+      const dashboardPath = 
+        user.role === 'student' ? '/dash' :
+        user.role === 'examDiv' ? '/exam' : '/';
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -21,7 +39,7 @@ const AdminDashboard = () => {
           <div className="container mx-auto px-6 py-8">
             {/* Welcome Message */}
             <div className="mb-8">
-              <h1 className="text-3xl font-semibold text-gray-800">Welcome, Lahiru</h1>
+              <h1 className="text-3xl font-semibold text-gray-800">Welcome, {user?.name || 'Admin'}</h1>
               <p className="text-gray-600 mt-2">Admin Home Page Overview</p>
             </div>
 
