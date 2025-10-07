@@ -10,17 +10,13 @@ import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable p
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
 import Profile from './pages/dashboard/Profile'; // Profile page
 import Help from './pages/dashboard/Help'; // Help and support page
+import AdminDashboard from './pages/admin/AdminDashboard'; // Admin dashboard page
 import './App.css'; // Global CSS styles
 
-// Placeholder components for other dashboards
+// Placeholder component for exam dashboard
 const ExamDashboard = () => (
   <div className="p-8">
     <h1 className="text-2xl font-bold">Exam Division Dashboard</h1>
-  </div>
-);
-const AdminDashboard = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">Admin Dashboard</h1>
   </div>
 );
 
@@ -33,7 +29,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot password page */}
 
       {/* Student Dashboard Routes */}
-      <Route path="/st-dash" element={<DashboardLayout />}> {/* Dashboard layout */}
+      <Route path="/dash" element={<DashboardLayout />}> {/* Dashboard layout */}
         <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
         <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} /> {/* Results page */}
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} /> {/* GPA trend analysis page */}
@@ -46,7 +42,18 @@ function App() {
 
       {/* Other Dashboard Routes */}
       <Route path="/exam/*" element={<ExamDashboard />} /> {/* Exam division dashboard */}
-      <Route path="/admin/*" element={<AdminDashboard />} /> {/* Admin dashboard */}
+      
+      {/* Admin Dashboard Routes */}
+      <Route path="/admin" element={<AdminDashboard />}>
+        <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
+        <Route path="update-result" element={<div className="p-8"><h1 className="text-2xl font-bold">Update Result</h1></div>} />
+        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
+        <Route path="exam-division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
+        <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
+        <Route path="help" element={<Help />} />
+      </Route>
 
       {/* Fallback Route */}
       <Route path="*" element={<Navigate to="/" replace />} /> {/* Redirect unknown routes to login page */}
