@@ -15,12 +15,9 @@ import { AuthProvider } from './context/AuthContext.jsx'; // Auth context provid
 import ProtectedRoute from './components/ProtectedRoute'; // Protected route component
 import './App.css'; // Global CSS styles
 
-// Placeholder component for exam dashboard
-const ExamDashboard = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">Exam Division Dashboard</h1>
-  </div>
-);
+// Import Exam Division components
+import ExamDivision from './pages/examdivision/ExamDivision';
+import ExamDivisionLayout from './layouts/ExamDivisionLayout';
 
 function App() {
   return (
@@ -49,15 +46,27 @@ function App() {
         <Route path="help" element={<Help />} /> {/* Help and support page */}
       </Route>
 
-      {/* Other Dashboard Routes */}
-      <Route 
-        path="/exam/*" 
+      {/* Exam Division Dashboard Routes */}
+      <Route
+        path="/exam"
         element={
           <ProtectedRoute requiredRole="examDiv">
-            <ExamDashboard />
+            <ExamDivisionLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<ExamDivision />} />
+        <Route path="update-result" element={<div className="p-8"><h1 className="text-2xl font-bold">Update Result</h1></div>} />
+        <Route path="new-result" element={<div className="p-8"><h1 className="text-2xl font-bold">New Result Upload</h1></div>} />
+        <Route path="time-table" element={<div className="p-8"><h1 className="text-2xl font-bold">Time Table Update</h1></div>} />
+        <Route path="news" element={<div className="p-8"><h1 className="text-2xl font-bold">News Upload</h1></div>} />
+        <Route path="compliance" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Compliance</h1></div>} />
+        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
+        <Route path="division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
+        <Route path="help" element={<Help />} />
+      </Route>
       
       {/* Admin Dashboard Routes */}
       <Route 
