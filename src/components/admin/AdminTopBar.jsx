@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { 
   Bars3Icon, 
   UserCircleIcon, 
@@ -15,13 +15,28 @@ const AdminTopBar = ({ onMenuClick }) => {
   const { logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
-  
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentDate = currentDateTime.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+
+  const currentTime = currentDateTime.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
 
   const handleSignOut = () => {
     setShowSignOutConfirm(true);
@@ -58,6 +73,8 @@ const AdminTopBar = ({ onMenuClick }) => {
               <div className="flex items-center space-x-2">
                 <CalendarIcon className="h-5 w-5 text-gray-400" />
                 <span className="text-sm hidden md:inline">{currentDate}</span>
+                <span className="text-sm hidden md:inline">|</span>
+                <span className="text-sm">{currentTime}</span>
               </div>
               <div className="h-6 w-px bg-gray-200"></div>
               <button className="p-2 rounded-full hover:bg-gray-100 relative">
