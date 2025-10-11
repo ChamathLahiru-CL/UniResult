@@ -1,18 +1,23 @@
-import React from 'react';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import {
   ClockIcon,
   DocumentTextIcon,
   CalendarDaysIcon,
   ChevronRightIcon,
   UserCircleIcon,
-  UsersIcon
+  UsersIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
-const RecentActivities = ({ isLoading, filter = 'all', userId }) => {
-  // Mock data - In a real app, this would come from an API
-  const allActivities = [
+const RecentActivities = ({ activeFilter = 'all' }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      const allActivities = [
     {
       id: 1,
       title: 'ICT, 200 level semester 3 Stat result Update',
@@ -49,39 +54,24 @@ const RecentActivities = ({ isLoading, filter = 'all', userId }) => {
     },
   ];
 
-  // Filter activities based on the selected tab
-  const filteredActivities = allActivities.filter(activity => {
-    if (filter === 'myActivities') {
-      return activity.userId === userId;
-    } else if (filter === 'otherActivities') {
-      return activity.userId !== userId;
+      setActivities(allActivities);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  // Filter activities based on the active filter
+  const filteredActivities = activities.filter(activity => {
+    switch (activeFilter) {
+      case 'my':
+        return activity.userId === 'user1'; // Current user
+      case 'others':
+        return activity.userId !== 'user1';
+      default:
+        return true;
     }
-    return true; // Show all activities if no filter
   });
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
 
-  const itemVariants = {
-    hidden: { x: -20, opacity: 0 },
-    visible: { x: 0, opacity: 1 },
-    hover: {
-      scale: 1.02,
-      backgroundColor: 'rgba(59, 130, 246, 0.05)',
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 10
-      }
-    }
-  };
 
   const getIconColor = (type) => {
     switch (type) {
@@ -100,34 +90,31 @@ const RecentActivities = ({ isLoading, filter = 'all', userId }) => {
         <h2 className="text-xl font-semibold text-gray-800">Recent Activities</h2>
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="divide-y divide-gray-200"
-      >
+      <div className="divide-y divide-gray-200">
         {filteredActivities.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
             <div className="flex justify-center mb-4">
-              {filter === 'myActivities' ? (
+              {activeFilter === 'my' ? (
                 <UserCircleIcon className="w-12 h-12 text-gray-400" />
-              ) : (
+              ) : activeFilter === 'others' ? (
                 <UsersIcon className="w-12 h-12 text-gray-400" />
+              ) : (
+                <ClockIcon className="w-12 h-12 text-gray-400" />
               )}
             </div>
             <p className="text-sm">
-              {filter === 'myActivities'
+              {activeFilter === 'my'
                 ? 'No recent activities found for you'
-                : 'No activities from other users found'}
+                : activeFilter === 'others'
+                ? 'No activities from other users found'
+                : 'No activities found'}
             </p>
           </div>
         ) : (
           filteredActivities.map((activity) => (
-            <motion.div
+            <div
               key={activity.id}
-              variants={itemVariants}
-              whileHover="hover"
-              className="p-4 transition-colors duration-200"
+              className="p-4 transition-colors duration-200 hover:bg-gray-50"
             >
               <div className="flex items-start space-x-4">
                 <div className={`p-2 rounded-lg ${getIconColor(activity.type)}`}>
@@ -155,19 +142,17 @@ const RecentActivities = ({ isLoading, filter = 'all', userId }) => {
                   </div>
                 </div>
 
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700"
+                <button
+                  className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-150"
                 >
                   View Details
                   <ChevronRightIcon className="w-4 h-4 ml-1" />
-                </motion.button>
+                </button>
               </div>
-            </motion.div>
+            </div>
           ))
         )}
-      </motion.div>
+      </div>
 
       {isLoading && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
