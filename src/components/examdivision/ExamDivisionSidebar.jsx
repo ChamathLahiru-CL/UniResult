@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
 import {
   Squares2X2Icon,
   DocumentArrowUpIcon,
@@ -36,30 +34,6 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Help', href: '/exam/help', icon: QuestionMarkCircleIcon },
   ];
 
-  const sidebarVariants = {
-    open: {
-      x: 0,
-      opacity: 1,
-      display: 'block',
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
-      },
-    },
-    closed: {
-      x: '-100%',
-      opacity: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
-      },
-      transitionEnd: {
-        display: 'none',
-      },
-    },
-  };
 
   const NavItem = ({ item }) => {
     const isActive = location.pathname === item.href;
@@ -75,9 +49,8 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
         <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
         <span>{item.name}</span>
         {isActive && (
-          <motion.div
-            className="absolute left-0 w-1 h-8 bg-blue-600 rounded-r-full"
-            layoutId="activeNavIndicator"
+          <div
+            className="absolute left-0 w-1 h-8 bg-blue-600 rounded-r-full transition-all duration-300 ease-in-out"
           />
         )}
       </Link>
@@ -95,11 +68,10 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
       )}
 
       {/* Sidebar */}
-      <motion.div
-        variants={sidebarVariants}
-        initial={false}
-        animate={isOpen ? 'open' : 'closed'}
-        className="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 lg:static lg:z-0 lg:block"
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 lg:static lg:z-0`}
       >
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
@@ -109,7 +81,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col justify-between h-[calc(100%-4rem)] p-4">
+        <nav className="flex flex-col justify-between h-[calc(100%-4rem)] p-4 mt-16">
           <div className="space-y-1">
             {navigation.map((item) => (
               <NavItem key={item.name} item={item} />
@@ -123,7 +95,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
             ))}
           </div>
         </nav>
-      </motion.div>
+      </div>
     </>
   );
 };

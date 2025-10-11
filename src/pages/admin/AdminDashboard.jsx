@@ -26,12 +26,12 @@ const AdminDashboard = () => {
   }, [user, navigate]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col lg:ml-64">
         <AdminTopBar onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Main Content Area */}

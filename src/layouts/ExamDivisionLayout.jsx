@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import ExamDivisionSidebar from '../components/examdivision/ExamDivisionSidebar';
 import ExamDivisionTopBar from '../components/examdivision/ExamDivisionTopBar';
 
 const ExamDivisionLayout = () => {
-  // Set sidebar to be open by default on desktop, closed on mobile
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  // Set sidebar to be closed by default on both mobile and desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-50">
