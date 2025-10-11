@@ -49,43 +49,40 @@ const AdminTopBar = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm z-50 sticky top-0">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+    <header className="bg-white shadow-sm z-40 sticky top-0">
+      <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Left section - Menu Button and Title */}
           <div className="flex items-center">
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-md text-gray-600 lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="p-2 rounded-md text-gray-600 lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 mr-2"
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
-            <div className="hidden lg:flex lg:items-center lg:space-x-3">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                Uni<span className="text-blue-600">Result</span>
-              </span>
+            <div className="lg:flex lg:items-center lg:space-x-3">
+              <h1 className="text-2xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result Admin Home Page</span>
+              </h1>
             </div>
           </div>
 
-          {/* Center section - Date and Notifications */}
-          <div className="flex-1 flex items-center justify-center px-2 lg:justify-end">
-            <div className="hidden sm:flex items-center text-gray-500 space-x-4">
+          {/* Right section - Date, Notifications, and Profile */}
+          <div className="flex items-center">
+            <div className="hidden sm:flex items-center text-gray-500 mr-4">
               <div className="flex items-center space-x-2">
                 <CalendarIcon className="h-5 w-5 text-gray-400" />
                 <span className="text-sm hidden md:inline">{currentDate}</span>
                 <span className="text-sm hidden md:inline">|</span>
                 <span className="text-sm">{currentTime}</span>
               </div>
-              <div className="h-6 w-px bg-gray-200"></div>
+              <div className="h-6 w-px bg-gray-200 mx-4"></div>
               <button className="p-2 rounded-full hover:bg-gray-100 relative">
                 <BellIcon className="h-5 w-5 text-gray-400" />
                 <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
               </button>
             </div>
-          </div>
-
-          {/* Right section - User Profile */}
-          <div className="flex items-center space-x-4">
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -174,13 +171,14 @@ const AdminTopBar = ({ onMenuClick }) => {
         </div>
       )}
 
-      {/* Mobile date display */}
-      <div className="lg:hidden border-t border-gray-200 px-4 py-2">
-        <div className="flex items-center justify-between text-sm text-gray-500">
+          {/* Mobile date display */}
+      <div className="lg:hidden border-t border-gray-200">
+        <div className="flex items-center justify-end text-sm text-gray-500 px-4 py-2">
           <div className="flex items-center space-x-2">
             <CalendarIcon className="h-4 w-4" />
             <span>{currentDate}</span>
           </div>
+          <div className="h-4 w-px bg-gray-200 mx-4"></div>
           <button className="p-1 rounded-full hover:bg-gray-100 relative">
             <BellIcon className="h-5 w-5 text-gray-400" />
             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>

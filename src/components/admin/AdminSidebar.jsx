@@ -39,14 +39,17 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:transform-none lg:relative ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } lg:translate-x-0 lg:fixed lg:top-0 lg:bottom-0`}
       >
         {/* Logo and close button */}
         <div className="flex items-center justify-between h-16 px-6">
           <Link to="/admin" className="text-2xl font-bold text-[#246BFD]">
-            UniResult
+            <h1 className="text-3xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
+              </h1>
           </Link>
           <button
             onClick={() => setIsOpen(false)}
@@ -57,8 +60,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex flex-col h-[calc(100%-4rem)] px-4">
-          <div className="flex-1 space-y-1 py-4">
+        <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-4 pt-2">
+          {/* Main Navigation */}
+          <div className="space-y-0.5">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -74,17 +78,19 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </div>
 
           {/* Bottom Navigation */}
-          <div className="border-t border-gray-200 py-4 space-y-1">
-            {bottomNav.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-100"
-              >
-                <item.icon className="h-5 w-5 mr-3" />
-                {item.name}
-              </Link>
-            ))}
+          <div className="pb-4">
+            <div className="border-t border-gray-200 pt-3 space-y-1">
+              {bottomNav.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <item.icon className="h-5 w-5 text-gray-500 mr-3" />
+                  <span className="text-sm font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </nav>
       </div>
