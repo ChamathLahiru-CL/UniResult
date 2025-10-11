@@ -18,6 +18,7 @@ import './App.css'; // Global CSS styles
 // Import Exam Division components
 import ExamDivision from './pages/examdivision/ExamDivision';
 import ExamDivisionLayout from './layouts/ExamDivisionLayout';
+import ExamCompliance from './pages/examdivision/ExamCompliance';
 
 function App() {
   return (
@@ -60,7 +61,7 @@ function App() {
         <Route path="new-result" element={<div className="p-8"><h1 className="text-2xl font-bold">New Result Upload</h1></div>} />
         <Route path="time-table" element={<div className="p-8"><h1 className="text-2xl font-bold">Time Table Update</h1></div>} />
         <Route path="news" element={<div className="p-8"><h1 className="text-2xl font-bold">News Upload</h1></div>} />
-        <Route path="compliance" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Compliance</h1></div>} />
+        <Route path="compliance" element={<ExamCompliance />} />
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
         <Route path="division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
         <Route path="profile" element={<Profile />} />
