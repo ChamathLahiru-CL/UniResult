@@ -62,9 +62,10 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
               <Bars3Icon className="h-6 w-6" />
             </button>
             <div className="lg:flex lg:items-center">
-              <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                UniResult Exam Division
-              </span>
+              <h3 className="text-2xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result Exam Division</span>
+              </h3>
             </div>
           </div>
 

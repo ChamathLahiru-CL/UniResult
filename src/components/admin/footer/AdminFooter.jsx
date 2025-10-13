@@ -31,9 +31,10 @@ const AdminFooter = () => {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
-              UniResult Admin
-            </h2>
+            <h1 className="text-2xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result Admin Page</span>
+              </h1>
             <p className="text-sm text-gray-500 max-w-md">
               Centralized administration platform for result management and academic performance analytics.
             </p>
