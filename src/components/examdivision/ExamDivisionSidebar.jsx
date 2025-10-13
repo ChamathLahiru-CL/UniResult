@@ -81,7 +81,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col justify-between h-[calc(100%-4rem)] p-4 mt-16">
+        <nav className="flex flex-col justify-between h-[calc(100%-4rem)] px-4 pt-2">
           <div className="space-y-1">
             {navigation.map((item) => (
               <NavItem key={item.name} item={item} />
