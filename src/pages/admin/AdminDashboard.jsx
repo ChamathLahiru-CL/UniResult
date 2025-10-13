@@ -5,6 +5,7 @@ import AdminTopBar from '../../components/admin/AdminTopBar';
 import LastUpdatedResults from '../../components/admin/LastUpdatedResults';
 import AdminRecentActivities from '../../components/admin/AdminRecentActivities';
 import { useAuth } from '../../context/useAuth';
+import AdminFooter from '../../components/admin/footer/AdminFooter';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -53,6 +54,9 @@ const AdminDashboard = () => {
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <AdminFooter />
       </div>
     </div>
   );

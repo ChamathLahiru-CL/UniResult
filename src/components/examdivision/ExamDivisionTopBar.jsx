@@ -51,20 +51,21 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
 
   return (
     <header className="bg-white shadow-sm z-40 sticky top-0">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+      <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Left section - Menu Button and Title */}
           <div className="flex items-center space-x-3">
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
+              className="p-2 rounded-md text-gray-600 lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 mr-2"
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
             <div className="lg:flex lg:items-center">
-              <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                UniResult Exam Division
-              </span>
+              <h3 className="text-2xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result Exam Division</span>
+              </h3>
             </div>
           </div>
 
