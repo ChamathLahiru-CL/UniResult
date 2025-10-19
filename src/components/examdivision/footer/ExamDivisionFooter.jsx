@@ -13,7 +13,6 @@ import {
 
 const ExamDivisionFooter = () => {
   const quickLinks = [
-    { name: 'Result Updates', href: '/exam/update-result', icon: DocumentTextIcon },
     { name: 'Recent Activities', href: '/exam/activities', icon: ClockIcon },
     { name: 'Time Tables', href: '/exam/time-tables', icon: CalendarIcon },
     { name: 'News Upload', href: '/exam/news', icon: NewspaperIcon },
