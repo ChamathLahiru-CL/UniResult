@@ -19,6 +19,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/exam', icon: Squares2X2Icon },
+    { name: 'Results Management', href: '/exam/results', icon: DocumentArrowUpIcon },
     { name: 'Update Result', href: '/exam/update-result', icon: DocumentArrowUpIcon },
     { name: 'New Result Upload', href: '/exam/new-result', icon: DocumentTextIcon },
     { name: 'New Time Table Update', href: '/exam/time-table', icon: CalendarIcon },
