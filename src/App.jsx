@@ -20,6 +20,7 @@ import ExamDivision from './pages/examdivision/ExamDivision';
 import ExamDivisionLayout from './layouts/ExamDivisionLayout';
 import ExamCompliance from './pages/examdivision/ExamCompliance';
 import ExamActivities from './pages/examdivision/ExamActivities';
+import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
 
 function App() {
   return (
@@ -64,7 +65,7 @@ function App() {
         <Route path="news" element={<div className="p-8"><h1 className="text-2xl font-bold">News Upload</h1></div>} />
         <Route path="compliance" element={<ExamCompliance />} />
         <Route path="activities" element={<ExamActivities />} />
-        <Route path="division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
+        <Route path="members" element={<ExamDivisionMembers />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
         <Route path="help" element={<Help />} />

@@ -25,7 +25,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
     { name: 'News Upload', href: '/exam/news', icon: NewspaperIcon },
     { name: 'Student Compliance', href: '/exam/compliance', icon: ClipboardDocumentCheckIcon },
     { name: 'Recent Activities', href: '/exam/activities', icon: ClockIcon },
-    { name: 'Exam Division', href: '/exam/division', icon: UserGroupIcon },
+    { name: 'Exam Members', href: '/exam/members', icon: UserGroupIcon },
   ];
 
   const bottomNav = [
