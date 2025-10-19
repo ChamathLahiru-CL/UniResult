@@ -15,7 +15,6 @@ import {
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const navigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/admin', current: true },
-    { name: 'Update Result', icon: DocumentTextIcon, href: '/admin/update-result', current: false },
     { name: 'Recent Activities', icon: ClockIcon, href: '/admin/activities', current: false },
     { name: 'Exam Division', icon: AcademicCapIcon, href: '/admin/exam-division', current: false },
     { name: 'Students', icon: UsersIcon, href: '/admin/students', current: false },

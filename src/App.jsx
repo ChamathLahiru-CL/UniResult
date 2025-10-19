@@ -20,6 +20,8 @@ import ExamDivision from './pages/examdivision/ExamDivision';
 import ExamDivisionLayout from './layouts/ExamDivisionLayout';
 import ExamCompliance from './pages/examdivision/ExamCompliance';
 import ExamActivities from './pages/examdivision/ExamActivities';
+import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
+import ResultManagement from './pages/examdivision/ResultManagement';
 
 function App() {
   return (
@@ -58,13 +60,13 @@ function App() {
         }
       >
         <Route index element={<ExamDivision />} />
-        <Route path="update-result" element={<div className="p-8"><h1 className="text-2xl font-bold">Update Result</h1></div>} />
         <Route path="new-result" element={<div className="p-8"><h1 className="text-2xl font-bold">New Result Upload</h1></div>} />
         <Route path="time-table" element={<div className="p-8"><h1 className="text-2xl font-bold">Time Table Update</h1></div>} />
         <Route path="news" element={<div className="p-8"><h1 className="text-2xl font-bold">News Upload</h1></div>} />
         <Route path="compliance" element={<ExamCompliance />} />
         <Route path="activities" element={<ExamActivities />} />
-        <Route path="division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
+        <Route path="members" element={<ExamDivisionMembers />} />
+        <Route path="results" element={<ResultManagement />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
         <Route path="help" element={<Help />} />
@@ -79,7 +81,6 @@ function App() {
           </ProtectedRoute>
         }>
         <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
-        <Route path="update-result" element={<div className="p-8"><h1 className="text-2xl font-bold">Update Result</h1></div>} />
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
         <Route path="exam-division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
         <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
