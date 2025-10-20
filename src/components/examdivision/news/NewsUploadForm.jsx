@@ -1,12 +1,34 @@
+/**
+ * News Management System for UniResult
+ * ===================================
+ * This module is part of the News page development (October 2025)
+ * 
+ * Purpose:
+ * - Provides a form interface for uploading and managing news items
+ * - Supports multiple news types (Exam, Result, Time Table, etc.)
+ * - Handles file attachments and faculty-specific news
+ * 
+ * Features:
+ * - News type categorization
+ * - Faculty-specific targeting
+ * - File attachment support
+ * - Form validation
+ * - Responsive design
+ */
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { DocumentArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
+// News Upload Form Component - Handles creation and submission of news items
 const NewsUploadForm = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm();
 
+  // News Types Configuration
+  // Defines all possible types of news that can be posted in the system
+  // Each type includes an ID, display name, and helpful description
   const newsTypes = [
     { id: 'exam', name: 'Exam News', description: 'Examination schedules and updates' },
     { id: 'result', name: 'Result News', description: 'Result announcements and grades' },
@@ -15,6 +37,9 @@ const NewsUploadForm = () => {
     { id: 'announcement', name: 'General Announcement', description: 'Other important announcements' }
   ];
 
+  // Faculty List Configuration
+  // Defines all faculties in the university system
+  // Used for targeting news to specific faculty departments
   const faculties = [
     { id: 'ICT', name: 'Information & Communication Technology' },
     { id: 'CST', name: 'Computer Science & Technology' },
@@ -22,6 +47,9 @@ const NewsUploadForm = () => {
     { id: 'BBA', name: 'Business Administration' }
   ];
 
+  // Form Submission Handler
+  // Processes the news submission with file attachment support
+  // TODO: Replace mock API call with actual backend integration
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -52,6 +80,9 @@ const NewsUploadForm = () => {
     }
   };
 
+  // File Upload Handler
+  // Manages file selection for news attachments
+  // Supports various file types (PDF, DOC, JPG, PNG, TXT)
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
