@@ -5,7 +5,15 @@ import { DocumentArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
 const NewsUploadForm = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm();
+
+  const newsTypes = [
+    { id: 'exam', name: 'Exam News', description: 'Examination schedules and updates' },
+    { id: 'result', name: 'Result News', description: 'Result announcements and grades' },
+    { id: 'timetable', name: 'Time Table', description: 'Academic schedules and timetables' },
+    { id: 'assessment', name: 'Assessment', description: 'Quizzes and assignments information' },
+    { id: 'announcement', name: 'General Announcement', description: 'Other important announcements' }
+  ];
 
   const faculties = [
     { id: 'ICT', name: 'Information & Communication Technology' },
@@ -20,6 +28,7 @@ const NewsUploadForm = () => {
       const formData = new FormData();
       formData.append('topic', data.topic);
       formData.append('faculty', data.faculty);
+      formData.append('newsType', data.newsType);
       formData.append('message', data.message);
       if (selectedFile) {
         formData.append('file', selectedFile);
@@ -72,6 +81,31 @@ const NewsUploadForm = () => {
           {errors.topic && (
             <p className="mt-1 text-sm text-red-600">{errors.topic.message}</p>
           )}
+        </div>
+
+        {/* News Type Selector */}
+        <div>
+          <label htmlFor="newsType" className="block text-sm font-medium text-gray-700 mb-1">
+            News Type
+          </label>
+          <select
+            id="newsType"
+            {...register('newsType', { required: 'News type is required' })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select news type...</option>
+            {newsTypes.map(type => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+          {errors.newsType && (
+            <p className="mt-1 text-sm text-red-600">{errors.newsType.message}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            {newsTypes.find(t => t.id === watch('newsType'))?.description}
+          </p>
         </div>
 
         {/* Faculty Selector */}
