@@ -19,6 +19,8 @@ import './App.css'; // Global CSS styles
 import ExamDivision from './pages/examdivision/ExamDivision';
 import ExamDivisionLayout from './layouts/ExamDivisionLayout';
 import ExamCompliance from './pages/examdivision/ExamCompliance';
+import AdminExamDivisionPage from './pages/admin/AdminExamDivisionPage';
+import AdminLayout from './layouts/AdminLayout';
 import ExamActivities from './pages/examdivision/ExamActivities';
 import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
 import ResultManagement from './pages/examdivision/ResultManagement';
@@ -78,12 +80,13 @@ function App() {
         path="/admin" 
         element={
           <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }>
         <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
-        <Route path="exam-division" element={<div className="p-8"><h1 className="text-2xl font-bold">Exam Division</h1></div>} />
+        <Route path="exam-division" element={<AdminExamDivisionPage />} />
+        <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
         <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />

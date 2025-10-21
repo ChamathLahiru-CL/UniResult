@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -13,11 +13,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
+  const location = useLocation();
+  
   const navigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/admin', current: true },
     { name: 'Recent Activities', icon: ClockIcon, href: '/admin/activities', current: false },
-    { name: 'Exam Division', icon: AcademicCapIcon, href: '/admin/exam-division', current: false },
-    { name: 'Students', icon: UsersIcon, href: '/admin/students', current: false },
+    { name: 'Exam Division', icon: UsersIcon, href: '/admin/exam-division', current: false },
+    { name: 'Students', icon: AcademicCapIcon, href: '/admin/students', current: false },
   ];
 
   const bottomNav = [
@@ -67,7 +69,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 key={item.name}
                 to={item.href}
                 className={`flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-100 ${
-                  item.current ? 'bg-blue-50 text-[#246BFD]' : ''
+                  location.pathname === item.href || location.pathname.startsWith(`${item.href}/`) 
+                    ? 'bg-blue-50 text-[#246BFD]' 
+                    : ''
                 }`}
               >
                 <item.icon className="h-5 w-5 mr-3" />
