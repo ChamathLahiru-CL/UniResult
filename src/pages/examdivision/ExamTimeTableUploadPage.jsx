@@ -83,125 +83,124 @@ const ExamTimeTableUploadPage = () => {
           </p>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Upload Form - Left Side */}
-          <div className="lg:col-span-2">
-            <TimeTableUploadForm onUploadSuccess={handleUploadSuccess} />
-          </div>
+        {/* 1. New Time Table Upload Section - Full Width */}
+        <div className="mb-12">
+          <TimeTableUploadForm onUploadSuccess={handleUploadSuccess} />
+        </div>
 
-          {/* History List - Right Side */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Filter Bar */}
-            <div className="flex items-center justify-between">
-              <ExamFilterBar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                facultyFilter={facultyFilter}
-                onFacultyFilterChange={setFacultyFilter}
-                timeRangeFilter={timeRangeFilter}
-                onTimeRangeFilterChange={setTimeRangeFilter}
-              />
-            </div>
-
-            {/* Active Filters Indicator */}
-            {hasActiveFilters && (
-              <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-800">Active Filters:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {searchQuery && (
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                        Search: "{searchQuery}"
-                      </span>
-                    )}
-                    {facultyFilter && (
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                        Faculty: {facultyFilter}
-                      </span>
-                    )}
-                    {timeRangeFilter !== 'all' && (
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                        Time: {timeRangeFilter === 'last7days' ? 'Last 7 days' : 'Last 30 days'}
-                      </span>
-                    )}
-                  </div>
+        {/* 2. Statistics Cards Section - Full Width */}
+        <div className="mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-blue-500">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Uploads</p>
+                  <p className="text-2xl font-bold text-gray-900">{timeTables.length}</p>
                 </div>
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Clear All
-                </button>
+                <ClockIcon className="h-8 w-8 text-blue-500" />
               </div>
-            )}
-
-            {/* Results Summary */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                {filteredTimeTables.length === timeTables.length ? (
-                  `Showing all ${timeTables.length} time table${timeTables.length !== 1 ? 's' : ''}`
-                ) : (
-                  `Showing ${filteredTimeTables.length} of ${timeTables.length} time table${timeTables.length !== 1 ? 's' : ''}`
-                )}
-              </p>
             </div>
 
-            {/* Time Tables List */}
-            <TimeTableHistoryList 
-              timeTables={filteredTimeTables}
-              onPreview={handlePreview}
-            />
+            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-green-500">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">ICT Faculty</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {timeTables.filter(tt => tt.faculty === 'ICT').length}
+                  </p>
+                </div>
+                <ClockIcon className="h-8 w-8 text-green-500" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-purple-500">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">PDF Files</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {timeTables.filter(tt => tt.type === 'pdf').length}
+                  </p>
+                </div>
+                <ClockIcon className="h-8 w-8 text-purple-500" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-orange-500">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Image Files</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {timeTables.filter(tt => tt.type === 'image').length}
+                  </p>
+                </div>
+                <ClockIcon className="h-8 w-8 text-orange-500" />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Uploads</p>
-                <p className="text-2xl font-bold text-gray-900">{timeTables.length}</p>
-              </div>
-              <ClockIcon className="h-8 w-8 text-blue-500" />
-            </div>
+        {/* 3. Past Time Tables List Section - Full Width */}
+        <div className="space-y-6">
+          {/* Filter Bar */}
+          <div className="w-full">
+            <ExamFilterBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              facultyFilter={facultyFilter}
+              onFacultyFilterChange={setFacultyFilter}
+              timeRangeFilter={timeRangeFilter}
+              onTimeRangeFilterChange={setTimeRangeFilter}
+            />
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">ICT Faculty</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {timeTables.filter(tt => tt.faculty === 'ICT').length}
-                </p>
+          {/* Active Filters Indicator */}
+          {hasActiveFilters && (
+            <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-blue-800">Active Filters:</span>
+                <div className="flex flex-wrap gap-2">
+                  {searchQuery && (
+                    <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      Search: "{searchQuery}"
+                    </span>
+                  )}
+                  {facultyFilter && (
+                    <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      Faculty: {facultyFilter}
+                    </span>
+                  )}
+                  {timeRangeFilter !== 'all' && (
+                    <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      Time: {timeRangeFilter === 'last7days' ? 'Last 7 days' : 'Last 30 days'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <ClockIcon className="h-8 w-8 text-green-500" />
+              <button
+                onClick={clearFilters}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear All
+              </button>
             </div>
+          )}
+
+          {/* Results Summary */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              {filteredTimeTables.length === timeTables.length ? (
+                `Showing all ${timeTables.length} time table${timeTables.length !== 1 ? 's' : ''}`
+              ) : (
+                `Showing ${filteredTimeTables.length} of ${timeTables.length} time table${timeTables.length !== 1 ? 's' : ''}`
+              )}
+            </p>
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-purple-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">PDF Files</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {timeTables.filter(tt => tt.type === 'pdf').length}
-                </p>
-              </div>
-              <ClockIcon className="h-8 w-8 text-purple-500" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-orange-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Image Files</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {timeTables.filter(tt => tt.type === 'image').length}
-                </p>
-              </div>
-              <ClockIcon className="h-8 w-8 text-orange-500" />
-            </div>
-          </div>
+          {/* Time Tables List */}
+          <TimeTableHistoryList 
+            timeTables={filteredTimeTables}
+            onPreview={handlePreview}
+          />
         </div>
       </div>
 
