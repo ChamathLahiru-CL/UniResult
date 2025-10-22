@@ -100,17 +100,22 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                   <span className="hidden sm:inline">Preview</span>
                 </button>
 
-                {timeTable.type === 'pdf' && (
-                  <a
-                    href={timeTable.fileUrl}
-                    download={timeTable.fileName}
-                    className="inline-flex items-center gap-2 px-3 py-2 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors"
-                    title="Download PDF"
-                  >
-                    <ArrowDownTrayIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Download</span>
-                  </a>
-                )}
+                {/* Download button for all file types */}
+                <a
+                  href={timeTable.fileUrl}
+                  download={timeTable.fileName}
+                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                    timeTable.type === 'pdf'
+                      ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
+                      : 'text-green-600 hover:text-green-800 hover:bg-green-50'
+                  }`}
+                  title={`Download ${timeTable.type.toUpperCase()} file`}
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {timeTable.type === 'pdf' ? 'Download PDF' : 'Download Image'}
+                  </span>
+                </a>
               </div>
             </div>
           </div>

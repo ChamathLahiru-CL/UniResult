@@ -172,15 +172,18 @@ const FilePreviewModal = ({ isOpen, onClose, file }) => {
             Press <kbd className="px-2 py-1 bg-white border rounded text-xs">Esc</kbd> to close
           </div>
           <div className="flex gap-3">
-            {isPDF && (
-              <a
-                href={file.fileUrl}
-                download={file.fileName}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-              >
-                Download PDF
-              </a>
-            )}
+            {/* Download button for all file types */}
+            <a
+              href={file.fileUrl}
+              download={file.fileName}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm ${
+                isPDF 
+                  ? 'bg-red-600 hover:bg-red-700' 
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              {isPDF ? 'Download PDF' : 'Download Image'}
+            </a>
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
