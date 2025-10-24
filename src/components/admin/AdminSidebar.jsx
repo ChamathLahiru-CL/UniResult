@@ -19,6 +19,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Dashboard', icon: HomeIcon, href: '/admin', current: true },
     { name: 'Recent Activities', icon: ClockIcon, href: '/admin/activities', current: false },
     { name: 'Exam Division', icon: UsersIcon, href: '/admin/exam-division', current: false },
+    { name: 'Compliance', icon: DocumentTextIcon, href: '/admin/compliance', current: false },
     { name: 'Students', icon: AcademicCapIcon, href: '/admin/students', current: false },
   ];
 

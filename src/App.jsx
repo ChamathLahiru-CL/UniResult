@@ -27,6 +27,10 @@ import ResultManagement from './pages/examdivision/ResultManagement';
 import ExamNewsPage from './pages/examdivision/ExamNewsPage';
 import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
 
+// Import Admin Compliance components
+import AdminCompliancePage from './pages/admin/AdminCompliancePage';
+import ComplianceDetailPage from './pages/admin/ComplianceDetailPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -88,6 +92,8 @@ function App() {
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
         <Route path="exam-division" element={<AdminExamDivisionPage />} />
         <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
+        <Route path="compliance" element={<AdminCompliancePage />} />
+        <Route path="compliance/:id" element={<ComplianceDetailPage />} />
         <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
