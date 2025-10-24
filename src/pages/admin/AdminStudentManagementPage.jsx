@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns';
+import React, { useState, useMemo } from 'react';
+import { format, isAfter, subDays } from 'date-fns';
+import FilterBar from '../../components/admin/students/FilterBar';
 
 const AdminStudentManagementPage = () => {
   const [students, setStudents] = useState([
@@ -35,10 +36,91 @@ const AdminStudentManagementPage = () => {
       matricNumber: 'EN20251003',
       status: 'Suspended',
       registrationDate: '2025-09-15'
+    },
+    {
+      id: 4,
+      name: 'Sarah Wilson',
+      email: 'sarah.wilson@uniresult.edu',
+      department: 'BBA',
+      program: 'BBA in Finance',
+      year: 4,
+      matricNumber: 'EN20201004',
+      status: 'Active',
+      registrationDate: '2025-10-19'
     }
   ]);
   const [loading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    search: '',
+    year: '',
+    faculty: '',
+    degree: '',
+    status: ''
+  });
+
+  const handleFilterChange = (key, value) => {
+    if (key === 'clear') {
+      setFilters({
+        search: '',
+        year: '',
+        faculty: '',
+        degree: '',
+        status: ''
+      });
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleDownload = () => {
+    // Create CSV content
+    const headers = ['Name', 'Email', 'Department', 'Program', 'Year', 'Matric Number', 'Status', 'Registration Date'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredStudents.map(student => [
+        `"${student.name}"`,
+        `"${student.email}"`,
+        `"${student.department}"`,
+        `"${student.program}"`,
+        student.year,
+        `"${student.matricNumber}"`,
+        `"${student.status}"`,
+        `"${format(new Date(student.registrationDate), 'MMM dd, yyyy')}"`
+      ].join(','))
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `students_report_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const isNewStudent = (registrationDate) => {
+    const sevenDaysAgo = subDays(new Date(), 7);
+    return isAfter(new Date(registrationDate), sevenDaysAgo);
+  };
+
+  const filteredStudents = useMemo(() => {
+    return students.filter(student => {
+      const matchesSearch = !filters.search || 
+        student.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+        student.email.toLowerCase().includes(filters.search.toLowerCase()) ||
+        student.matricNumber.toLowerCase().includes(filters.search.toLowerCase());
+
+      const matchesYear = !filters.year || student.year.toString() === filters.year;
+      const matchesFaculty = !filters.faculty || student.department === filters.faculty;
+      const matchesDegree = !filters.degree || student.program === filters.degree;
+      const matchesStatus = !filters.status || student.status === filters.status;
+
+      return matchesSearch && matchesYear && matchesFaculty && matchesDegree && matchesStatus;
+    });
+  }, [students, filters]);
 
   const handleSuspend = (id) => {
     if (window.confirm('Are you sure you want to suspend this student?')) {
@@ -62,26 +144,19 @@ const AdminStudentManagementPage = () => {
     }
   };
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.matricNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Student Management</h1>
-        <div className="flex items-center gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search by name, email, or matric number..."
-            className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
       </div>
+
+      {/* Filter Bar */}
+      <FilterBar
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onDownload={handleDownload}
+        totalStudents={filteredStudents.length}
+      />
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
@@ -123,7 +198,7 @@ const AdminStudentManagementPage = () => {
                 </tr>
               ) : (
                 filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50">
+                  <tr key={student.id} className={`hover:bg-gray-50 ${isNewStudent(student.registrationDate) ? 'border-l-4 border-green-400' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -134,8 +209,15 @@ const AdminStudentManagementPage = () => {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {student.name}
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-medium text-gray-900">
+                              {student.name}
+                            </div>
+                            {isNewStudent(student.registrationDate) && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                New
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">
                             {student.email}

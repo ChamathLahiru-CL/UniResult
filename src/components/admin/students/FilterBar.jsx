@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { faculties, degrees } from '../../../data/mockStudents';
 
-const FilterBar = ({ filters, onFilterChange }) => {
+const FilterBar = ({ filters, onFilterChange, onDownload, totalStudents }) => {
   const years = ["1", "2", "3", "4"];
 
   const availableDegrees = useMemo(() => {
@@ -106,6 +106,33 @@ const FilterBar = ({ filters, onFilterChange }) => {
               Clear Filters
             </button>
           )}
+
+          {/* Download Report Button */}
+          <button
+            onClick={onDownload}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors text-sm"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+            Download Report
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Summary */}
+      <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+        <div className="flex items-center gap-4">
+          <span>Showing {totalStudents} students</span>
+          {(filters.search || filters.faculty || filters.year || filters.degree || filters.status) && (
+            <span className="text-blue-600">• Filters applied</span>
+          )}
+        </div>
+        
+        {/* Show recently registered indicator */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+            <span className="text-xs">New (Last 7 days)</span>
+          </div>
         </div>
       </div>
     </div>
