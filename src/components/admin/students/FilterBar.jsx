@@ -1,6 +1,74 @@
 import React, { useMemo } from 'react';
 import { MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { faculties, degrees } from '../../../data/mockStudents';
+
+// Updated departments and degrees based on requirements
+const departments = [
+  { id: 'ICT', name: 'ICT' },
+  { id: 'CST', name: 'CST' },
+  { id: 'EET', name: 'EET' },
+  { id: 'BBST', name: 'BBST' },
+  { id: 'BBA', name: 'BBA' },
+  { id: 'Technological Studies', name: 'Technological Studies' },
+  { id: 'Applied Science', name: 'Applied Science' },
+  { id: 'Medicine', name: 'Medicine' },
+  { id: 'Agriculture', name: 'Agriculture' },
+  { id: 'Finance', name: 'Finance' }
+];
+
+const degrees = {
+  'ICT': [
+    'BSc in Computer Science',
+    'BSc in IT',
+    'BSc in Software Engineering',
+    'BSc in Information Systems'
+  ],
+  'CST': [
+    'BSc in Computer Science & Technology',
+    'BSc in Data Science',
+    'BSc in Artificial Intelligence'
+  ],
+  'EET': [
+    'BSc in Electrical Engineering',
+    'BSc in Electronic Engineering',
+    'BSc in Telecommunication Engineering'
+  ],
+  'BBST': [
+    'BSc in Business Studies',
+    'BSc in Business Information Systems',
+    'BSc in Business Analytics'
+  ],
+  'BBA': [
+    'BBA in Marketing',
+    'BBA in Finance',
+    'BBA in Human Resources',
+    'BBA in Operations Management'
+  ],
+  'Technological Studies': [
+    'BSc in Technology Management',
+    'BSc in Industrial Technology',
+    'BSc in Manufacturing Technology'
+  ],
+  'Applied Science': [
+    'BSc in Applied Physics',
+    'BSc in Applied Chemistry',
+    'BSc in Applied Mathematics'
+  ],
+  'Medicine': [
+    'MBBS',
+    'BSc in Nursing',
+    'BSc in Medical Technology'
+  ],
+  'Agriculture': [
+    'BSc in Agriculture',
+    'BSc in Agricultural Technology',
+    'BSc in Food Science'
+  ],
+  'Finance': [
+    'BSc in Finance',
+    'BSc in Banking & Finance',
+    'BSc in Financial Management'
+  ]
+};
 
 const FilterBar = ({ filters, onFilterChange, onDownload, totalStudents }) => {
   const years = ["1", "2", "3", "4"];
@@ -57,10 +125,10 @@ const FilterBar = ({ filters, onFilterChange, onDownload, totalStudents }) => {
             }}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
           >
-            <option value="">All Faculties</option>
-            {faculties.map((faculty) => (
-              <option key={faculty.id} value={faculty.id}>
-                {faculty.name}
+            <option value="">All Departments</option>
+            {departments.map((department) => (
+              <option key={department.id} value={department.id}>
+                {department.name}
               </option>
             ))}
           </select>
@@ -87,8 +155,8 @@ const FilterBar = ({ filters, onFilterChange, onDownload, totalStudents }) => {
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
           >
             <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
+            <option value="Active">Active</option>
+            <option value="Suspended">Suspended</option>
           </select>
 
           {/* Clear Filters */}

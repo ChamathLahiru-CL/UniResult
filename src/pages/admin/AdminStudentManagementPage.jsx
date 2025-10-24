@@ -10,6 +10,7 @@ const AdminStudentManagementPage = () => {
       email: 'john.doe@uniresult.edu',
       department: 'ICT',
       program: 'BSc in Computer Science',
+      degree: 'BSc in Computer Science',
       year: 2,
       matricNumber: 'EN20241001',
       status: 'Active',
@@ -21,6 +22,7 @@ const AdminStudentManagementPage = () => {
       email: 'jane.smith@uniresult.edu',
       department: 'BBA',
       program: 'BBA in Marketing',
+      degree: 'BBA in Marketing',
       year: 3,
       matricNumber: 'EN20231002',
       status: 'Active',
@@ -32,6 +34,7 @@ const AdminStudentManagementPage = () => {
       email: 'alex.johnson@uniresult.edu',
       department: 'ICT',
       program: 'BSc in IT',
+      degree: 'BSc in IT',
       year: 1,
       matricNumber: 'EN20251003',
       status: 'Suspended',
@@ -43,10 +46,119 @@ const AdminStudentManagementPage = () => {
       email: 'sarah.wilson@uniresult.edu',
       department: 'BBA',
       program: 'BBA in Finance',
+      degree: 'BBA in Finance',
       year: 4,
       matricNumber: 'EN20201004',
       status: 'Active',
       registrationDate: '2025-10-19'
+    },
+    {
+      id: 5,
+      name: 'Mike Chen',
+      email: 'mike.chen@uniresult.edu',
+      department: 'CST',
+      program: 'BSc in Data Science',
+      degree: 'BSc in Data Science',
+      year: 2,
+      matricNumber: 'EN20241005',
+      status: 'Active',
+      registrationDate: '2025-10-21'
+    },
+    {
+      id: 6,
+      name: 'Emily Rodriguez',
+      email: 'emily.rodriguez@uniresult.edu',
+      department: 'EET',
+      program: 'BSc in Electrical Engineering',
+      degree: 'BSc in Electrical Engineering',
+      year: 3,
+      matricNumber: 'EN20231006',
+      status: 'Active',
+      registrationDate: '2025-10-18'
+    },
+    {
+      id: 7,
+      name: 'David Kumar',
+      email: 'david.kumar@uniresult.edu',
+      department: 'BBST',
+      program: 'BSc in Business Studies',
+      degree: 'BSc in Business Studies',
+      year: 1,
+      matricNumber: 'EN20251007',
+      status: 'Active',
+      registrationDate: '2025-10-22'
+    },
+    {
+      id: 8,
+      name: 'Lisa Thompson',
+      email: 'lisa.thompson@uniresult.edu',
+      department: 'CST',
+      program: 'BSc in Artificial Intelligence',
+      degree: 'BSc in Artificial Intelligence',
+      year: 4,
+      matricNumber: 'EN20201008',
+      status: 'Suspended',
+      registrationDate: '2025-09-20'
+    },
+    {
+      id: 9,
+      name: 'Robert Zhang',
+      email: 'robert.zhang@uniresult.edu',
+      department: 'Technological Studies',
+      program: 'BSc in Technology Management',
+      degree: 'BSc in Technology Management',
+      year: 2,
+      matricNumber: 'EN20241009',
+      status: 'Active',
+      registrationDate: '2025-10-19'
+    },
+    {
+      id: 10,
+      name: 'Maria Garcia',
+      email: 'maria.garcia@uniresult.edu',
+      department: 'Applied Science',
+      program: 'BSc in Applied Physics',
+      degree: 'BSc in Applied Physics',
+      year: 3,
+      matricNumber: 'EN20231010',
+      status: 'Active',
+      registrationDate: '2025-10-17'
+    },
+    {
+      id: 11,
+      name: 'Ahmed Hassan',
+      email: 'ahmed.hassan@uniresult.edu',
+      department: 'Medicine',
+      program: 'MBBS',
+      degree: 'MBBS',
+      year: 1,
+      matricNumber: 'EN20251011',
+      status: 'Active',
+      registrationDate: '2025-10-21'
+    },
+    {
+      id: 12,
+      name: 'Jennifer Lee',
+      email: 'jennifer.lee@uniresult.edu',
+      department: 'Agriculture',
+      program: 'BSc in Agriculture',
+      degree: 'BSc in Agriculture',
+      year: 2,
+      matricNumber: 'EN20241012',
+      status: 'Active',
+      registrationDate: '2025-10-16'
+    },
+    {
+      id: 13,
+      name: 'Michael Brown',
+      email: 'michael.brown@uniresult.edu',
+      department: 'Finance',
+      program: 'BSc in Banking & Finance',
+      degree: 'BSc in Banking & Finance',
+      year: 4,
+      matricNumber: 'EN20201013',
+      status: 'Suspended',
+      registrationDate: '2025-09-25'
     }
   ]);
   const [loading] = useState(false);
@@ -74,7 +186,7 @@ const AdminStudentManagementPage = () => {
 
   const handleDownload = () => {
     // Create CSV content
-    const headers = ['Name', 'Email', 'Department', 'Program', 'Year', 'Matric Number', 'Status', 'Registration Date'];
+    const headers = ['Name', 'Email', 'Department', 'Program', 'Degree', 'Year', 'Matric Number', 'Status', 'Registration Date'];
     const csvContent = [
       headers.join(','),
       ...filteredStudents.map(student => [
@@ -82,6 +194,7 @@ const AdminStudentManagementPage = () => {
         `"${student.email}"`,
         `"${student.department}"`,
         `"${student.program}"`,
+        `"${student.degree}"`,
         student.year,
         `"${student.matricNumber}"`,
         `"${student.status}"`,
@@ -170,6 +283,9 @@ const AdminStudentManagementPage = () => {
                   Department
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Degree
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Year & Matric
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -186,13 +302,13 @@ const AdminStudentManagementPage = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center">
+                  <td colSpan="7" className="px-6 py-4 text-center">
                     Loading students...
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center">
+                  <td colSpan="7" className="px-6 py-4 text-center">
                     No students found.
                   </td>
                 </tr>
@@ -228,6 +344,9 @@ const AdminStudentManagementPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{student.department}</div>
                       <div className="text-sm text-gray-500">{student.program}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{student.degree}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">Year {student.year}</div>
