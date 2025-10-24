@@ -25,6 +25,11 @@ import ExamActivities from './pages/examdivision/ExamActivities';
 import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
 import ResultManagement from './pages/examdivision/ResultManagement';
 import ExamNewsPage from './pages/examdivision/ExamNewsPage';
+import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
+
+// Import Admin Compliance components
+import AdminCompliancePage from './pages/admin/AdminCompliancePage';
+import ComplianceDetailPage from './pages/admin/ComplianceDetailPage';
 
 function App() {
   return (
@@ -64,7 +69,7 @@ function App() {
       >
         <Route index element={<ExamDivision />} />
         <Route path="new-result" element={<div className="p-8"><h1 className="text-2xl font-bold">New Result Upload</h1></div>} />
-        <Route path="time-table" element={<div className="p-8"><h1 className="text-2xl font-bold">Time Table Update</h1></div>} />
+        <Route path="time-table" element={<ExamTimeTableUploadPage />} />
         <Route path="news" element={<ExamNewsPage />} />
         <Route path="compliance" element={<ExamCompliance />} />
         <Route path="activities" element={<ExamActivities />} />
@@ -87,6 +92,8 @@ function App() {
         <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
         <Route path="exam-division" element={<AdminExamDivisionPage />} />
         <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
+        <Route path="compliance" element={<AdminCompliancePage />} />
+        <Route path="compliance/:id" element={<ComplianceDetailPage />} />
         <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
