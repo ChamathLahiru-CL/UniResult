@@ -31,6 +31,9 @@ import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPag
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
 import ComplianceDetailPage from './pages/admin/ComplianceDetailPage';
 
+// Import Admin Student Management components
+import AdminStudentManagementPage from './pages/admin/AdminStudentManagementPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -94,7 +97,7 @@ function App() {
         <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
         <Route path="compliance" element={<AdminCompliancePage />} />
         <Route path="compliance/:id" element={<ComplianceDetailPage />} />
-        <Route path="students" element={<div className="p-8"><h1 className="text-2xl font-bold">Students Management</h1></div>} />
+        <Route path="students" element={<AdminStudentManagementPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
         <Route path="help" element={<Help />} />

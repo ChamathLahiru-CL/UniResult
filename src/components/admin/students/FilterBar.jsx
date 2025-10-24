@@ -1,0 +1,115 @@
+import React, { useMemo } from 'react';
+import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { faculties, degrees } from '../../../data/mockStudents';
+
+const FilterBar = ({ filters, onFilterChange }) => {
+  const years = ["1", "2", "3", "4"];
+
+  const availableDegrees = useMemo(() => {
+    if (!filters.faculty) return [];
+    return degrees[filters.faculty] || [];
+  }, [filters.faculty]);
+
+  return (
+    <div className="bg-slate-50 rounded-lg border border-slate-200 p-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Search Input */}
+        <div className="flex-1">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => onFilterChange('search', e.target.value)}
+              placeholder="Search by name or enrollment number..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Filter Section */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <span className="text-sm text-gray-600">Filters:</span>
+          </div>
+
+          {/* Year Filter */}
+          <select
+            value={filters.year}
+            onChange={(e) => onFilterChange('year', e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
+          >
+            <option value="">All Years</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                Year {year}
+              </option>
+            ))}
+          </select>
+
+          {/* Faculty Filter */}
+          <select
+            value={filters.faculty}
+            onChange={(e) => {
+              onFilterChange('faculty', e.target.value);
+              onFilterChange('degree', ''); // Reset degree when faculty changes
+            }}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
+          >
+            <option value="">All Faculties</option>
+            {faculties.map((faculty) => (
+              <option key={faculty.id} value={faculty.id}>
+                {faculty.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Degree Filter */}
+          <select
+            value={filters.degree}
+            onChange={(e) => onFilterChange('degree', e.target.value)}
+            disabled={!filters.faculty}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">All Degrees</option>
+            {availableDegrees.map((degree) => (
+              <option key={degree} value={degree}>
+                {degree}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={filters.status}
+            onChange={(e) => onFilterChange('status', e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+
+          {/* Clear Filters */}
+          {(filters.year || filters.faculty || filters.degree || filters.status || filters.search) && (
+            <button
+              onClick={() => {
+                onFilterChange('year', '');
+                onFilterChange('faculty', '');
+                onFilterChange('degree', '');
+                onFilterChange('status', '');
+                onFilterChange('search', '');
+              }}
+              className="px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FilterBar;
