@@ -34,6 +34,9 @@ import ComplianceDetailPage from './pages/admin/ComplianceDetailPage';
 // Import Admin Student Management components
 import AdminStudentManagementPage from './pages/admin/AdminStudentManagementPage';
 
+// Import Admin Recent Activities components
+import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -92,7 +95,7 @@ function App() {
           </ProtectedRoute>
         }>
         <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
-        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
+        <Route path="activities" element={<AdminRecentActivitiesPage />} />
         <Route path="exam-division" element={<AdminExamDivisionPage />} />
         <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
         <Route path="compliance" element={<AdminCompliancePage />} />
