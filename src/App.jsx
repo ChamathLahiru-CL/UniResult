@@ -41,6 +41,9 @@ import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
 import AdminStudentResultPage from './pages/admin/AdminStudentResultPage';
 import ResultDetailsPage from './pages/admin/ResultDetailsPage';
 
+// Import Admin Settings page
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -108,7 +111,7 @@ function App() {
         <Route path="results" element={<AdminStudentResultPage />} />
         <Route path="results/:id" element={<ResultDetailsPage />} />
         <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
+        <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="help" element={<Help />} />
       </Route>
 
