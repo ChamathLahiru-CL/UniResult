@@ -88,3 +88,48 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Custom utility classes for AdminRecentActivities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.activity-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.activity-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.notification-pulse {
+  animation: notification-pulse 2s infinite;
+}
+
+@keyframes notification-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Activity type indicators */
+.activity-new-indicator {
+  position: relative;
+}
+
+.activity-new-indicator::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  border-radius: 8px;
+  z-index: -1;
+  opacity: 0.1;
+}
