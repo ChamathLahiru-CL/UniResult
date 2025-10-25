@@ -34,6 +34,19 @@ import ComplianceDetailPage from './pages/admin/ComplianceDetailPage';
 // Import Admin Student Management components
 import AdminStudentManagementPage from './pages/admin/AdminStudentManagementPage';
 
+// Import Admin Recent Activities components
+import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
+
+// Import Admin Student Result Management components
+import AdminStudentResultPage from './pages/admin/AdminStudentResultPage';
+import ResultDetailsPage from './pages/admin/ResultDetailsPage';
+
+// Import Admin Settings page
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+
+// Import Admin Announcement page
+import AdminAnnouncementPage from './pages/admin/AdminAnnouncementPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -92,14 +105,17 @@ function App() {
           </ProtectedRoute>
         }>
         <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
-        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} />
+        <Route path="activities" element={<AdminRecentActivitiesPage />} />
         <Route path="exam-division" element={<AdminExamDivisionPage />} />
         <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
         <Route path="compliance" element={<AdminCompliancePage />} />
         <Route path="compliance/:id" element={<ComplianceDetailPage />} />
         <Route path="students" element={<AdminStudentManagementPage />} />
+        <Route path="results" element={<AdminStudentResultPage />} />
+        <Route path="results/:id" element={<ResultDetailsPage />} />
         <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="announcement" element={<AdminAnnouncementPage />} />
         <Route path="help" element={<Help />} />
       </Route>
 

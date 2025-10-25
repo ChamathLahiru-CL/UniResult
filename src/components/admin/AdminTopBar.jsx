@@ -9,13 +9,19 @@ import {
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
+import NotificationDropdown from './NotificationDropdown';
+import { mockActivities } from '../../data/mockActivities';
 
 const AdminTopBar = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  // Get unread notification count
+  const unreadCount = mockActivities.filter(activity => activity.status === 'NEW').length;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -41,11 +47,18 @@ const AdminTopBar = ({ onMenuClick }) => {
   const handleSignOut = () => {
     setShowSignOutConfirm(true);
     setShowProfileMenu(false);
+    setShowNotifications(false);
   };
 
   const confirmSignOut = () => {
     logout();
     navigate('/');
+  };
+
+  // Close dropdowns when clicking profile button
+  const toggleProfileMenu = () => {
+    setShowProfileMenu(!showProfileMenu);
+    setShowNotifications(false);
   };
 
   return (
@@ -78,14 +91,25 @@ const AdminTopBar = ({ onMenuClick }) => {
                 <span className="text-sm">{currentTime}</span>
               </div>
               <div className="h-6 w-px bg-gray-200 mx-4"></div>
-              <button className="p-2 rounded-full hover:bg-gray-100 relative">
-                <BellIcon className="h-5 w-5 text-gray-400" />
-                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 rounded-full hover:bg-gray-100 relative transition-colors"
+                >
+                  <BellIcon className="h-5 w-5 text-gray-400" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                  )}
+                </button>
+                <NotificationDropdown 
+                  isOpen={showNotifications} 
+                  onClose={() => setShowNotifications(false)} 
+                />
+              </div>
             </div>
             <div className="relative">
               <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                onClick={toggleProfileMenu}
                 className="flex items-center space-x-3 px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
               >
                 <div className="flex items-center space-x-3">
@@ -179,10 +203,21 @@ const AdminTopBar = ({ onMenuClick }) => {
             <span>{currentDate}</span>
           </div>
           <div className="h-4 w-px bg-gray-200 mx-4"></div>
-          <button className="p-1 rounded-full hover:bg-gray-100 relative">
-            <BellIcon className="h-5 w-5 text-gray-400" />
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-1 rounded-full hover:bg-gray-100 relative transition-colors"
+            >
+              <BellIcon className="h-5 w-5 text-gray-400" />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+              )}
+            </button>
+            <NotificationDropdown 
+              isOpen={showNotifications} 
+              onClose={() => setShowNotifications(false)} 
+            />
+          </div>
         </div>
       </div>
     </header>
