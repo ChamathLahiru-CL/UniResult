@@ -22,6 +22,7 @@ const Profile = () => {
 
   // Sample user data - replace with actual user data from your auth system
   const [userData, setUserData] = useState({
+    adminId: 'ADM001',
     studentId: 'IT21021380',
     email: 'it21021380@my.sliit.lk',
     firstName: 'Chamath',
@@ -77,7 +78,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="animate-fadeIn">
+    <div className="p-6 animate-fadeIn">
       {/* Page Header */}
       <div className="relative mb-6">
         <div className="absolute top-0 left-0 w-12 h-12 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
@@ -148,10 +149,10 @@ const Profile = () => {
             {/* Non-editable Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Student ID</label>
+                <label className="block text-sm font-medium text-gray-700">Admin Id</label>
                 <input
                   type="text"
-                  value={userData.studentId}
+                  value={userData.adminId}
                   disabled
                   className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500 sm:text-sm"
                 />
