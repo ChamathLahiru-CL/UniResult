@@ -40,12 +40,39 @@ const AnnouncementCard = ({
     return configs[audience] || configs.all;
   };
 
+  const getPriorityConfig = (priority) => {
+    const configs = {
+      low: {
+        label: 'Low',
+        badgeClass: 'bg-gray-100 text-gray-700',
+        iconClass: 'text-gray-500'
+      },
+      medium: {
+        label: 'Medium',
+        badgeClass: 'bg-blue-100 text-blue-700',
+        iconClass: 'text-blue-500'
+      },
+      high: {
+        label: 'High',
+        badgeClass: 'bg-orange-100 text-orange-700',
+        iconClass: 'text-orange-500'
+      },
+      critical: {
+        label: 'Critical',
+        badgeClass: 'bg-red-100 text-red-700',
+        iconClass: 'text-red-500'
+      }
+    };
+    return configs[priority] || configs.medium;
+  };
+
   const truncateMessage = (message, maxLength) => {
     if (message.length <= maxLength) return message;
     return message.substring(0, maxLength) + '...';
   };
 
   const audienceConfig = getAudienceConfig(announcement.audience);
+  const priorityConfig = getPriorityConfig(announcement.priority);
   const needsTruncation = announcement.message.length > maxPreviewLength;
 
   return (
@@ -71,9 +98,16 @@ const AnnouncementCard = ({
             </div>
           </div>
         </div>
-        <span className={`${audienceConfig.badgeClass} text-xs px-2 py-1 rounded-full font-medium flex-shrink-0 ml-3`}>
-          {audienceConfig.label}
-        </span>
+        <div className="flex flex-col space-y-2 ml-3">
+          <span className={`${audienceConfig.badgeClass} text-xs px-2 py-1 rounded-full font-medium flex-shrink-0`}>
+            {audienceConfig.label}
+          </span>
+          {announcement.priority && (
+            <span className={`${priorityConfig.badgeClass} text-xs px-2 py-1 rounded-full font-medium flex-shrink-0`}>
+              {priorityConfig.label}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Message */}

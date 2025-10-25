@@ -25,7 +25,7 @@ export const sendAnnouncementDispatcher = async (announcementData) => {
       type: 'announcement',
       from: announcementData.by,
       timestamp: announcementData.timestamp,
-      priority: 'high',
+      priority: announcementData.priority || 'medium',
       read: false
     };
 
@@ -162,6 +162,10 @@ export const validateAnnouncementData = (data) => {
 
   if (!data.audience || !['all', 'students', 'exam'].includes(data.audience)) {
     errors.audience = 'Please select a valid audience';
+  }
+
+  if (!data.priority || !['low', 'medium', 'high', 'critical'].includes(data.priority)) {
+    errors.priority = 'Please select a valid priority level';
   }
 
   return {

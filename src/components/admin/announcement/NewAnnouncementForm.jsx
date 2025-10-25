@@ -6,7 +6,8 @@ const NewAnnouncementForm = () => {
   const [formData, setFormData] = useState({
     audience: 'all',
     topic: '',
-    message: ''
+    message: '',
+    priority: 'medium'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -16,6 +17,37 @@ const NewAnnouncementForm = () => {
     { value: 'all', label: 'All Users', description: 'Send to students and exam division' },
     { value: 'students', label: 'Students', description: 'Send only to student users' },
     { value: 'exam', label: 'Exam Division', description: 'Send only to exam division staff' }
+  ];
+
+  const priorityOptions = [
+    { 
+      value: 'low', 
+      label: 'Low Priority', 
+      description: 'General information, non-urgent',
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100'
+    },
+    { 
+      value: 'medium', 
+      label: 'Medium Priority', 
+      description: 'Important information, moderate urgency',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100'
+    },
+    { 
+      value: 'high', 
+      label: 'High Priority', 
+      description: 'Urgent information, immediate attention required',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100'
+    },
+    { 
+      value: 'critical', 
+      label: 'Critical', 
+      description: 'Emergency or system-critical announcement',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100'
+    }
   ];
 
   const validateForm = () => {
@@ -74,7 +106,7 @@ const NewAnnouncementForm = () => {
       type: 'announcement',
       from: 'Admin',
       timestamp: new Date().toISOString(),
-      priority: 'high'
+      priority: announcementData.priority
     };
     
     if (announcementData.audience === 'students' || announcementData.audience === 'all') {
@@ -88,7 +120,7 @@ const NewAnnouncementForm = () => {
     // Log to admin activities
     const activityData = {
       type: 'announcement',
-      message: `Sent new announcement "${announcementData.topic}" to ${getAudienceLabel(announcementData.audience)}`,
+      message: `Sent new ${announcementData.priority} priority announcement "${announcementData.topic}" to ${getAudienceLabel(announcementData.audience)}`,
       timestamp: new Date().toISOString(),
       by: 'Admin (Lahiru)'
     };
@@ -116,6 +148,7 @@ const NewAnnouncementForm = () => {
         topic: formData.topic.trim(),
         message: formData.message.trim(),
         audience: formData.audience,
+        priority: formData.priority,
         by: 'Admin (Lahiru)',
         timestamp: new Date().toISOString()
       };
@@ -130,7 +163,8 @@ const NewAnnouncementForm = () => {
       setFormData({
         audience: 'all',
         topic: '',
-        message: ''
+        message: '',
+        priority: 'medium'
       });
       
     } catch (error) {
@@ -185,6 +219,34 @@ const NewAnnouncementForm = () => {
             ))}
           </div>
         </fieldset>
+
+        {/* Priority Selector */}
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-slate-700">
+            Priority Level <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={formData.priority}
+            onChange={(e) => handleInputChange(e)}
+            name="priority"
+            className="w-full border border-slate-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-[#246BFD] focus:border-[#246BFD] transition-colors bg-white"
+          >
+            {priorityOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label} - {option.description}
+              </option>
+            ))}
+          </select>
+          <div className="flex items-center space-x-2">
+            {priorityOptions.map((option) => (
+              formData.priority === option.value && (
+                <div key={option.value} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${option.bgColor} ${option.color}`}>
+                  {option.label}
+                </div>
+              )
+            ))}
+          </div>
+        </div>
 
         {/* Topic Input */}
         <div className="space-y-2">

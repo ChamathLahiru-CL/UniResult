@@ -15,6 +15,7 @@ const mockAnnouncements = [
     topic: "New GPA System Rollout",
     message: "A new GPA calculation system will be implemented starting next week. All students and exam division staff should familiarize themselves with the new grading criteria. The system will automatically convert existing grades to the new scale.",
     audience: "all",
+    priority: "high",
     by: "Admin (Lahiru)",
     timestamp: "2024-01-15T10:30:00Z"
   },
@@ -23,6 +24,7 @@ const mockAnnouncements = [
     topic: "Exam Schedule Update",
     message: "Due to unforeseen circumstances, the mid-term examinations scheduled for next week have been postponed. New dates will be announced soon.",
     audience: "students",
+    priority: "critical",
     by: "Admin (Sarah)",
     timestamp: "2024-01-14T14:20:00Z"
   },
@@ -31,6 +33,7 @@ const mockAnnouncements = [
     topic: "Result Verification Process",
     message: "All exam division staff are required to complete the result verification training by end of this month. Please contact HR for scheduling your training session.",
     audience: "exam",
+    priority: "medium",
     by: "Admin (Lahiru)",
     timestamp: "2024-01-13T09:15:00Z"
   },
@@ -39,6 +42,7 @@ const mockAnnouncements = [
     topic: "System Maintenance Notice",
     message: "The university result system will undergo scheduled maintenance this Saturday from 2 AM to 6 AM. During this time, the system will be temporarily unavailable.",
     audience: "all",
+    priority: "medium",
     by: "Admin (Tech Team)",
     timestamp: "2024-01-12T16:45:00Z"
   },
@@ -47,6 +51,7 @@ const mockAnnouncements = [
     topic: "Student Portal Updates",
     message: "New features have been added to the student portal including GPA tracking, notification center, and improved result viewing. Log in to explore the new interface.",
     audience: "students",
+    priority: "low",
     by: "Admin (Sarah)",
     timestamp: "2024-01-11T11:30:00Z"
   },
@@ -55,6 +60,7 @@ const mockAnnouncements = [
     topic: "Grade Submission Deadline",
     message: "Reminder: All grades for the current semester must be submitted by Friday, January 19th. Late submissions will require special approval from the academic office.",
     audience: "exam",
+    priority: "high",
     by: "Admin (Lahiru)",
     timestamp: "2024-01-10T13:20:00Z"
   },
@@ -63,6 +69,7 @@ const mockAnnouncements = [
     topic: "Holiday Schedule Announcement",
     message: "The university will be closed from December 25th to January 2nd for winter holidays. Normal operations will resume on January 3rd. Emergency contacts will remain available.",
     audience: "all",
+    priority: "low",
     by: "Admin (HR)",
     timestamp: "2024-01-09T08:00:00Z"
   },
@@ -71,6 +78,7 @@ const mockAnnouncements = [
     topic: "Security Update Required",
     message: "All users must update their passwords by the end of this month as part of our enhanced security measures. New passwords must meet the updated complexity requirements.",
     audience: "all",
+    priority: "medium",
     by: "Admin (Security)",
     timestamp: "2024-01-08T15:30:00Z"
   }
