@@ -44,6 +44,9 @@ import ResultDetailsPage from './pages/admin/ResultDetailsPage';
 // Import Admin Settings page
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 
+// Import Admin Announcement page
+import AdminAnnouncementPage from './pages/admin/AdminAnnouncementPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -112,6 +115,7 @@ function App() {
         <Route path="results/:id" element={<ResultDetailsPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="announcement" element={<AdminAnnouncementPage />} />
         <Route path="help" element={<Help />} />
       </Route>
 

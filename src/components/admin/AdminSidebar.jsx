@@ -11,6 +11,7 @@ import {
   UserIcon,
   XMarkIcon,
   DocumentChartBarIcon,
+  SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -19,6 +20,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const navigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/admin', current: true },
     { name: 'Recent Activities', icon: ClockIcon, href: '/admin/activities', current: false },
+    { name: 'Announcements', icon: SpeakerWaveIcon, href: '/admin/announcement', current: false },
     { name: 'Exam Division', icon: UsersIcon, href: '/admin/exam-division', current: false },
     { name: 'Compliance', icon: DocumentTextIcon, href: '/admin/compliance', current: false },
     { name: 'Students', icon: AcademicCapIcon, href: '/admin/students', current: false },
