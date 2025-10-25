@@ -37,6 +37,10 @@ import AdminStudentManagementPage from './pages/admin/AdminStudentManagementPage
 // Import Admin Recent Activities components
 import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
 
+// Import Admin Student Result Management components
+import AdminStudentResultPage from './pages/admin/AdminStudentResultPage';
+import ResultDetailsPage from './pages/admin/ResultDetailsPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -101,6 +105,8 @@ function App() {
         <Route path="compliance" element={<AdminCompliancePage />} />
         <Route path="compliance/:id" element={<ComplianceDetailPage />} />
         <Route path="students" element={<AdminStudentManagementPage />} />
+        <Route path="results" element={<AdminStudentResultPage />} />
+        <Route path="results/:id" element={<ResultDetailsPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
         <Route path="help" element={<Help />} />
