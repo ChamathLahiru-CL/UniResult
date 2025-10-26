@@ -11,7 +11,6 @@ import {
 const Notifications = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
-  const [isLoading, setIsLoading] = useState(true);
 
   // Load notifications from localStorage on component mount
   const loadNotifications = () => {
@@ -142,50 +141,54 @@ const Notifications = () => {
 
   return (
     <>
-      <div className="animate-fadeIn p-4 max-w-4xl mx-auto">
+      <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
         {/* Page Header */}
-        <div className="relative mb-8">
-        <div className="absolute top-0 left-0 w-16 h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-        <div className="absolute top-4 right-16 w-20 h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 right-0 w-16 h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-        <h1 className="relative text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
+        <div className="relative mb-6 sm:mb-8">
+        <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+        <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+        <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
           Notifications
         </h1>
-        <p className="text-gray-600 text-sm font-medium">
+        <p className="text-gray-600 text-xs sm:text-sm font-medium">
           Stay updated with your latest academic activities
         </p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between border-b border-gray-200 bg-white rounded-lg shadow-sm p-1">
-          <nav className="-mb-px flex space-x-6">
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white rounded-lg shadow-sm p-3 sm:p-4">
+          {/* Tab Navigation */}
+          <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto pb-2 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide">
             {['all', 'unread', 'read'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
                 className={`
-                  relative whitespace-nowrap py-3 px-6 rounded-lg font-medium text-sm capitalize transition-all duration-200
-                  focus:outline-none
+                  relative whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-medium text-xs sm:text-sm capitalize transition-all duration-200
+                  focus:outline-none flex-shrink-0
                   ${filter === tab
                     ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md shadow-blue-200'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }
+                  ${tab === 'unread' && unreadCount > 0 ? 'pr-8 sm:pr-10' : ''}
                 `}
               >
                 {tab}
                 {tab === 'unread' && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full min-w-[20px]">
+                  <span className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-3 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs bg-red-500 text-white rounded-full min-w-[18px] sm:min-w-[20px] flex items-center justify-center font-bold">
                     {unreadCount}
                   </span>
                 )}
               </button>
             ))}
           </nav>
+          
+          {/* Mark All as Read Button */}
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-2 px-6 rounded-lg 
+              className="w-full sm:w-auto text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-2 sm:py-2.5 px-4 sm:px-6 rounded-lg 
                 shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-300 transition-all duration-200 
                 hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
             >
@@ -203,7 +206,7 @@ const Notifications = () => {
             <div
               key={notification.id}
               className={`
-                group bg-white rounded-xl shadow-md p-5 transition-all duration-300
+                group bg-white rounded-xl shadow-md p-4 sm:p-5 transition-all duration-300
                 ${notification.isRead 
                   ? 'border border-gray-100 hover:border-gray-200' 
                   : 'border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50'
@@ -211,53 +214,53 @@ const Notifications = () => {
                 hover:shadow-xl hover:transform hover:-translate-y-1
               `}
             >
-              <div className="flex items-start space-x-4">
+              <div className="flex items-start space-x-3 sm:space-x-4">
                 <div className={`
-                  p-3 rounded-xl transition-all duration-300 
+                  p-2.5 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0
                   ${notification.isRead 
                     ? 'bg-gray-100 group-hover:bg-gray-200' 
                     : 'bg-gradient-to-r from-blue-100 to-indigo-100 group-hover:shadow-md'
                   }
                 `}>
-                  <Icon className={`w-6 h-6 ${
+                  <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${
                     notification.isRead 
                       ? 'text-gray-600 group-hover:text-gray-800' 
                       : 'text-blue-600 group-hover:text-blue-700'
                   }`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className={`text-base font-semibold ${
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 mb-2">
+                    <p className={`text-sm sm:text-base font-semibold pr-2 ${
                       notification.isRead ? 'text-gray-800' : 'text-blue-800'
                     }`}>
                       {notification.title}
                     </p>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                    <span className="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600 w-fit">
                       {formatTime(notification.time)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">
                     {notification.message}
                   </p>
-                  <div className="mt-3 flex items-center space-x-4">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                     <button
                       onClick={() => handleNotificationClick(notification)}
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r 
+                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-gradient-to-r 
                         from-blue-500 to-indigo-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200
                         hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
                     >
                       View Details
-                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="ml-2 w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
                     {!notification.isRead && (
                       <button
                         onClick={() => markAsRead(notification.id)}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 
+                        className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 
                           bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none"
                       >
-                        <CheckCircleIcon className="w-4 h-4 mr-2" />
+                        <CheckCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                         Mark as read
                       </button>
                     )}
@@ -269,12 +272,12 @@ const Notifications = () => {
         })}
 
         {filteredNotifications.length === 0 && (
-          <div className="text-center py-16 px-4 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 mb-4">
-              <BellIcon className="h-8 w-8 text-blue-500" />
+          <div className="text-center py-12 sm:py-16 px-4 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 mb-3 sm:mb-4">
+              <BellIcon className="h-7 w-7 sm:h-8 sm:w-8 text-blue-500" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No notifications</h3>
-            <p className="text-sm text-gray-600 max-w-sm mx-auto">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No notifications</h3>
+            <p className="text-xs sm:text-sm text-gray-600 max-w-sm mx-auto">
               {filter === 'unread' ? 'You\'re all caught up! No unread notifications to show.' : 
                filter === 'read' ? 'No read notifications in your history yet.' :
                'Your notification feed is empty. New updates will appear here.'}

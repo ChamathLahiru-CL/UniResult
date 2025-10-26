@@ -14,7 +14,7 @@ import {
  * Contains main navigation links and footer links
  * Highlights active route based on current URL
  */
-const Sidebar = ({ isCollapsed, isMobile, isHoverExpanded, onCloseMobile }) => {
+const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -59,7 +59,7 @@ const Sidebar = ({ isCollapsed, isMobile, isHoverExpanded, onCloseMobile }) => {
     { 
       name: 'GPA Analytics', 
       icon: ChartBarIcon, 
-      path: '/dash/gpa-analytics',
+      path: '/dash/gpa-trend',
       tooltip: 'GPA Performance Analytics'
     },
     { 
