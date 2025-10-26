@@ -6,7 +6,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   BellIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/useAuth';
 import NotificationDropdown from './NotificationDropdown';
@@ -27,7 +28,7 @@ import NotificationDropdown from './NotificationDropdown';
  * - Responsive design
  * - Click-outside behavior for dropdowns
  */
-const TopBar = ({ toggleCollapse, isCollapsed }) => {
+const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMobileMenuOpen }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -118,34 +119,38 @@ const TopBar = ({ toggleCollapse, isCollapsed }) => {
         <div className="flex justify-between items-center h-14 px-3">
           {/* Left section with logo and toggle buttons */}
           <div className="flex items-center space-x-3">
-            {/* Single sidebar toggle button */}
-            <button
-              type="button"
-              className="group flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 border border-blue-100 hover:border-blue-200 focus:outline-none transition-all duration-200 hover:shadow-md relative"
-              onClick={toggleCollapse}
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 rounded-lg transition-opacity duration-200"></div>
-              <div className="flex flex-col items-center">
-                {isCollapsed ? (
-                  <>
-                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h15" />
-                    </svg>
-                    <span className="text-[10px] text-blue-600 font-medium mt-0.5 hidden md:block">Menu</span>
-                  </>
+            {/* Mobile menu button */}
+            {isMobile ? (
+              <button
+                type="button"
+                className="p-2 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                onClick={toggleMobileMenu}
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {isMobileMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
                 ) : (
-                  <>
-                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 12H4" />
-                    </svg>
-                    <span className="text-[10px] text-blue-600 font-medium mt-0.5 hidden md:block">Menu</span>
-                  </>
+                  <Bars3Icon className="h-6 w-6" />
                 )}
-              </div>
-            </button>
+              </button>
+            ) : (
+              // Desktop collapse button
+              <button
+                type="button"
+                className="group flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 border border-blue-100 hover:border-blue-200 focus:outline-none transition-all duration-200 hover:shadow-md relative"
+                onClick={toggleCollapse}
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 rounded-lg transition-opacity duration-200"></div>
+                <div className="flex flex-col items-center">
+                  {isCollapsed ? (
+                    <ChevronRightIcon className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <ChevronLeftIcon className="h-5 w-5 text-blue-600" />
+                  )}
+                </div>
+              </button>
+            )}
 
             {/* Logo */}
             <div className="flex items-center ml-1">

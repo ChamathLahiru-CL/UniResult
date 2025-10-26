@@ -65,8 +65,10 @@ function App() {
           </ProtectedRoute>
         }>
         <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
+        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} /> {/* Activities page */}
         <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} /> {/* Results page */}
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} /> {/* GPA trend analysis page */}
+        <Route path="progress" element={<div className="p-8"><h1 className="text-2xl font-bold">Academic Progress</h1></div>} /> {/* Academic Progress page */}
         <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
         <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
         <Route path="profile" element={<Profile />} /> {/* Profile page */}

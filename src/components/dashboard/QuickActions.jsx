@@ -49,7 +49,7 @@ const QuickActions = () => {
         
         {/* Action Buttons */}
         <div className="space-y-3">
-          {actions.map((action, index) => (
+          {actions.map((action) => (
             <Link
               key={action.name}
               to={action.path.replace('/student/', '/dash/')}
