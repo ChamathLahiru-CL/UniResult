@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  HomeIcon, DocumentTextIcon, ChartBarIcon, 
-  CalendarIcon, BellIcon, UserCircleIcon, 
-  CogIcon, QuestionMarkCircleIcon 
+  HomeIcon, DocumentTextIcon, 
+  ClipboardDocumentListIcon, AcademicCapIcon,
+  CalendarIcon, BellIcon, ChartBarIcon,
+  ArrowTrendingUpIcon, UserCircleIcon,
+  Cog6ToothIcon as CogIcon,
+  QuestionMarkCircleIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -11,12 +14,17 @@ import {
  * Contains main navigation links and footer links
  * Highlights active route based on current URL
  */
-const Sidebar = ({ isCollapsed }) => {
+const Sidebar = ({ isCollapsed, isMobile, isHoverExpanded, onCloseMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Function to handle navigation with scroll to top
+  // Function to handle navigation with scroll to top and mobile menu close
   const handleNavigation = (path) => {
+    // Close mobile menu when navigating (if in mobile mode)
+    if (isMobile && onCloseMobile) {
+      onCloseMobile();
+    }
+
     // If we're already on the path, just scroll to top
     if (location.pathname === path) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -29,18 +37,72 @@ const Sidebar = ({ isCollapsed }) => {
 
   // Navigation items with their icons and routes
   const navItems = [
-    { name: 'Home Page', icon: HomeIcon, path: '/dash' },
-    { name: 'Results', icon: DocumentTextIcon, path: '/dash/results' },
-    { name: 'GPA Trend', icon: ChartBarIcon, path: '/dash/gpa-trend' },
-    { name: 'Exam Time Table', icon: CalendarIcon, path: '/dash/exam-time-table' },
-    { name: 'Notification', icon: BellIcon, path: '/dash/notifications' },
+    { 
+      name: 'Dashboard', 
+      icon: HomeIcon, 
+      path: '/dash',
+      tooltip: 'Overview Dashboard'
+    },
+    { 
+      name: 'Recent Activities', 
+      icon: ClipboardDocumentListIcon, 
+      path: '/dash/activities',
+      tooltip: 'View Recent Activities',
+      badge: 3
+    },
+    { 
+      name: 'Results', 
+      icon: DocumentTextIcon, 
+      path: '/dash/results',
+      tooltip: 'View Examination Results'
+    },
+    { 
+      name: 'GPA Analytics', 
+      icon: ChartBarIcon, 
+      path: '/dash/gpa-analytics',
+      tooltip: 'GPA Performance Analytics'
+    },
+    { 
+      name: 'Exam Timetable', 
+      icon: CalendarIcon, 
+      path: '/dash/exam-time-table',
+      tooltip: 'View Exam Schedule'
+    },
+    { 
+      name: 'Academic Progress', 
+      icon: ArrowTrendingUpIcon, 
+      path: '/dash/progress',
+      tooltip: 'Track Academic Progress'
+    },
+    { 
+      name: 'Notifications', 
+      icon: BellIcon, 
+      path: '/dash/notifications',
+      tooltip: 'View Notifications',
+      badge: 2
+    },
   ];
 
   // Footer navigation items
   const footerItems = [
-    { name: 'Profile', icon: UserCircleIcon, path: '/dash/profile' },
-    { name: 'Setting', icon: CogIcon, path: '/dash/settings' },
-    { name: 'Help', icon: QuestionMarkCircleIcon, path: '/dash/help' },
+    { 
+      name: 'Profile', 
+      icon: UserCircleIcon, 
+      path: '/dash/profile',
+      tooltip: 'Manage your student profile'
+    },
+    { 
+      name: 'Settings', 
+      icon: CogIcon, 
+      path: '/dash/settings',
+      tooltip: 'Customize your preferences'
+    },
+    { 
+      name: 'Help & Support', 
+      icon: QuestionMarkCircleIcon, 
+      path: '/dash/help',
+      tooltip: 'Get assistance and documentation'
+    },
   ];
 
   // Function to check if a nav item is active
@@ -53,75 +115,138 @@ const Sidebar = ({ isCollapsed }) => {
   };
 
   return (
-    <div className={`h-full ${isCollapsed ? 'w-16' : 'w-64'} bg-gradient-to-br from-white via-blue-50/30 to-blue-100/20 border-r border-blue-100 flex flex-col shadow-xl backdrop-blur-sm transition-all duration-300 relative overflow-hidden`}>
-      {/* Decorative Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none"></div>
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-200 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
-      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-300 rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-blob animation-delay-2000"></div>
+    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
+      isCollapsed ? 'w-20' : 'w-64'
+    } ${isMobile ? 'shadow-xl' : ''}`}>
       
-      {/* Brand logo at top of sidebar */}
-      <div className="h-16 border-b border-blue-100/50 bg-white/80 backdrop-blur-sm flex items-center justify-center relative z-10 shadow-sm">
-        <button 
-          onClick={() => handleNavigation('/dash')}
-          className="flex items-center justify-center hover:opacity-90 transition-all duration-200 transform hover:scale-105 focus:outline-none"
-        >
-          {isCollapsed ? (
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent hover:from-blue-700 hover:to-blue-900">UR</span>
-          ) : (
-            <h1 className="text-3xl font-bold">
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-sm">Uni</span>
-                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-sm">Result</span>
+      {/* Header with brand logo and mobile close button */}
+      <div className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4">
+        {!isCollapsed && (
+          <Link 
+            to="/dash"
+            className="flex items-center focus:outline-none"
+            onClick={() => isMobile && onCloseMobile && onCloseMobile()}
+          >
+            <h1 className="text-2xl font-bold text-blue-600">
+              UniResult
             </h1>
-          )}
-        </button>
+          </Link>
+        )}
+
+        {isCollapsed && !isMobile && (
+          <Link 
+            to="/dash"
+            className="flex items-center justify-center w-full focus:outline-none"
+          >
+            <h1 className="text-xl font-bold text-blue-600">UR</h1>
+          </Link>
+        )}
+
+        {/* Mobile close button - Styled like admin dashboard */}
+        {isMobile && (
+          <button
+            onClick={() => {
+              console.log('Close button clicked');
+              if (onCloseMobile) {
+                onCloseMobile();
+              }
+            }}
+            className="p-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Close menu"
+            type="button"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
       
       {/* Main navigation section */}
-      <nav className="flex-grow py-6 px-3 flex flex-col justify-center space-y-2">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
-          <button
-            key={item.name}
-            onClick={() => handleNavigation(item.path)}
-            className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-300 group relative focus:outline-none ${
-              isActive(item.path)
-                ? 'bg-gradient-to-r from-blue-500/10 to-blue-600/10 text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:bg-white/60 hover:shadow-sm hover:text-blue-600'
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'}`} />
-            </div>
-            {!isCollapsed && (
-              <span className={`text-sm ml-3 ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
-                {item.name}
-              </span>
+          <div key={item.name} className="relative group">
+            <button
+              onClick={() => handleNavigation(item.path)}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${
+                isActive(item.path)
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+              }`}
+            >
+              <div className="flex items-center justify-center relative">
+                <item.icon className={`h-5 w-5 ${
+                  isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
+                }`} />
+                {item.badge && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              
+              {!isCollapsed && (
+                <span className={`ml-3 text-sm ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
+                  {item.name}
+                </span>
+              )}
+
+              {/* Active indicator for collapsed state */}
+              {isCollapsed && isActive(item.path) && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-full"></div>
+              )}
+            </button>
+
+            {/* Tooltip for collapsed state */}
+            {isCollapsed && !isMobile && (
+              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                {item.tooltip}
+                <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+              </div>
             )}
-          </button>
+          </div>
         ))}
       </nav>
       
       {/* Footer navigation section */}
-      <div className={`px-3 py-4 border-t border-blue-100/50 bg-gradient-to-b from-white/50 to-blue-50/30 backdrop-blur-sm relative z-10 flex flex-col items-center ${isCollapsed ? 'space-y-2' : ''}`}>
-        {footerItems.map((item) => (
-          <button
-            key={item.name}
-            onClick={() => handleNavigation(item.path)}
-            className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-300 group focus:outline-none ${
-              isActive(item.path)
-                ? 'bg-gradient-to-r from-blue-500/10 to-blue-600/10 text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:bg-white/60 hover:shadow-sm hover:text-blue-600'
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'}`} />
+      <div className="mt-auto border-t border-gray-200 bg-gray-50">
+        <div className="px-3 py-4">
+          {footerItems.map((item) => (
+            <div key={item.name} className="relative group">
+              <button
+                onClick={() => handleNavigation(item.path)}
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${
+                  isActive(item.path)
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                } mb-1 last:mb-0`}
+              >
+                <div className="flex items-center justify-center">
+                  <item.icon className={`h-5 w-5 ${
+                    isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
+                  }`} />
+                </div>
+                
+                {!isCollapsed && (
+                  <span className={`ml-3 text-sm ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
+                    {item.name}
+                  </span>
+                )}
+
+                {/* Active indicator for collapsed state */}
+                {isCollapsed && isActive(item.path) && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-full"></div>
+                )}
+              </button>
+
+              {/* Tooltip for collapsed state */}
+              {isCollapsed && !isMobile && (
+                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                  {item.tooltip}
+                  <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+                </div>
+              )}
             </div>
-            {!isCollapsed && (
-              <span className={`text-sm ml-3 ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
-                {item.name}
-              </span>
-            )}
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
