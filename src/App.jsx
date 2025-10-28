@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp'; // Sign-up page component
 import ForgotPassword from './pages/ForgotPassword'; // Forgot password page component
 import DashboardLayout from './layouts/DashboardLayout'; // Layout for dashboard pages
 import StudentDashboard from './pages/dashboard/StudentDashboard'; // Main student dashboard page
+import Results from './pages/dashboard/Results'; // Student results page
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable page
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
 import Profile from './pages/dashboard/Profile'; // Profile page
@@ -65,8 +66,7 @@ function App() {
           </ProtectedRoute>
         }>
         <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
-        <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Recent Activities</h1></div>} /> {/* Activities page */}
-        <Route path="results" element={<div className="p-8"><h1 className="text-2xl font-bold">Student Results</h1></div>} /> {/* Results page */}
+        <Route path="results" element={<Results />} /> {/* Results page */}
         <Route path="gpa-trend" element={<div className="p-8"><h1 className="text-2xl font-bold">GPA Trend Analysis</h1></div>} /> {/* GPA trend analysis page */}
         <Route path="progress" element={<div className="p-8"><h1 className="text-2xl font-bold">Academic Progress</h1></div>} /> {/* Academic Progress page */}
         <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
