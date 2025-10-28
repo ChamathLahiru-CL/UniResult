@@ -198,13 +198,13 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
 
           {/* Right section with date/time, notifications and user profile */}
           <div className="flex items-center space-x-4">
-            {/* Date and Time Display */}
-            <div className="flex items-center space-x-2">
+            {/* Date and Time Display - Hidden on mobile */}
+            <div className="hidden md:flex items-center space-x-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-400">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
               </svg>
-              <span className="text-sm hidden md:inline">{formatDateTime(currentDateTime).formattedDate}</span>
-              <span className="text-sm hidden md:inline">|</span>
+              <span className="text-sm">{formatDateTime(currentDateTime).formattedDate}</span>
+              <span className="text-sm">|</span>
               <span className="text-sm">{formatDateTime(currentDateTime).formattedTime}</span>
             </div>
 
