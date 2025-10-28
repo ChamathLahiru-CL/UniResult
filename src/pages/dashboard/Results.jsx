@@ -16,8 +16,8 @@ import {
  * Features: Collapsible sections, export functionality, status indicators
  */
 const Results = () => {
-  const [expandedLevels, setExpandedLevels] = useState(new Set(['100'])); // 100 level expanded by default
-  const [expandedSemesters, setExpandedSemesters] = useState(new Set(['semester-1']));
+  const [expandedLevels, setExpandedLevels] = useState(new Set([])); // All sections collapsed by default
+  const [expandedSemesters, setExpandedSemesters] = useState(new Set([]));
   const [isExporting, setIsExporting] = useState(null);
 
   // Mock data for student results
@@ -265,6 +265,18 @@ const Results = () => {
         </div>
       </div>
 
+      {/* Initial Guide Message */}
+      <div className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-xl p-4 border border-blue-100 mb-6">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <ChevronDownIcon className="h-5 w-5 text-blue-600 animate-bounce" />
+          </div>
+          <p className="text-gray-600">
+            Click on any level section below to view detailed results and semester information
+          </p>
+        </div>
+      </div>
+
       {/* Results by Level */}
       <div className="space-y-6">
         {Object.entries(resultData).map(([level, levelData], index) => (
@@ -292,9 +304,16 @@ const Results = () => {
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
                     {levelData.title}
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1 group-hover:text-blue-500 transition-all duration-300">
-                    Click to {expandedLevels.has(level) ? 'collapse' : 'expand'} details
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-all duration-300">
+                      {expandedLevels.has(level) ? 'Click to collapse' : 'Click to view results'}
+                    </p>
+                    {!expandedLevels.has(level) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">
+                        Click to expand
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               {expandedLevels.has(level) ? (
