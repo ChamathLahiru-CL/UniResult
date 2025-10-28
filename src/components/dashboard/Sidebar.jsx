@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   HomeIcon, DocumentTextIcon, 
-  ClipboardDocumentListIcon, AcademicCapIcon,
   CalendarIcon, BellIcon, ChartBarIcon,
   ArrowTrendingUpIcon, UserCircleIcon,
   Cog6ToothIcon as CogIcon,
@@ -42,13 +41,6 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
       icon: HomeIcon, 
       path: '/dash',
       tooltip: 'Overview Dashboard'
-    },
-    { 
-      name: 'Recent Activities', 
-      icon: ClipboardDocumentListIcon, 
-      path: '/dash/activities',
-      tooltip: 'View Recent Activities',
-      badge: 3
     },
     { 
       name: 'Results', 

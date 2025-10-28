@@ -76,8 +76,6 @@ const StudentDashboard = () => {
             <h1 className="relative text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Welcome, Lahiru</h1>
             <p className="relative text-gray-500 text-xs">Home Page Overview</p>
           </div>
-          {/* Update the current date */}
-          <p className="text-xs text-gray-500">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
         </div>
       </div>
       
