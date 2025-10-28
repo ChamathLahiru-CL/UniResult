@@ -28,11 +28,11 @@ const Results = () => {
         '1': {
           title: '1st Semester',
           subjects: [
-            { code: 'CSC101', title: 'Introduction to Computing', score: 85, grade: 'A', gp: 4.0, status: 'completed' },
-            { code: 'MTH101', title: 'Mathematics I', score: 78, grade: 'B+', gp: 3.3, status: 'completed' },
-            { code: 'ENG101', title: 'English I', score: 82, grade: 'A-', gp: 3.7, status: 'completed' },
-            { code: 'PHY101', title: 'Physics I', score: null, grade: null, gp: null, status: 'pending' },
-            { code: 'CHE101', title: 'Chemistry I', score: 75, grade: 'B', gp: 3.0, status: 'completed' }
+            { code: 'CSC101', title: 'Introduction to Computing', creditCount: 3, grade: 'A', status: 'completed', updateDate: '2025-10-15' },
+            { code: 'MTH101', title: 'Mathematics I', creditCount: 4, grade: 'B+', status: 'completed', updateDate: '2025-10-18' },
+            { code: 'ENG101', title: 'English I', creditCount: 2, grade: 'A-', status: 'completed', updateDate: '2025-10-20' },
+            { code: 'PHY101', title: 'Physics I', creditCount: 3, grade: null, status: 'pending', updateDate: null },
+            { code: 'CHE101', title: 'Chemistry I', creditCount: 3, grade: 'B', status: 'completed', updateDate: '2025-10-25' }
           ]
         },
         '2': {
@@ -171,16 +171,16 @@ const Results = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Create CSV content (simplified Excel alternative)
-      const headers = ['Subject Code', 'Subject Title', 'Score', 'Grade', 'GP', 'Status'];
+      const headers = ['Subject Code', 'Subject Title', 'Credit Count', 'Grade', 'Status', 'Update Date'];
       const csvContent = [
         headers.join(','),
         ...semesterData.subjects.map(subject => [
           subject.code,
           `"${subject.title}"`,
-          subject.score || 'N/A',
+          subject.creditCount || '3',
           subject.grade || 'N/A',
-          subject.gp || 'N/A',
-          subject.status === 'completed' ? 'Completed' : 'Pending'
+          subject.status === 'completed' ? 'Completed' : 'Pending',
+          subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : 'N/A')
         ].join(','))
       ].join('\n');
 
@@ -208,8 +208,12 @@ const Results = () => {
       // For demo purposes, we'll create a simple text file
       // In production, you'd use jsPDF or similar library
       const content = `${semesterTitle} Results\n\n` +
+        'Subject Code | Subject Title | Credit Count | Grade | Status | Update Date\n' +
+        '------------|---------------|--------------|--------|--------|-------------\n' +
         semesterData.subjects.map(subject => 
-          `${subject.code} - ${subject.title}: ${subject.score ? `${subject.score} (${subject.grade})` : 'Pending'}`
+          `${subject.code} | ${subject.title} | ${subject.creditCount || '3'} | ${subject.grade || 'N/A'} | ${
+            subject.status === 'completed' ? 'Completed' : 'Pending'} | ${
+            subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : 'N/A')}`
         ).join('\n');
 
       const blob = new Blob([content], { type: 'text/plain' });
@@ -230,16 +234,16 @@ const Results = () => {
   const StatusBadge = ({ status }) => {
     if (status === 'completed') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 transition-all duration-300 hover:bg-green-200 hover:shadow-sm transform hover:scale-105">
-          <CheckCircleIcon className="w-3 h-3 mr-1" />
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-600 border border-green-200 transition-all duration-300 hover:bg-green-100 hover:shadow-sm transform hover:scale-105">
+          <CheckCircleIcon className="w-4 h-4 mr-1.5" />
           Completed
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 transition-all duration-300 hover:bg-yellow-200 hover:shadow-sm transform hover:scale-105">
-        <ClockIcon className="w-3 h-3 mr-1" />
-        Result Pending
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-50 text-yellow-600 border border-yellow-200 transition-all duration-300 hover:bg-yellow-100 hover:shadow-sm transform hover:scale-105">
+        <ClockIcon className="w-4 h-4 mr-1.5" />
+        Pending
       </span>
     );
   };
@@ -340,13 +344,37 @@ const Results = () => {
                           <div className="overflow-x-auto mb-4">
                             <table className="w-full table-auto">
                               <thead>
-                                <tr className="border-b border-gray-200">
-                                  <th className="text-left py-3 px-4 font-medium text-gray-700">Subject Code</th>
-                                  <th className="text-left py-3 px-4 font-medium text-gray-700">Subject Title</th>
-                                  <th className="text-center py-3 px-4 font-medium text-gray-700">Score</th>
-                                  <th className="text-center py-3 px-4 font-medium text-gray-700">Grade</th>
-                                  <th className="text-center py-3 px-4 font-medium text-gray-700">GP</th>
-                                  <th className="text-center py-3 px-4 font-medium text-gray-700">Status</th>
+                                <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
+                                  <th className="text-left py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Subject Code
+                                    </span>
+                                  </th>
+                                  <th className="text-left py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Subject Title
+                                    </span>
+                                  </th>
+                                  <th className="text-center py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Credit Count
+                                    </span>
+                                  </th>
+                                  <th className="text-center py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Grade
+                                    </span>
+                                  </th>
+                                  <th className="text-center py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Status
+                                    </span>
+                                  </th>
+                                  <th className="text-center py-4 px-4">
+                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
+                                      Update Date
+                                    </span>
+                                  </th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -354,22 +382,20 @@ const Results = () => {
                                   <tr key={subject.code} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.01] ${
                                     index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                                   }`}>
-                                    <td className="py-3 px-4 font-medium text-gray-900">{subject.code}</td>
-                                    <td className="py-3 px-4 text-gray-700">{subject.title}</td>
-                                    <td className="py-3 px-4 text-center">
-                                      {subject.score ? (
-                                        <span className="font-semibold text-gray-900">{subject.score}</span>
-                                      ) : (
-                                        <span className="text-gray-400">-</span>
-                                      )}
+                                    <td className="py-4 px-4 font-medium text-gray-900">{subject.code}</td>
+                                    <td className="py-4 px-4 text-gray-700">{subject.title}</td>
+                                    <td className="py-4 px-4 text-center">
+                                      <span className="font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-full">
+                                        {subject.creditCount || 3}
+                                      </span>
                                     </td>
-                                    <td className="py-3 px-4 text-center">
+                                    <td className="py-4 px-4 text-center">
                                       {subject.grade ? (
-                                        <span className={`font-semibold ${
-                                          subject.grade.startsWith('A') ? 'text-green-600' :
-                                          subject.grade.startsWith('B') ? 'text-blue-600' :
-                                          subject.grade.startsWith('C') ? 'text-yellow-600' :
-                                          'text-red-600'
+                                        <span className={`font-semibold px-3 py-1 rounded-full ${
+                                          subject.grade.startsWith('A') ? 'bg-green-50 text-green-600' :
+                                          subject.grade.startsWith('B') ? 'bg-blue-50 text-blue-600' :
+                                          subject.grade.startsWith('C') ? 'bg-yellow-50 text-yellow-600' :
+                                          'bg-red-50 text-red-600'
                                         }`}>
                                           {subject.grade}
                                         </span>
@@ -377,15 +403,13 @@ const Results = () => {
                                         <span className="text-gray-400">-</span>
                                       )}
                                     </td>
-                                    <td className="py-3 px-4 text-center">
-                                      {subject.gp ? (
-                                        <span className="font-semibold text-gray-900">{subject.gp}</span>
-                                      ) : (
-                                        <span className="text-gray-400">-</span>
-                                      )}
-                                    </td>
-                                    <td className="py-3 px-4 text-center">
+                                    <td className="py-4 px-4 text-center">
                                       <StatusBadge status={subject.status} />
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                      <span className="text-sm text-gray-500">
+                                        {subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : '-')}
+                                      </span>
                                     </td>
                                   </tr>
                                 ))}
