@@ -249,39 +249,27 @@ const Results = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8 animate-fadeIn">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 animate-fadeIn">
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-8 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
-        <div className="flex items-center space-x-4">
-          <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl shadow-inner transform hover:scale-105 transition-transform duration-300">
-            <AcademicCapIcon className="h-10 w-10 text-blue-600" />
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl shadow-inner">
+              <AcademicCapIcon className="h-8 w-8 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Academic Results</h1>
+              <p className="text-gray-600 mt-1">Review your academic performance</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Academic Results
-            </h1>
-            <p className="text-gray-600 mt-2 text-lg">Review your academic journey and achievements</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Initial Guide Message */}
-      <div className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-xl p-4 border border-blue-100 mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <ChevronDownIcon className="h-5 w-5 text-blue-600 animate-bounce" />
-          </div>
-          <p className="text-gray-600">
-            Click on any level section below to view detailed results and semester information
-          </p>
         </div>
       </div>
 
       {/* Results by Level */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {Object.entries(resultData).map(([level, levelData], index) => (
           <div key={level} 
-            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:border-blue-200"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200 transform hover:scale-[1.02] hover:-translate-y-1 group cursor-pointer"
             style={{ 
               animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
               opacity: 0,
@@ -289,38 +277,48 @@ const Results = () => {
             {/* Level Header */}
             <button
               onClick={() => toggleLevel(level)}
-              className="w-full px-8 py-5 flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group"
+              className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50/30 to-white transition-all duration-300 group-hover:from-blue-50 group-hover:to-indigo-50 group-hover:shadow-inner"
             >
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-xl shadow-sm transition-all duration-300 group-hover:shadow-md transform group-hover:scale-110 ${
-                  level === '100' ? 'bg-gradient-to-br from-green-100 to-green-200 text-green-600' :
-                  level === '200' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600' :
-                  level === '300' ? 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600' :
-                  'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600'
-                }`}>
-                  <AcademicCapIcon className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center space-x-4">
+                  <div className={`p-3 rounded-full shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-200/30 transform group-hover:scale-110 group-hover:-translate-y-1 ${
+                    level === '100' ? 'bg-gradient-to-br from-green-100 to-green-200 text-green-600 group-hover:from-green-200 group-hover:to-green-300' :
+                    level === '200' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 group-hover:from-blue-200 group-hover:to-blue-300' :
+                    level === '300' ? 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 group-hover:from-purple-200 group-hover:to-purple-300' :
+                    'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 group-hover:from-orange-200 group-hover:to-orange-300'
+                  }`}>
+                    <AcademicCapIcon className="h-6 w-6" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-blue-600 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-105 transform">
                     {levelData.title}
                   </h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-all duration-300">
-                      {expandedLevels.has(level) ? 'Click to collapse' : 'Click to view results'}
-                    </p>
-                    {!expandedLevels.has(level) && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">
-                        Click to expand
-                      </span>
-                    )}
-                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    className="px-4 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLevel(level);
+                    }}
+                  >
+                    Click to view results
+                  </button>
+                  <button
+                    className="px-4 py-1.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLevel(level);
+                    }}
+                  >
+                    {expandedLevels.has(level) ? 'Collapse' : 'Click to expand'}
+                  </button>
+                  {expandedLevels.has(level) ? (
+                    <ChevronUpIcon className="h-5 w-5 text-blue-600 transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110" />
+                  ) : (
+                    <ChevronDownIcon className="h-5 w-5 text-blue-600 transition-all duration-300 transform group-hover:translate-y-1 group-hover:scale-110 animate-bounce" />
+                  )}
                 </div>
               </div>
-              {expandedLevels.has(level) ? (
-                <ChevronUpIcon className="h-6 w-6 text-gray-400 group-hover:text-blue-500 transition-all duration-300 transform group-hover:-translate-y-1" />
-              ) : (
-                <ChevronDownIcon className="h-6 w-6 text-gray-400 group-hover:text-blue-500 transition-all duration-300 transform group-hover:translate-y-1" />
-              )}
             </button>
 
             {/* Semesters */}
