@@ -234,32 +234,34 @@ const Results = () => {
   const StatusBadge = ({ status }) => {
     if (status === 'completed') {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-600 border border-green-200 transition-all duration-300 hover:bg-green-100 hover:shadow-sm transform hover:scale-105">
-          <CheckCircleIcon className="w-4 h-4 mr-1.5" />
-          Completed
+        <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-green-50 text-green-600 border border-green-200 transition-all duration-300 hover:bg-green-100 hover:shadow-sm transform hover:scale-105">
+          <CheckCircleIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+          <span className="hidden sm:inline">Completed</span>
+          <span className="sm:hidden">Done</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-50 text-yellow-600 border border-yellow-200 transition-all duration-300 hover:bg-yellow-100 hover:shadow-sm transform hover:scale-105">
-        <ClockIcon className="w-4 h-4 mr-1.5" />
-        Pending
+      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-yellow-50 text-yellow-600 border border-yellow-200 transition-all duration-300 hover:bg-yellow-100 hover:shadow-sm transform hover:scale-105">
+        <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+        <span className="hidden sm:inline">Pending</span>
+        <span className="sm:hidden">Wait</span>
       </span>
     );
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6 animate-fadeIn">
+    <div className="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 animate-fadeIn">
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl shadow-inner">
-              <AcademicCapIcon className="h-8 w-8 text-blue-600" />
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl shadow-inner">
+              <AcademicCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Academic Results</h1>
-              <p className="text-gray-600 mt-1">Review your academic performance</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Academic Results</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Review your academic performance</p>
             </div>
           </div>
         </div>
@@ -269,33 +271,30 @@ const Results = () => {
       <div className="space-y-4">
         {Object.entries(resultData).map(([level, levelData], index) => (
           <div key={level} 
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200 transform hover:scale-[1.02] hover:-translate-y-1 group cursor-pointer"
+            className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200 transform hover:scale-[1.02] hover:-translate-y-1 group cursor-pointer"
             style={{ 
               animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
               opacity: 0,
             }}>
             {/* Level Header */}
-            <button
-              onClick={() => toggleLevel(level)}
-              className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50/30 to-white transition-all duration-300 group-hover:from-blue-50 group-hover:to-indigo-50 group-hover:shadow-inner"
-            >
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-full shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-200/30 transform group-hover:scale-110 group-hover:-translate-y-1 ${
+            <div className="w-full px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50/30 to-white transition-all duration-300 group-hover:from-blue-50 group-hover:to-indigo-50 group-hover:shadow-inner">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 w-full">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className={`p-2 sm:p-3 rounded-full shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-200/30 transform group-hover:scale-110 group-hover:-translate-y-1 ${
                     level === '100' ? 'bg-gradient-to-br from-green-100 to-green-200 text-green-600 group-hover:from-green-200 group-hover:to-green-300' :
                     level === '200' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 group-hover:from-blue-200 group-hover:to-blue-300' :
                     level === '300' ? 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 group-hover:from-purple-200 group-hover:to-purple-300' :
                     'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 group-hover:from-orange-200 group-hover:to-orange-300'
                   }`}>
-                    <AcademicCapIcon className="h-6 w-6" />
+                    <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <h2 className="text-2xl font-bold text-blue-600 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-105 transform">
+                  <h2 className="text-lg sm:text-2xl font-bold text-blue-600 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-105 transform">
                     {levelData.title}
                   </h2>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <button 
-                    className="px-4 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5"
+                    className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5 text-center"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleLevel(level);
@@ -304,7 +303,7 @@ const Results = () => {
                     Click to view results
                   </button>
                   <button
-                    className="px-4 py-1.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5"
+                    className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5 text-center"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleLevel(level);
@@ -312,18 +311,20 @@ const Results = () => {
                   >
                     {expandedLevels.has(level) ? 'Collapse' : 'Click to expand'}
                   </button>
-                  {expandedLevels.has(level) ? (
-                    <ChevronUpIcon className="h-5 w-5 text-blue-600 transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110" />
-                  ) : (
-                    <ChevronDownIcon className="h-5 w-5 text-blue-600 transition-all duration-300 transform group-hover:translate-y-1 group-hover:scale-110 animate-bounce" />
-                  )}
+                  <div className="flex justify-center sm:justify-start">
+                    {expandedLevels.has(level) ? (
+                      <ChevronUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110" />
+                    ) : (
+                      <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition-all duration-300 transform group-hover:translate-y-1 group-hover:scale-110 animate-bounce" />
+                    )}
+                  </div>
                 </div>
               </div>
-            </button>
+            </div>
 
             {/* Semesters */}
             {expandedLevels.has(level) && (
-              <div className="px-6 pb-6 space-y-4">
+              <div className="px-3 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
                 {Object.entries(levelData.semesters).map(([semesterNum, semesterData]) => {
                   const semesterId = `semester-${semesterNum}`;
                   const completion = getCompletionPercentage(semesterData.subjects);
@@ -335,11 +336,11 @@ const Results = () => {
                       {/* Semester Header */}
                       <button
                         onClick={() => toggleSemester(semesterId)}
-                        className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group"
+                        className="w-full px-3 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 bg-gradient-to-r from-gray-50 to-white hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group"
                       >
-                        <div className="flex items-center space-x-3">
-                          <h3 className="text-lg font-medium text-gray-900">{semesterData.title}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900 text-left">{semesterData.title}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
                             completion >= 80 ? 'bg-green-100 text-green-800' :
                             completion >= 50 ? 'bg-yellow-100 text-yellow-800' :
                             'bg-red-100 text-red-800'
@@ -347,105 +348,109 @@ const Results = () => {
                             {completion}% Complete
                           </span>
                         </div>
-                        {expandedSemesters.has(semesterId) ? (
-                          <ChevronUpIcon className="h-4 w-4 text-gray-500" />
-                        ) : (
-                          <ChevronDownIcon className="h-4 w-4 text-gray-500" />
-                        )}
+                        <div className="flex justify-center sm:justify-end">
+                          {expandedSemesters.has(semesterId) ? (
+                            <ChevronUpIcon className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+                          )}
+                        </div>
                       </button>
 
                       {/* Semester Content */}
                       {expandedSemesters.has(semesterId) && (
-                        <div className="p-4">
+                        <div className="p-3 sm:p-4">
                           {/* Results Table */}
-                          <div className="overflow-x-auto mb-4">
-                            <table className="w-full table-auto">
-                              <thead>
-                                <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
-                                  <th className="text-left py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Subject Code
-                                    </span>
-                                  </th>
-                                  <th className="text-left py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Subject Title
-                                    </span>
-                                  </th>
-                                  <th className="text-center py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Credit Count
-                                    </span>
-                                  </th>
-                                  <th className="text-center py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Grade
-                                    </span>
-                                  </th>
-                                  <th className="text-center py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Status
-                                    </span>
-                                  </th>
-                                  <th className="text-center py-4 px-4">
-                                    <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300">
-                                      Update Date
-                                    </span>
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {semesterData.subjects.map((subject, index) => (
-                                  <tr key={subject.code} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.01] ${
-                                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                                  }`}>
-                                    <td className="py-4 px-4 font-medium text-gray-900">{subject.code}</td>
-                                    <td className="py-4 px-4 text-gray-700">{subject.title}</td>
-                                    <td className="py-4 px-4 text-center">
-                                      <span className="font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-full">
-                                        {subject.creditCount || 3}
+                          <div className="overflow-x-auto mb-4 -mx-3 sm:mx-0">
+                            <div className="min-w-full inline-block align-middle">
+                              <table className="w-full table-auto min-w-[600px]">
+                                <thead>
+                                  <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
+                                    <th className="text-left py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Subject Code
                                       </span>
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                      {subject.grade ? (
-                                        <span className={`font-semibold px-3 py-1 rounded-full ${
-                                          subject.grade.startsWith('A') ? 'bg-green-50 text-green-600' :
-                                          subject.grade.startsWith('B') ? 'bg-blue-50 text-blue-600' :
-                                          subject.grade.startsWith('C') ? 'bg-yellow-50 text-yellow-600' :
-                                          'bg-red-50 text-red-600'
-                                        }`}>
-                                          {subject.grade}
-                                        </span>
-                                      ) : (
-                                        <span className="text-gray-400">-</span>
-                                      )}
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                      <StatusBadge status={subject.status} />
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                      <span className="text-sm text-gray-500">
-                                        {subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : '-')}
+                                    </th>
+                                    <th className="text-left py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Subject Title
                                       </span>
-                                    </td>
+                                    </th>
+                                    <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Credit Count
+                                      </span>
+                                    </th>
+                                    <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Grade
+                                      </span>
+                                    </th>
+                                    <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Status
+                                      </span>
+                                    </th>
+                                    <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
+                                        Update Date
+                                      </span>
+                                    </th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                                </thead>
+                                <tbody>
+                                  {semesterData.subjects.map((subject, index) => (
+                                    <tr key={subject.code} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.01] ${
+                                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                                    }`}>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{subject.code}</td>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">{subject.title}</td>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                                        <span className="font-semibold text-gray-900 bg-blue-50 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
+                                          {subject.creditCount || 3}
+                                        </span>
+                                      </td>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                                        {subject.grade ? (
+                                          <span className={`font-semibold px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
+                                            subject.grade.startsWith('A') ? 'bg-green-50 text-green-600' :
+                                            subject.grade.startsWith('B') ? 'bg-blue-50 text-blue-600' :
+                                            subject.grade.startsWith('C') ? 'bg-yellow-50 text-yellow-600' :
+                                            'bg-red-50 text-red-600'
+                                          }`}>
+                                            {subject.grade}
+                                          </span>
+                                        ) : (
+                                          <span className="text-gray-400 text-xs sm:text-sm">-</span>
+                                        )}
+                                      </td>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                                        <StatusBadge status={subject.status} />
+                                      </td>
+                                      <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                                        <span className="text-xs sm:text-sm text-gray-500">
+                                          {subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : '-')}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
 
                           {/* Export Buttons */}
                           {canDownload(semesterData.subjects) && (
-                            <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-200">
                               <button
                                 onClick={() => exportToExcel(semesterData, semesterData.title)}
                                 disabled={isExporting === `${semesterData.title}-excel`}
-                                className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-all duration-300 text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+                                className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
                               >
                                 {isExporting === `${semesterData.title}-excel` ? (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                  <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent mr-2"></div>
                                 ) : (
-                                  <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                                  <DocumentArrowDownIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                                 )}
                                 Download Excel
                               </button>
@@ -453,12 +458,12 @@ const Results = () => {
                               <button
                                 onClick={() => exportToPDF(semesterData, semesterData.title)}
                                 disabled={isExporting === `${semesterData.title}-pdf`}
-                                className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-all duration-300 text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+                                className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
                               >
                                 {isExporting === `${semesterData.title}-pdf` ? (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                  <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent mr-2"></div>
                                 ) : (
-                                  <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                                  <DocumentArrowDownIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                                 )}
                                 Download PDF
                               </button>
@@ -466,8 +471,8 @@ const Results = () => {
                           )}
 
                           {!canDownload(semesterData.subjects) && (
-                            <div className="flex items-center space-x-2 pt-4 border-t border-gray-200 text-sm text-gray-500">
-                              <ExclamationTriangleIcon className="h-4 w-4" />
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 pt-4 border-t border-gray-200 text-xs sm:text-sm text-gray-500">
+                              <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
                               <span>Download will be available when at least 50% of results are published</span>
                             </div>
                           )}
