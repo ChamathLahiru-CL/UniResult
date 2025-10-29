@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import './Results.css'; // Create this file for animations
 import { 
   ChevronDownIcon, 
@@ -13,12 +14,37 @@ import {
 /**
  * Student Results Component
  * Displays academic results organized by level and semester
- * Features: Collapsible sections, export functionality, status indicators
+ * Features: Collapsible sections, export functionality, status indicators, navigation state handling
  */
 const Results = () => {
+  const location = useLocation();
   const [expandedLevels, setExpandedLevels] = useState(new Set([])); // All sections collapsed by default
   const [expandedSemesters, setExpandedSemesters] = useState(new Set([]));
   const [isExporting, setIsExporting] = useState(null);
+  const [highlightedSubject, setHighlightedSubject] = useState(null);
+
+  // Handle navigation from dashboard
+  useEffect(() => {
+    if (location.state) {
+      const { expandLevel, expandSemester, highlightSubject } = location.state;
+      
+      // Expand specific level and semester if provided
+      if (expandLevel) {
+        setExpandedLevels(new Set([expandLevel]));
+      }
+      if (expandSemester) {
+        setExpandedSemesters(new Set([expandSemester]));
+      }
+      if (highlightSubject) {
+        setHighlightedSubject(highlightSubject);
+        // Clear highlight after 3 seconds
+        setTimeout(() => setHighlightedSubject(null), 3000);
+      }
+
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Mock data for student results
   const resultData = {
@@ -402,6 +428,8 @@ const Results = () => {
                                   {semesterData.subjects.map((subject, index) => (
                                     <tr key={subject.code} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.01] ${
                                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                                    } ${
+                                      highlightedSubject === subject.code ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-yellow-300 shadow-lg ring-2 ring-yellow-300/50 animate-pulse' : ''
                                     }`}>
                                       <td className="py-3 sm:py-4 px-2 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{subject.code}</td>
                                       <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">{subject.title}</td>

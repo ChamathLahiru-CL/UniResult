@@ -18,11 +18,44 @@ const StudentDashboard = () => {
     semester: 5
   };
   
-  // Sample data for last updated results
+  // Sample data for last updated results with enhanced structure
   const recentResults = [
-    { subject: 'Stat', level: 200, semester: 2, grade: 'A+' },
-    { subject: 'HCI', level: 200, semester: 4, grade: 'B' },
-    { subject: 'Calculus', level: 100, semester: 3, grade: 'C' }
+    { 
+      code: 'CSC201',
+      subject: 'Data Structures', 
+      level: 200, 
+      semester: 3, 
+      grade: 'A+',
+      updateDate: '2025-10-28',
+      isNew: true
+    },
+    { 
+      code: 'CSC102',
+      subject: 'Programming Fundamentals', 
+      level: 100, 
+      semester: 2, 
+      grade: 'A',
+      updateDate: '2025-10-27',
+      isNew: true
+    },
+    { 
+      code: 'MTH101',
+      subject: 'Mathematics I', 
+      level: 100, 
+      semester: 1, 
+      grade: 'B+',
+      updateDate: '2025-10-25',
+      isNew: false
+    },
+    { 
+      code: 'ENG101',
+      subject: 'English I', 
+      level: 100, 
+      semester: 1, 
+      grade: 'A-',
+      updateDate: '2025-10-24',
+      isNew: false
+    }
   ];
   
   // Sample data for GPA trend
