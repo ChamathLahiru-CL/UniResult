@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 /**
  * GPATrend Component
@@ -6,6 +8,7 @@ import React, { useEffect, useRef } from 'react';
  * Uses simple canvas-based drawing for the chart
  */
 const GPATrend = ({ data }) => {
+  const navigate = useNavigate();
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -142,12 +145,21 @@ const GPATrend = ({ data }) => {
       <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mb-16 opacity-40"></div>
       
       <div className="relative z-10">
-        <h2 className="text-lg font-semibold text-gray-800 mb-5 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-          </svg>
-          GPA Trend
-        </h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            GPA Trend
+          </h2>
+          <button
+            onClick={() => navigate('/dash/gpa-trend')}
+            className="flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn"
+          >
+            View Analysis
+            <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-1 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+          </button>
+        </div>
         
         {/* Canvas for chart with enhanced styling */}
         <div className="relative h-56 bg-gradient-to-b from-white to-blue-50 rounded-lg border border-blue-100 p-3">

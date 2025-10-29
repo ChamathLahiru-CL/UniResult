@@ -8,6 +8,7 @@ import {
   CalendarIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import GPAChart from '../../components/dashboard/GPAChart';
 import '../../components/dashboard/GPAComponents.css';
 
 /**
@@ -163,6 +164,21 @@ const GPAAnalytics = () => {
               <ArrowPathIcon className="h-6 w-6 text-purple-600" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* GPA Progress Chart */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">GPA Progress</h2>
+        <div className="h-80">
+          <GPAChart 
+            data={Object.values(gpaData.levels).map(level => level.gpa).filter(gpa => gpa !== null)}
+            labels={Object.values(gpaData.levels)
+              .filter(level => level.gpa !== null)
+              .map(level => level.level)}
+            targetGPA={gpaData.overall.targetGPA}
+            showTarget={true}
+          />
         </div>
       </div>
 

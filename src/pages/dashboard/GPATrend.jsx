@@ -6,6 +6,7 @@ import {
   ArrowPathIcon,
   DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
+import GPAChart from '../../components/dashboard/GPAChart';
 import '../../components/dashboard/GPAComponents.css';
 
 const GPATrend = () => {
@@ -148,14 +149,31 @@ const GPATrend = () => {
         ))}
       </div>
 
-      {/* Trend Chart Placeholder */}
+      {/* GPA Progress Chart */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <DocumentChartBarIcon className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-bold text-gray-900">GPA Progress Chart</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <DocumentChartBarIcon className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl font-bold text-gray-900">GPA Progress Chart</h2>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="px-3 py-1 bg-blue-50 rounded-full flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Current Progress</span>
+            </div>
+            <div className="px-3 py-1 bg-gray-50 rounded-full flex items-center space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span className="text-sm text-gray-600">Projected</span>
+            </div>
+          </div>
         </div>
-        <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-          <p className="text-gray-500">GPA trend chart will be implemented here</p>
+        <div className="h-80">
+          <GPAChart 
+            data={trendData.overall.history.concat(trendData.overall.projected).map(sem => sem.gpa)}
+            labels={trendData.overall.history.concat(trendData.overall.projected).map(sem => sem.semester)}
+            targetGPA={3.80}
+            showTarget={true}
+          />
         </div>
       </div>
     </div>
