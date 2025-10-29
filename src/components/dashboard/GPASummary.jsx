@@ -26,18 +26,18 @@ const GPASummary = ({
 }) => {
   const navigate = useNavigate();
 
-  // Handle navigation to specific level in GPA Analytics
+  // Handle navigation to specific level in GPA Trend
   const handleLevelClick = (level) => {
-    navigate('/dash/gpa-analytics', { 
+    navigate('/dash/gpa-trend', { 
       state: { 
-        highlightLevel: level.toString()
+        selectedLevel: level.toString()
       }
     });
   };
 
-  // Handle view all analytics
+  // Handle view all trends
   const handleViewAllAnalytics = () => {
-    navigate('/dash/gpa-analytics');
+    navigate('/dash/gpa-trend');
   };
 
   // Get color for GPA based on value
@@ -66,7 +66,7 @@ const GPASummary = ({
             onClick={handleViewAllAnalytics}
             className="analytics-button flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn"
           >
-            <span>View Analytics</span>
+            <span>View GPA Trend</span>
             <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-1 transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
           </button>
         </div>
@@ -156,7 +156,7 @@ const GPASummary = ({
               onClick={handleViewAllAnalytics}
               className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200"
             >
-              Detailed Analysis
+              View GPA Trend Analysis
             </button>
             <span className="text-gray-500">
               Updated: Oct 29, 2025

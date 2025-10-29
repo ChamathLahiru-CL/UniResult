@@ -148,7 +148,7 @@ const GPAAnalytics = () => {
               <p className="text-2xl font-bold text-gray-900">{gpaData.overall.targetGPA}</p>
             </div>
             <div className="p-3 bg-green-50 rounded-full">
-              <TrendingUpIcon className="h-6 w-6 text-green-600" />
+              <ArrowTrendingUpIcon className="h-6 w-6 text-green-600" />
             </div>
           </div>
         </div>
