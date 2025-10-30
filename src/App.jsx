@@ -9,6 +9,7 @@ import StudentDashboard from './pages/dashboard/StudentDashboard'; // Main stude
 import Results from './pages/dashboard/Results'; // Student results page
 import GPAAnalytics from './pages/dashboard/GPAAnalytics'; // GPA Analytics page
 import GPATrend from './pages/dashboard/GPATrend'; // GPA Trend Analysis page
+import AcademicProgress from './pages/dashboard/AcademicProgress'; // Academic Progress page
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable page
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
 import ProfileAndSettings from './pages/dashboard/ProfileAndSettings'; // Combined Profile and Settings page
@@ -71,7 +72,7 @@ function App() {
         <Route path="results" element={<Results />} /> {/* Results page */}
         <Route path="gpa-analytics" element={<GPAAnalytics />} /> {/* GPA Analytics page */}
         <Route path="gpa-trend" element={<GPATrend />} /> {/* GPA trend analysis page */}
-        <Route path="progress" element={<div className="p-8"><h1 className="text-2xl font-bold">Academic Progress</h1></div>} /> {/* Academic Progress page */}
+        <Route path="progress" element={<AcademicProgress />} /> {/* Academic Progress page */}
         <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
         <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
         <Route path="profile-settings" element={<ProfileAndSettings />} /> {/* Combined Profile and Settings page */}
