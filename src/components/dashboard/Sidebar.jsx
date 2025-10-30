@@ -78,16 +78,10 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   // Footer navigation items
   const footerItems = [
     { 
-      name: 'Profile', 
+      name: 'Profile & Settings', 
       icon: UserCircleIcon, 
-      path: '/dash/profile',
-      tooltip: 'Manage your student profile'
-    },
-    { 
-      name: 'Settings', 
-      icon: CogIcon, 
-      path: '/dash/settings',
-      tooltip: 'Customize your preferences'
+      path: '/dash/profile-settings',
+      tooltip: 'Manage profile and preferences'
     },
     { 
       name: 'Help & Support', 

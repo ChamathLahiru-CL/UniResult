@@ -11,7 +11,7 @@ import GPAAnalytics from './pages/dashboard/GPAAnalytics'; // GPA Analytics page
 import GPATrend from './pages/dashboard/GPATrend'; // GPA Trend Analysis page
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable page
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
-import Profile from './pages/dashboard/Profile'; // Profile page
+import ProfileAndSettings from './pages/dashboard/ProfileAndSettings'; // Combined Profile and Settings page
 import Help from './pages/dashboard/Help'; // Help and support page
 import AdminDashboard from './pages/admin/AdminDashboard'; // Admin dashboard page
 import { AuthProvider } from './context/AuthContext.jsx'; // Auth context provider
@@ -74,8 +74,9 @@ function App() {
         <Route path="progress" element={<div className="p-8"><h1 className="text-2xl font-bold">Academic Progress</h1></div>} /> {/* Academic Progress page */}
         <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
         <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
-        <Route path="profile" element={<Profile />} /> {/* Profile page */}
-        <Route path="settings" element={<Profile />} /> {/* Settings page (reuses Profile component) */}
+        <Route path="profile-settings" element={<ProfileAndSettings />} /> {/* Combined Profile and Settings page */}
+        <Route path="profile" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old profile route */}
+        <Route path="settings" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old settings route */}
         <Route path="help" element={<Help />} /> {/* Help and support page */}
       </Route>
 
@@ -96,8 +97,8 @@ function App() {
         <Route path="activities" element={<ExamActivities />} />
         <Route path="members" element={<ExamDivisionMembers />} />
         <Route path="results" element={<ResultManagement />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1></div>} />
+        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
         <Route path="help" element={<Help />} />
       </Route>
       
@@ -118,8 +119,8 @@ function App() {
         <Route path="students" element={<AdminStudentManagementPage />} />
         <Route path="results" element={<AdminStudentResultPage />} />
         <Route path="results/:id" element={<ResultDetailsPage />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
         <Route path="announcement" element={<AdminAnnouncementPage />} />
         <Route path="help" element={<Help />} />
       </Route>
