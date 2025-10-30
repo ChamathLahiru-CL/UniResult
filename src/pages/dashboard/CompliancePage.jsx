@@ -110,33 +110,37 @@ const CompliancePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-blue-100 transition-all duration-300 hover:shadow-xl">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <ClipboardDocumentIcon className="h-8 w-8 text-blue-600" />
+      <div className="max-w-3xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-blue-100">
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-3 sm:mb-4">
+            <ClipboardDocumentIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Submit Compliance</h2>
-          <p className="text-gray-600 max-w-lg mx-auto">
-            Please fill out the form below to submit your compliance to the Exam Division.
-            We'll ensure your request is processed promptly.
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Submit Compliance</h2>
+          <p className="text-sm sm:text-base text-gray-600 max-w-lg mx-auto">
+            Please fill out the form to submit your compliance to the Exam Division.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Topic Input */}
-          <div>
-            <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
-              Main Topic
-            </label>
+          <div className="border-b pb-4 sm:pb-6">
+            <div className="flex items-center mb-2">
+              <div className="bg-blue-50 rounded-full p-1.5 sm:p-2 mr-2 sm:mr-3">
+                <ClipboardDocumentIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+              </div>
+              <label htmlFor="topic" className="text-base sm:text-lg font-medium text-gray-900">
+                Main Topic
+              </label>
+            </div>
             <input
               type="text"
               id="topic"
               name="topic"
               value={formData.topic}
               onChange={handleInputChange}
-              className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                transition-all duration-200 hover:border-blue-300
-                ${errors.topic ? 'border-red-500' : ''}`}
+              className={`mt-1 block w-full rounded-lg border-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base
+                transition-all duration-200 hover:border-blue-300 p-3
+                ${errors.topic ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'}`}
               placeholder="E.g., Result Discrepancy, Exam Schedule Issue"
             />
             {errors.topic && (
@@ -145,22 +149,29 @@ const CompliancePage = () => {
                 {errors.topic}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">Choose a clear, specific topic that best describes your compliance</p>
+            <p className="mt-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <span className="font-medium text-blue-600">💡 Tip:</span> Choose a clear, specific topic that best describes your compliance
+            </p>
           </div>
 
           {/* Recipient Select */}
-          <div>
-            <label htmlFor="recipient" className="block text-sm font-medium text-gray-700">
-              Who to send to?
-            </label>
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-purple-100 rounded-lg mr-3">
+                <UserGroupIcon className="h-5 w-5 text-purple-600" />
+              </div>
+              <label htmlFor="recipient" className="block text-lg font-semibold text-gray-900">
+                Who to send to?
+              </label>
+            </div>
             <select
               id="recipient"
               name="recipient"
               value={formData.recipient}
               onChange={handleInputChange}
-              className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                transition-all duration-200 hover:border-blue-300
-                ${errors.recipient ? 'border-red-500' : ''}`}
+              className={`mt-1 block w-full rounded-lg border-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-base
+                transition-all duration-200 hover:border-purple-300 p-3
+                ${errors.recipient ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'}`}
             >
               <option value="">Select recipient...</option>
               <option value="admin" className="py-2">Admin</option>
@@ -172,21 +183,29 @@ const CompliancePage = () => {
                 {errors.recipient}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">Select the appropriate department to handle your compliance</p>
+            <p className="mt-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <span className="font-medium text-purple-600">💡 Tip:</span> Select the appropriate department to handle your compliance
+            </p>
           </div>
 
           {/* Importance Select */}
-          <div>
-            <label htmlFor="importance" className="block text-sm font-medium text-gray-700">
-              Compliance Importance
-            </label>
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-amber-100 rounded-lg mr-3">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <label htmlFor="importance" className="block text-lg font-semibold text-gray-900">
+                Compliance Importance
+              </label>
+            </div>
             <select
               id="importance"
               name="importance"
               value={formData.importance}
               onChange={handleInputChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                ${errors.importance ? 'border-red-500' : ''}`}
+              className={`mt-1 block w-full rounded-lg border-2 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-base
+                transition-all duration-200 hover:border-amber-300 p-3
+                ${errors.importance ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'}`}
             >
               <option value="">Select importance...</option>
               {Object.entries(importanceConfig).map(([level, config]) => (
@@ -205,22 +224,32 @@ const CompliancePage = () => {
                 {errors.importance}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">Select the urgency level of your compliance</p>
+            <p className="mt-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <span className="font-medium text-amber-600">💡 Tip:</span> Select the urgency level that best matches your compliance needs
+            </p>
           </div>
 
           {/* Message Textarea */}
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-              Message
-            </label>
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-green-100 rounded-lg mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+              </div>
+              <label htmlFor="message" className="block text-lg font-semibold text-gray-900">
+                Message
+              </label>
+            </div>
             <textarea
               id="message"
               name="message"
-              rows={4}
+              rows={6}
               value={formData.message}
               onChange={handleInputChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                ${errors.message ? 'border-red-500' : ''}`}
+              className={`mt-1 block w-full rounded-lg border-2 shadow-sm focus:border-green-500 focus:ring-green-500 text-base
+                transition-all duration-200 hover:border-green-300 p-3
+                ${errors.message ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'}`}
               placeholder="Describe your compliance in detail..."
             />
             {errors.message && (
@@ -229,16 +258,21 @@ const CompliancePage = () => {
           </div>
 
           {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Attachments
-            </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-200 border-dashed rounded-lg bg-blue-50 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200">
-              <div className="space-y-3 text-center">
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-indigo-100 rounded-lg mr-3">
+                <PaperClipIcon className="h-5 w-5 text-indigo-600" />
+              </div>
+              <label className="block text-lg font-semibold text-gray-900">
+                Attachments
+              </label>
+            </div>
+            <div className="mt-1 flex justify-center px-3 sm:px-6 py-4 sm:py-6 border-2 border-indigo-200 border-dashed rounded-lg bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200">
+              <div className="space-y-2 sm:space-y-3 text-center">
                 <div className="flex flex-col items-center">
-                  <PaperClipIcon className="mx-auto h-12 w-12 text-blue-500 mb-2" />
-                  <div className="flex items-center space-x-2">
-                    <label htmlFor="file-upload" className="relative cursor-pointer px-4 py-2 bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 hover:bg-blue-50 border border-blue-200 transition-all duration-200 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                  <PaperClipIcon className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-blue-500 mb-2" />
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <label htmlFor="file-upload" className="relative cursor-pointer px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 hover:bg-blue-50 border border-blue-200 transition-all duration-200">
                       <span>Choose files</span>
                       <input
                         id="file-upload"
@@ -250,16 +284,12 @@ const CompliancePage = () => {
                         className="sr-only"
                       />
                     </label>
-                    <span className="text-sm text-gray-600">or drag and drop</span>
+                    <span className="text-xs sm:text-sm text-gray-600">or drag and drop</span>
                   </div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <p className="text-xs text-gray-500 mb-1">
-                    Accepted formats: PNG, JPG, PDF, TXT, DOCX
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Maximum file size: 10MB per file
-                  </p>
+                <div className="flex flex-col items-center text-[10px] sm:text-xs text-gray-500 space-y-1">
+                  <p>Accepted: PNG, JPG, PDF, TXT, DOCX</p>
+                  <p>Max size: 10MB per file</p>
                 </div>
               </div>
             </div>
@@ -282,17 +312,22 @@ const CompliancePage = () => {
           </div>
 
           {/* Group Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Select which group to send this to
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-rose-100 rounded-lg mr-3">
+                <UserGroupIcon className="h-5 w-5 text-rose-600" />
+              </div>
+              <label className="block text-lg font-semibold text-gray-900">
+                Select which group to send this to
+              </label>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
               {['Teachers', 'Exam Officers', 'Admin Staff'].map((group) => (
                 <label
                   key={group}
-                  className={`relative flex items-center p-4 cursor-pointer rounded-lg border ${
+                  className={`relative flex items-center p-2 sm:p-4 cursor-pointer rounded-lg border ${
                     formData.selectedGroups.includes(group)
-                      ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500'
+                      ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-500'
                       : 'bg-white border-gray-200 hover:bg-gray-50'
                   } transition-all duration-200`}
                 >
@@ -300,10 +335,10 @@ const CompliancePage = () => {
                     type="checkbox"
                     checked={formData.selectedGroups.includes(group)}
                     onChange={() => handleGroupChange(group)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <div className="ml-3">
-                    <span className={`text-sm ${formData.selectedGroups.includes(group) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>
+                  <div className="ml-2 sm:ml-3">
+                    <span className={`text-xs sm:text-sm ${formData.selectedGroups.includes(group) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>
                       {group}
                     </span>
                   </div>
