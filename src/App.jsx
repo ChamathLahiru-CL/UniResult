@@ -17,6 +17,7 @@ import Help from './pages/dashboard/Help'; // Help and support page
 import AdminDashboard from './pages/admin/AdminDashboard'; // Admin dashboard page
 import { AuthProvider } from './context/AuthContext.jsx'; // Auth context provider
 import ProtectedRoute from './components/ProtectedRoute'; // Protected route component
+import CompliancePage from './pages/dashboard/CompliancePage'; // Student Compliance Form page
 import './App.css'; // Global CSS styles
 
 // Import Exam Division components
@@ -79,6 +80,7 @@ function App() {
         <Route path="profile" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old profile route */}
         <Route path="settings" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old settings route */}
         <Route path="help" element={<Help />} /> {/* Help and support page */}
+        <Route path="compliance/new" element={<CompliancePage />} /> {/* New Compliance Form */}
       </Route>
 
       {/* Exam Division Dashboard Routes */}

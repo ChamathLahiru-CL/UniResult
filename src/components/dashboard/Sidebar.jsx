@@ -5,7 +5,8 @@ import {
   CalendarIcon, BellIcon, ChartBarIcon,
   ArrowTrendingUpIcon, UserCircleIcon,
   Cog6ToothIcon as CogIcon,
-  QuestionMarkCircleIcon, XMarkIcon
+  QuestionMarkCircleIcon, XMarkIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -72,6 +73,12 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
       path: '/dash/notifications',
       tooltip: 'View Notifications',
       badge: 2
+    },
+    {
+      name: 'Submit Compliance',
+      icon: ClipboardDocumentIcon,
+      path: '/dash/compliance/new',
+      tooltip: 'Submit a new compliance'
     },
   ];
 
