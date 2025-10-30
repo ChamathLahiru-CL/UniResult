@@ -237,22 +237,22 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
             {/* User profile button and dropdown */}
             <div className="relative">
               <button 
-                className="user-button flex items-center space-x-1 p-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="user-button flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
                 {user.avatar ? (
                   <img 
                     src={user.avatar} 
                     alt={user.name} 
-                    className="h-6 w-6 rounded-full object-cover" 
+                    className="h-8 w-8 rounded-full object-cover" 
                   />
                 ) : (
-                  <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
-                    <UserCircleIcon className="h-5 w-5 text-blue-600" />
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <UserCircleIcon className="h-7 w-7 text-blue-600" />
                   </div>
                 )}
-                <span className="text-sm text-gray-700">{user.name}</span>
-                <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>

@@ -5,7 +5,8 @@ import {
   CalendarIcon, BellIcon, ChartBarIcon,
   ArrowTrendingUpIcon, UserCircleIcon,
   Cog6ToothIcon as CogIcon,
-  QuestionMarkCircleIcon, XMarkIcon
+  QuestionMarkCircleIcon, XMarkIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -73,21 +74,21 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
       tooltip: 'View Notifications',
       badge: 2
     },
+    {
+      name: 'Submit Compliance',
+      icon: ClipboardDocumentIcon,
+      path: '/dash/compliance/new',
+      tooltip: 'Submit a new compliance'
+    },
   ];
 
   // Footer navigation items
   const footerItems = [
     { 
-      name: 'Profile', 
+      name: 'Profile & Settings', 
       icon: UserCircleIcon, 
-      path: '/dash/profile',
-      tooltip: 'Manage your student profile'
-    },
-    { 
-      name: 'Settings', 
-      icon: CogIcon, 
-      path: '/dash/settings',
-      tooltip: 'Customize your preferences'
+      path: '/dash/profile-settings',
+      tooltip: 'Manage profile and preferences'
     },
     { 
       name: 'Help & Support', 
@@ -119,8 +120,9 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
             className="flex items-center focus:outline-none"
             onClick={() => isMobile && onCloseMobile && onCloseMobile()}
           >
-            <h1 className="text-2xl font-bold text-blue-600">
-              UniResult
+            <h1 className="text-3xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
             </h1>
           </Link>
         )}

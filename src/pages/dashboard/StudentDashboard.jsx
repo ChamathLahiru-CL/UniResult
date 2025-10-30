@@ -11,18 +11,56 @@ import RecentNotifications from '../../components/dashboard/RecentNotifications'
  * Displays overview of academic performance and notifications
  */
 const StudentDashboard = () => {
-  // Sample data for GPA Summary
+  // Sample data for GPA Summary with level-wise breakdown
   const gpaData = {
-    currentGPA: 3.7,
     overallGPA: 3.75,
-    semester: 5
+    semester: 5,
+    levelGPAs: {
+      100: 3.65,
+      200: 3.80,
+      300: 3.70,
+      400: null
+    }
   };
   
-  // Sample data for last updated results
+  // Sample data for last updated results with enhanced structure
   const recentResults = [
-    { subject: 'Stat', level: 200, semester: 2, grade: 'A+' },
-    { subject: 'HCI', level: 200, semester: 4, grade: 'B' },
-    { subject: 'Calculus', level: 100, semester: 3, grade: 'C' }
+    { 
+      code: 'CSC201',
+      subject: 'Data Structures', 
+      level: 200, 
+      semester: 3, 
+      grade: 'A+',
+      updateDate: '2025-10-28',
+      isNew: true
+    },
+    { 
+      code: 'CSC102',
+      subject: 'Programming Fundamentals', 
+      level: 100, 
+      semester: 2, 
+      grade: 'A',
+      updateDate: '2025-10-27',
+      isNew: true
+    },
+    { 
+      code: 'MTH101',
+      subject: 'Mathematics I', 
+      level: 100, 
+      semester: 1, 
+      grade: 'B+',
+      updateDate: '2025-10-25',
+      isNew: false
+    },
+    { 
+      code: 'ENG101',
+      subject: 'English I', 
+      level: 100, 
+      semester: 1, 
+      grade: 'A-',
+      updateDate: '2025-10-24',
+      isNew: false
+    }
   ];
   
   // Sample data for GPA trend
@@ -84,9 +122,9 @@ const StudentDashboard = () => {
         {/* GPA Summary Card */}
         <div className="col-span-1 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
           <GPASummary 
-            currentGPA={gpaData.currentGPA} 
             overallGPA={gpaData.overallGPA} 
             semester={gpaData.semester}
+            levelGPAs={gpaData.levelGPAs}
           />
         </div>
         
