@@ -31,6 +31,8 @@ import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
 import ResultManagement from './pages/examdivision/ResultManagement';
 import ExamNewsPage from './pages/examdivision/ExamNewsPage';
 import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
+import ExamProfileSettings from './pages/examdivision/ExamProfileSettings';
+import ExamDivisionHelp from './pages/examdivision/ExamDivisionHelp';
 
 // Import Admin Compliance components
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
@@ -103,9 +105,9 @@ function App() {
         <Route path="activities" element={<ExamActivities />} />
         <Route path="members" element={<ExamDivisionMembers />} />
         <Route path="results" element={<ResultManagement />} />
-        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="profile" element={<ExamProfileSettings />} />
         <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
-        <Route path="help" element={<Help />} />
+        <Route path="help" element={<ExamDivisionHelp />} />
       </Route>
       
       {/* Admin Dashboard Routes */}

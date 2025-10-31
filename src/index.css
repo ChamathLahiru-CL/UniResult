@@ -110,6 +110,14 @@ button:focus-visible {
   overflow: hidden;
 }
 
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .activity-card-hover {
   transition: all 0.2s ease-in-out;
 }
