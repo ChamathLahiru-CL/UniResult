@@ -12,11 +12,27 @@ import {
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
+// Helper component for rendering category icons
+const CategoryIcon = ({ category }) => {
+  const iconMap = {
+    'getting-started': AcademicCapIcon,
+    'user-management': UserGroupIcon,
+    'result-management': DocumentTextIcon,
+    'notifications': BellIcon,
+    'security': ShieldCheckIcon,
+    'system-settings': Cog6ToothIcon,
+    'analytics': ChartBarIcon,
+    'support': ChatBubbleLeftRightIcon,
+  };
+  const Icon = iconMap[category];
+  return Icon ? <Icon className="h-6 w-6 text-blue-500 mr-3" /> : null;
+};
+
+// Main AdminHelpPage component
 const AdminHelpPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Help categories with icons and detailed content
   const categories = [
     { id: 'getting-started', name: 'Getting Started', icon: AcademicCapIcon },
     { id: 'user-management', name: 'User Management', icon: UserGroupIcon },
@@ -28,7 +44,6 @@ const AdminHelpPage = () => {
     { id: 'support', name: 'Support', icon: ChatBubbleLeftRightIcon },
   ];
 
-  // Comprehensive help content
   const helpContent = [
     {
       category: 'getting-started',
@@ -87,7 +102,6 @@ const AdminHelpPage = () => {
     },
   ];
 
-  // Filter help content based on search and category
   const filteredContent = helpContent.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.content.toLowerCase().includes(searchQuery.toLowerCase());
@@ -141,20 +155,23 @@ const AdminHelpPage = () => {
           >
             All Topics
           </button>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={\`flex items-center px-4 py-2 rounded-lg text-sm font-medium \${
-                selectedCategory === category.id
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }\`}
-            >
-              <category.icon className="h-5 w-5 mr-2" />
-              {category.name}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
+                  selectedCategory === category.id
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Icon className="h-5 w-5 mr-2" />
+                {category.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -168,11 +185,7 @@ const AdminHelpPage = () => {
             >
               <div className="p-6">
                 <div className="flex items-center mb-4">
-                  {categories.find(cat => cat.id === item.category)?.icon && (
-                    <categories.find(cat => cat.id === item.category).icon 
-                      className="h-6 w-6 text-blue-500 mr-3"
-                    />
-                  )}
+                  <CategoryIcon category={item.category} />
                   <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
@@ -180,7 +193,7 @@ const AdminHelpPage = () => {
                 </p>
                 <button
                   className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
-                  onClick={() => {/* Implement expand/collapse or modal view */}}
+                  onClick={() => {/* TODO: Implement expand/collapse or modal view */}}
                 >
                   Learn more
                   <svg
@@ -208,7 +221,9 @@ const AdminHelpPage = () => {
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-8 md:px-12 md:py-12 flex flex-col md:flex-row items-center justify-between">
             <div className="text-center md:text-left mb-6 md:mb-0">
-              <h2 className="text-2xl font-bold text-white mb-2">Need Additional Support?</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Need Additional Support?
+              </h2>
               <p className="text-blue-100">
                 Contact our technical team for personalized assistance
               </p>
