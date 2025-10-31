@@ -46,8 +46,8 @@ import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
 import AdminStudentResultPage from './pages/admin/AdminStudentResultPage';
 import ResultDetailsPage from './pages/admin/ResultDetailsPage';
 
-// Import Admin Settings page
-import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+// Import Admin Profile Settings page
+import AdminProfileSettings from './pages/admin/AdminProfileSettings';
 
 // Import Admin Announcement page
 import AdminAnnouncementPage from './pages/admin/AdminAnnouncementPage';
@@ -122,7 +122,7 @@ function App() {
         <Route path="students" element={<AdminStudentManagementPage />} />
         <Route path="results" element={<AdminStudentResultPage />} />
         <Route path="results/:id" element={<ResultDetailsPage />} />
-        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="profile" element={<AdminProfileSettings />} />
         <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
         <Route path="announcement" element={<AdminAnnouncementPage />} />
         <Route path="help" element={<Help />} />
