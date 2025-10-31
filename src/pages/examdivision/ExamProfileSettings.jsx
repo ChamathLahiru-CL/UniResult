@@ -21,6 +21,8 @@ import {
   AcademicCapIcon,
   IdentificationIcon,
 } from '@heroicons/react/24/outline';
+import Toggle from '../../components/Toggle';
+import Button, { SuccessButton, LoadingButton } from '../../components/Button';
 
 const ExamProfileSettings = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -317,13 +319,9 @@ const ExamProfileSettings = () => {
                     </div>
 
                     <div className="mt-8 flex justify-end">
-                      <button
-                        type="submit"
-                        className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                      >
-                        <CheckCircleIcon className="h-5 w-5 mr-2" />
+                      <SuccessButton type="submit">
                         Save Changes
-                      </button>
+                      </SuccessButton>
                     </div>
                   </form>
                 </div>
@@ -395,12 +393,13 @@ const ExamProfileSettings = () => {
                         </div>
                       </div>
                       <div className="mt-6">
-                        <button
+                        <Button
                           type="submit"
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          variant="success"
+                          leftIcon={KeyIcon}
                         >
                           Update Password
-                        </button>
+                        </Button>
                       </div>
                     </form>
                   </div>
@@ -413,31 +412,19 @@ const ExamProfileSettings = () => {
                     <p className="text-sm text-gray-500">Manage your account security preferences</p>
                   </div>
                   <div className="p-6 space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-900">Two-Factor Authentication</h4>
-                        <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
-                      </div>
-                      <button
-                        onClick={() => handleSettingChange('twoFactorAuth')}
-                        className={`${settings.twoFactorAuth ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                      >
-                        <span className={`${settings.twoFactorAuth ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                      </button>
-                    </div>
+                    <Toggle
+                      enabled={settings.twoFactorAuth}
+                      onChange={() => handleSettingChange('twoFactorAuth')}
+                      label="Two-Factor Authentication"
+                      description="Add an extra layer of security to your account"
+                    />
                     
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-900">Login Alerts</h4>
-                        <p className="text-sm text-gray-500">Get notified of new login attempts</p>
-                      </div>
-                      <button
-                        onClick={() => handleSettingChange('loginAlerts')}
-                        className={`${settings.loginAlerts ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                      >
-                        <span className={`${settings.loginAlerts ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                      </button>
-                    </div>
+                    <Toggle
+                      enabled={settings.loginAlerts}
+                      onChange={() => handleSettingChange('loginAlerts')}
+                      label="Login Alerts"
+                      description="Get notified of new login attempts"
+                    />
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout</label>
@@ -474,44 +461,26 @@ const ExamProfileSettings = () => {
                         General Notifications
                       </h3>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Email Notifications</h4>
-                            <p className="text-sm text-gray-500">Receive updates via email</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('emailNotifications')}
-                            className={`${settings.emailNotifications ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.emailNotifications ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.emailNotifications}
+                          onChange={() => handleSettingChange('emailNotifications')}
+                          label="Email Notifications"
+                          description="Receive updates via email"
+                        />
                         
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">SMS Notifications</h4>
-                            <p className="text-sm text-gray-500">Receive updates via text message</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('smsNotifications')}
-                            className={`${settings.smsNotifications ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.smsNotifications ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.smsNotifications}
+                          onChange={() => handleSettingChange('smsNotifications')}
+                          label="SMS Notifications"
+                          description="Receive updates via text message"
+                        />
 
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Push Notifications</h4>
-                            <p className="text-sm text-gray-500">Receive browser push notifications</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('pushNotifications')}
-                            className={`${settings.pushNotifications ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.pushNotifications ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.pushNotifications}
+                          onChange={() => handleSettingChange('pushNotifications')}
+                          label="Push Notifications"
+                          description="Receive browser push notifications"
+                        />
                       </div>
                     </div>
 
@@ -522,57 +491,33 @@ const ExamProfileSettings = () => {
                         Exam Division Notifications
                       </h3>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Exam Reminders</h4>
-                            <p className="text-sm text-gray-500">Get notified about upcoming exams</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('examReminders')}
-                            className={`${settings.examReminders ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.examReminders ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.examReminders}
+                          onChange={() => handleSettingChange('examReminders')}
+                          label="Exam Reminders"
+                          description="Get notified about upcoming exams"
+                        />
                         
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Result Notifications</h4>
-                            <p className="text-sm text-gray-500">Notifications for result processing</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('resultNotifications')}
-                            className={`${settings.resultNotifications ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.resultNotifications ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.resultNotifications}
+                          onChange={() => handleSettingChange('resultNotifications')}
+                          label="Result Notifications"
+                          description="Notifications for result processing"
+                        />
 
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">System Alerts</h4>
-                            <p className="text-sm text-gray-500">Important system notifications</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('systemAlerts')}
-                            className={`${settings.systemAlerts ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.systemAlerts ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.systemAlerts}
+                          onChange={() => handleSettingChange('systemAlerts')}
+                          label="System Alerts"
+                          description="Important system notifications"
+                        />
 
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Weekly Reports</h4>
-                            <p className="text-sm text-gray-500">Receive weekly activity summaries</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('weeklyReports')}
-                            className={`${settings.weeklyReports ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.weeklyReports ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.weeklyReports}
+                          onChange={() => handleSettingChange('weeklyReports')}
+                          label="Weekly Reports"
+                          description="Receive weekly activity summaries"
+                        />
                       </div>
                     </div>
                   </div>
@@ -596,31 +541,19 @@ const ExamProfileSettings = () => {
                         Appearance
                       </h3>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Dark Mode</h4>
-                            <p className="text-sm text-gray-500">Enable dark theme</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('darkMode')}
-                            className={`${settings.darkMode ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.darkMode ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.darkMode}
+                          onChange={() => handleSettingChange('darkMode')}
+                          label="Dark Mode"
+                          description="Enable dark theme"
+                        />
                         
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Compact View</h4>
-                            <p className="text-sm text-gray-500">Use more compact interface</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('compactView')}
-                            className={`${settings.compactView ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.compactView ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.compactView}
+                          onChange={() => handleSettingChange('compactView')}
+                          label="Compact View"
+                          description="Use more compact interface"
+                        />
                       </div>
                     </div>
 
@@ -631,18 +564,12 @@ const ExamProfileSettings = () => {
                         System Preferences
                       </h3>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">Auto Save</h4>
-                            <p className="text-sm text-gray-500">Automatically save form data</p>
-                          </div>
-                          <button
-                            onClick={() => handleSettingChange('autoSave')}
-                            className={`${settings.autoSave ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out`}
-                          >
-                            <span className={`${settings.autoSave ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1`} />
-                          </button>
-                        </div>
+                        <Toggle
+                          enabled={settings.autoSave}
+                          onChange={() => handleSettingChange('autoSave')}
+                          label="Auto Save"
+                          description="Automatically save form data"
+                        />
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
