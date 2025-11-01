@@ -28,9 +28,18 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
   ];
 
   const bottomNav = [
-    { name: 'Profile', icon: UserIcon, href: '/admin/profile' },
-    { name: 'Settings', icon: Cog6ToothIcon, href: '/admin/settings' },
-    { name: 'Help', icon: QuestionMarkCircleIcon, href: '/admin/help' },
+    { 
+      name: 'Profile & Settings', 
+      icon: UserIcon, 
+      href: '/admin/profile',
+      description: 'Manage your account and preferences'
+    },
+    { 
+      name: 'Help', 
+      icon: QuestionMarkCircleIcon, 
+      href: '/admin/help',
+      description: 'Get support and documentation'
+    },
   ];
 
   return (
@@ -87,15 +96,26 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
           {/* Bottom Navigation */}
           <div className="pb-4">
-            <div className="border-t border-gray-200 pt-3 space-y-1">
+            <div className="border-t border-gray-200 pt-3 space-y-2">
               {bottomNav.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors"
+                  className={`block px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors ${
+                    location.pathname === item.href ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  }`}
                 >
-                  <item.icon className="h-5 w-5 text-gray-500 mr-3" />
-                  <span className="text-sm font-medium">{item.name}</span>
+                  <div className="flex items-center">
+                    <item.icon className={`h-5 w-5 mr-3 ${
+                      location.pathname === item.href ? 'text-blue-600' : 'text-gray-500'
+                    }`} />
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  {item.description && (
+                    <p className="mt-0.5 ml-8 text-xs text-gray-500">
+                      {item.description}
+                    </p>
+                  )}
                 </Link>
               ))}
             </div>

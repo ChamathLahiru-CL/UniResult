@@ -29,8 +29,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
   ];
 
   const bottomNav = [
-    { name: 'Profile', href: '/exam/profile', icon: UserCircleIcon },
-    { name: 'Settings', href: '/exam/settings', icon: Cog6ToothIcon },
+    { name: 'Profile & Settings', href: '/exam/profile', icon: UserCircleIcon },
     { name: 'Help', href: '/exam/help', icon: QuestionMarkCircleIcon },
   ];
 

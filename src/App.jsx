@@ -31,6 +31,8 @@ import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
 import ResultManagement from './pages/examdivision/ResultManagement';
 import ExamNewsPage from './pages/examdivision/ExamNewsPage';
 import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
+import ExamProfileSettings from './pages/examdivision/ExamProfileSettings';
+import ExamDivisionHelp from './pages/examdivision/ExamDivisionHelp';
 
 // Import Admin Compliance components
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
@@ -46,8 +48,11 @@ import AdminRecentActivitiesPage from './pages/admin/AdminRecentActivitiesPage';
 import AdminStudentResultPage from './pages/admin/AdminStudentResultPage';
 import ResultDetailsPage from './pages/admin/ResultDetailsPage';
 
-// Import Admin Settings page
-import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+// Import Admin Profile Settings page
+import AdminProfileSettings from './pages/admin/AdminProfileSettings';
+
+// Import Admin Help page
+import AdminHelpPage from './pages/admin/AdminHelpPage';
 
 // Import Admin Announcement page
 import AdminAnnouncementPage from './pages/admin/AdminAnnouncementPage';
@@ -100,9 +105,9 @@ function App() {
         <Route path="activities" element={<ExamActivities />} />
         <Route path="members" element={<ExamDivisionMembers />} />
         <Route path="results" element={<ResultManagement />} />
-        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="profile" element={<ExamProfileSettings />} />
         <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
-        <Route path="help" element={<Help />} />
+        <Route path="help" element={<ExamDivisionHelp />} />
       </Route>
       
       {/* Admin Dashboard Routes */}
@@ -125,7 +130,7 @@ function App() {
         <Route path="profile" element={<ProfileAndSettings />} />
         <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
         <Route path="announcement" element={<AdminAnnouncementPage />} />
-        <Route path="help" element={<Help />} />
+        <Route path="help" element={<AdminHelpPage />} />
       </Route>
 
       {/* Fallback Route */}
