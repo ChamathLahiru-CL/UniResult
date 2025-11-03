@@ -63,18 +63,41 @@ const SignUp = () => {
 
       // Create the submission data with the full email
       const submissionData = {
-        ...formData,
+        fullName: formData.fullName,
         email: fullEmail,
+        enrollmentNumber: formData.enrollmentNumber,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        agreeTerms: formData.agreeTerms,
       };
 
-      // Simulating API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Make API call to register endpoint
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      });
 
-      console.log("Registration successful:", submissionData);
-      navigate("/"); // Redirect to login page after successful registration
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      console.log('Registration successful:', data);
+      
+      // Optionally store token if you want to auto-login after registration
+      // localStorage.setItem('token', data.data.token);
+      
+      // Show success message before redirecting
+      alert('Registration successful! Please login to continue.');
+      
+      navigate('/'); // Redirect to login page after successful registration
     } catch (err) {
       console.error("Registration failed:", err);
-      setError("Registration failed. Please try again.");
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: [true, 'Username (Student ID) is required'],
+        required: [true, 'Username (Enrollment Number) is required'],
         unique: true,
         trim: true
     },
@@ -28,12 +28,22 @@ const userSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: [true, 'Name is required'],
+        required: [true, 'Full name is required'],
         trim: true
+    },
+    enrollmentNumber: {
+        type: String,
+        required: [true, 'Enrollment number is required'],
+        trim: true,
+        unique: true
     },
     department: {
         type: String,
         trim: true
+    },
+    agreeTerms: {
+        type: Boolean,
+        default: false
     },
     lastLogin: {
         type: Date
@@ -45,6 +55,10 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

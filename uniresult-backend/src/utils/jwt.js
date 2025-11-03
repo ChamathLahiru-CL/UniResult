@@ -5,8 +5,11 @@ export const generateToken = (user) => {
     return jwt.sign(
         {
             id: user._id,
-            studentId: user.studentId,
-            role: user.role
+            username: user.username,
+            enrollmentNumber: user.enrollmentNumber,
+            role: user.role,
+            email: user.email,
+            name: user.name
         },
         config.JWT_SECRET,
         { expiresIn: '24h' }
