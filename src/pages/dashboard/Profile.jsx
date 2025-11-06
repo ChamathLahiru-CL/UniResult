@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   UserCircleIcon,
@@ -8,28 +8,105 @@ import {
 } from '@heroicons/react/24/outline';
 
 const Profile = () => {
+  console.log('🎯 Profile component mounted/re-rendered');
+  console.log('📍 Current URL:', window.location.href);
+  console.log('💾 Token in localStorage:', localStorage.getItem('token') ? 'EXISTS' : 'NOT FOUND');
+  
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('personal');
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
-  // Sample user data - replace with actual user data from your auth system
+  // User data from backend
   const [userData, setUserData] = useState({
-    adminId: 'ADM001',
-    studentId: 'IT21021380',
-    email: 'it21021380@my.sliit.lk',
-    firstName: 'Chamath',
-    lastName: 'Lahiru',
-    phoneNumber: '+94 77 123 4567',
-    profileImage: null // URL or null
+    adminId: '',
+    studentId: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    profileImage: null
   });
+
+  const fetchUserProfile = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      
+      console.log('🔍 Fetching profile with token:', token ? `Token exists (${token.substring(0, 20)}...)` : 'No token');
+      
+      if (!token) {
+        console.error('❌ No token found, redirecting to login');
+        setError('Please login to view your profile');
+        navigate('/');
+        return;
+      }
+
+      console.log('📤 Making request to: http://localhost:5000/api/user/profile');
+      console.log('📤 Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+
+      const response = await fetch('http://localhost:5000/api/user/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('📡 Profile API Response Status:', response.status);
+
+      const data = await response.json();
+      console.log('📦 Profile Data Received:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch profile');
+      }
+
+      console.log('✅ Setting user data:', data.data);
+
+      setUserData({
+        adminId: data.data.adminId || '',
+        studentId: data.data.studentId || '',
+        email: data.data.email || '',
+        firstName: data.data.firstName || '',
+        lastName: data.data.lastName || '',
+        phoneNumber: data.data.phoneNumber || '',
+        profileImage: data.data.profileImage || null
+      });
+
+      setIsLoading(false);
+    } catch (err) {
+      console.error('❌ Error fetching profile:', err);
+      console.error('Error details:', err.message);
+      setError(err.message);
+      setIsLoading(false);
+      
+      // If unauthorized, redirect to login
+      if (err.message.includes('authorized') || err.message.includes('token')) {
+        console.log('🔒 Unauthorized, clearing storage and redirecting');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/');
+      }
+    }
+  };
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    console.log('🔄 useEffect running - About to fetch profile');
+    fetchUserProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePasswordChange = (e) => {
     setPasswordForm({
@@ -45,33 +122,164 @@ const Profile = () => {
     });
   };
 
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault();
-    // Add password validation and update logic here
-    setIsEditingPassword(false);
-  };
+  const handlePhoneNumberSave = async () => {
+    try {
+      setError('');
+      setSuccessMessage('');
+      const token = localStorage.getItem('token');
 
-  const handleLogout = () => {
-    // Add logout logic here
-    navigate('/');
-  };
+      const response = await fetch('http://localhost:5000/api/user/phone', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ phoneNumber: userData.phoneNumber })
+      });
 
-  const handleDeleteAccount = () => {
-    if (deleteConfirmation === 'DELETE') {
-      // Add account deletion logic here
-      navigate('/');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update phone number');
+      }
+
+      setSuccessMessage('Phone number updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('Error updating phone:', err);
+      setError(err.message);
     }
   };
 
-  const handleImageChange = (e) => {
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setError('');
+      setSuccessMessage('');
+
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        setError('New passwords do not match');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('http://localhost:5000/api/user/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+          confirmPassword: passwordForm.confirmPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to change password');
+      }
+
+      setSuccessMessage('Password changed successfully!');
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setIsEditingPassword(false);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('Error changing password:', err);
+      setError(err.message);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation === 'DELETE') {
+      try {
+        setError('');
+        const token = localStorage.getItem('token');
+
+        const response = await fetch('http://localhost:5000/api/user/account', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ confirmation: 'DELETE' })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to delete account');
+        }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/');
+      } catch (err) {
+        console.error('Error deleting account:', err);
+        setError(err.message);
+      }
+    }
+  };
+
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError('Image size should be less than 2MB');
+        return;
+      }
+
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        
+        // Update UI immediately
         setUserData({
           ...userData,
-          profileImage: reader.result
+          profileImage: base64Image
         });
+
+        // Upload to backend
+        try {
+          setError('');
+          const token = localStorage.getItem('token');
+
+          const response = await fetch('http://localhost:5000/api/user/profile-image', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ profileImage: base64Image })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile image');
+          }
+
+          setSuccessMessage('Profile image updated successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err) {
+          console.error('Error uploading image:', err);
+          setError(err.message);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -110,9 +318,32 @@ const Profile = () => {
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <div className="mb-4 bg-green-50 text-green-600 text-sm p-3 rounded-lg flex items-start">
+          <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-4 bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-start">
+          <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Profile Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        {activeTab === 'personal' && (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : activeTab === 'personal' ? (
           <div className="space-y-6">
             {/* Profile Photo */}
             <div className="flex items-center space-x-6">
@@ -186,15 +417,25 @@ const Profile = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  value={userData.phoneNumber}
-                  onChange={handlePhoneNumberChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+                <div className="flex space-x-2">
+                  <input
+                    type="tel"
+                    value={userData.phoneNumber}
+                    onChange={handlePhoneNumberChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                  <button
+                    onClick={handlePhoneNumberSave}
+                    className="mt-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors whitespace-nowrap"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        ) : (
+          <div className="space-y-6"></div>
         )}
 
         {activeTab === 'security' && (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   UserCircleIcon,
@@ -10,12 +10,21 @@ import {
 } from '@heroicons/react/24/outline';
 
 const ProfileAndSettings = () => {
+  console.log('🎯 ProfileAndSettings component mounted/re-rendered');
+  console.log('📍 Current URL:', window.location.href);
+  console.log('💾 Token in localStorage:', localStorage.getItem('token') ? 'EXISTS' : 'NOT FOUND');
+  
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [originalPhoneNumber, setOriginalPhoneNumber] = useState('');
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
     resultAlerts: true,
@@ -28,15 +37,90 @@ const ProfileAndSettings = () => {
     confirmPassword: ''
   });
 
-  // Sample user data - replace with actual user data from your auth system
+  // User data from backend
   const [userData, setUserData] = useState({
-    studentId: 'IT21021380',
-    email: 'it21021380@my.sliit.lk',
-    firstName: 'Chamath',
-    lastName: 'Lahiru',
-    phoneNumber: '+94 77 123 4567',
-    profileImage: null // URL or null
+    studentId: '',
+    adminId: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    profileImage: null
   });
+
+  const fetchUserProfile = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      
+      console.log('🔍 Fetching profile with token:', token ? `Token exists (${token.substring(0, 20)}...)` : 'No token');
+      
+      if (!token) {
+        console.error('❌ No token found, redirecting to login');
+        setError('Please login to view your profile');
+        navigate('/');
+        return;
+      }
+
+      console.log('📤 Making request to: http://localhost:5000/api/user/profile');
+      console.log('📤 Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+
+      const response = await fetch('http://localhost:5000/api/user/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('📡 Profile API Response Status:', response.status);
+
+      const data = await response.json();
+      console.log('📦 Profile Data Received:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch profile');
+      }
+
+      console.log('✅ Setting user data:', data.data);
+
+      const phoneNum = data.data.phoneNumber || '';
+      setUserData({
+        adminId: data.data.adminId || '',
+        studentId: data.data.studentId || '',
+        email: data.data.email || '',
+        firstName: data.data.firstName || '',
+        lastName: data.data.lastName || '',
+        phoneNumber: phoneNum,
+        profileImage: data.data.profileImage || null
+      });
+      
+      // Store original phone number for cancel functionality
+      setOriginalPhoneNumber(phoneNum);
+
+      setIsLoading(false);
+    } catch (err) {
+      console.error('❌ Error fetching profile:', err);
+      console.error('Error details:', err.message);
+      setError(err.message);
+      setIsLoading(false);
+      
+      // If unauthorized, redirect to login
+      if (err.message.includes('authorized') || err.message.includes('token')) {
+        console.log('🔒 Unauthorized, clearing storage and redirecting');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/');
+      }
+    }
+  };
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    console.log('🔄 useEffect running - About to fetch profile');
+    fetchUserProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePasswordChange = (e) => {
     setPasswordForm({
@@ -59,10 +143,96 @@ const ProfileAndSettings = () => {
     });
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePhoneNumberSave = async () => {
+    try {
+      setIsSavingPhone(true);
+      setError('');
+      setSuccessMessage('');
+      
+      console.log('📞 Saving phone number:', userData.phoneNumber);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('http://localhost:5000/api/user/phone', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ phoneNumber: userData.phoneNumber })
+      });
+
+      const data = await response.json();
+      console.log('📡 Phone update response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update phone number');
+      }
+
+      console.log('✅ Phone number updated successfully in database');
+      setOriginalPhoneNumber(userData.phoneNumber);
+      setSuccessMessage('Phone number updated successfully!');
+      setIsSavingPhone(false);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('❌ Error updating phone:', err);
+      setError(err.message);
+      setIsSavingPhone(false);
+    }
+  };
+
+  const handlePhoneNumberCancel = () => {
+    console.log('↩️ Canceling phone number edit');
+    setUserData({
+      ...userData,
+      phoneNumber: originalPhoneNumber
+    });
+    setError('');
+  };
+
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    // Add password validation and update logic here
-    setIsEditingPassword(false);
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    try {
+      console.log('🔑 Changing password...');
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('http://localhost:5000/api/user/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to change password');
+      }
+
+      console.log('✅ Password changed successfully');
+      setError('');
+      setIsEditingPassword(false);
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (err) {
+      console.error('❌ Error changing password:', err);
+      setError(err.message);
+    }
   };
 
   const handleLogout = () => {
@@ -70,29 +240,110 @@ const ProfileAndSettings = () => {
     navigate('/');
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (deleteConfirmation === 'DELETE') {
-      // Add account deletion logic here
-      navigate('/');
+      try {
+        console.log('🗑️ Deleting account...');
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch('http://localhost:5000/api/user/account', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to delete account');
+        }
+
+        console.log('✅ Account deleted successfully');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/');
+      } catch (err) {
+        console.error('❌ Error deleting account:', err);
+        setError(err.message);
+      }
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserData({
-          ...userData,
-          profileImage: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+      try {
+        console.log('🖼️ Image selected, uploading...');
+        
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const token = localStorage.getItem('token');
+          
+          const response = await fetch('http://localhost:5000/api/user/profile-image', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ profileImage: reader.result })
+          });
+
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile image');
+          }
+
+          console.log('✅ Image updated successfully');
+          setUserData({
+            ...userData,
+            profileImage: reader.result
+          });
+          setError('');
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('❌ Error updating image:', err);
+        setError(err.message);
+      }
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 animate-fadeIn flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 animate-fadeIn">
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 animate-fadeIn">
+          <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
+          <span className="text-red-700">{error}</span>
+          <button onClick={() => setError('')} className="ml-auto text-red-600 hover:text-red-800 text-2xl leading-none">×</button>
+        </div>
+      )}
+
+      {/* Success Message Display */}
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-fadeIn">
+          <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="text-green-700">{successMessage}</span>
+          <button onClick={() => setSuccessMessage('')} className="ml-auto text-green-600 hover:text-green-800 text-2xl leading-none">×</button>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="relative mb-6">
         <div className="absolute top-0 left-0 w-12 h-12 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
@@ -210,13 +461,36 @@ const ProfileAndSettings = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  value={userData.phoneNumber}
-                  onChange={handlePhoneNumberChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <div className="space-y-3">
+                  <input
+                    type="tel"
+                    value={userData.phoneNumber}
+                    onChange={handlePhoneNumberChange}
+                    placeholder="Enter your phone number"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={handlePhoneNumberSave}
+                      disabled={isSavingPhone}
+                      className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                        isSavingPhone 
+                          ? 'bg-blue-400 cursor-not-allowed' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                    >
+                      {isSavingPhone ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={handlePhoneNumberCancel}
+                      disabled={isSavingPhone}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

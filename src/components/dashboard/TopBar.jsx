@@ -36,12 +36,65 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [userData, setUserData] = useState({
+    name: 'Loading...',
+    email: 'loading...',
+    avatar: null,
+    firstName: '',
+    lastName: ''
+  });
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // User data - In production, this would come from an authentication context or API
-  const user = {
-    name: 'Lahiru',
-    avatar: null, // Use null for default icon, otherwise would be a URL
-  };
+  /**
+   * Fetch user profile data from backend
+   */
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsLoadingUser(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/user/profile', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch user data');
+        }
+
+        // Set user data with proper display name
+        const displayName = data.data.firstName 
+          ? `${data.data.firstName}${data.data.lastName ? ' ' + data.data.lastName : ''}`
+          : data.data.name || 'User';
+
+        setUserData({
+          name: displayName,
+          email: data.data.email,
+          avatar: data.data.profileImage || null,
+          firstName: data.data.firstName || '',
+          lastName: data.data.lastName || ''
+        });
+
+        setIsLoadingUser(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   /**
    * Fetch notifications from backend
@@ -188,12 +241,12 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
             )}
 
             {/* Logo */}
-            <div className="flex items-center ml-1">
+            <Link to="/dash" className="flex items-center ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200">
               <h1 className="text-3xl font-bold">
                 <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
                 <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
               </h1>
-            </div>
+            </Link>
           </div>
 
           {/* Right section with date/time, notifications and user profile */}
@@ -240,29 +293,31 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                 className="user-button flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
-                {user.avatar ? (
+                {userData.avatar ? (
                   <img 
-                    src={user.avatar} 
-                    alt={user.name} 
-                    className="h-8 w-8 rounded-full object-cover" 
+                    src={userData.avatar} 
+                    alt={userData.name} 
+                    className="h-8 w-8 rounded-full object-cover flex-shrink-0" 
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <UserCircleIcon className="h-7 w-7 text-blue-600" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">{user.name}</span>
-                <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="text-sm font-medium text-gray-700 hidden sm:block truncate max-w-[120px]">
+                  {isLoadingUser ? 'Loading...' : userData.name}
+                </span>
+                <svg className="h-5 w-5 text-gray-500 hidden sm:block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
               {/* User Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
-                  <div className="px-4 py-2">
-                    <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                    <p className="text-xs text-gray-500">student@uwu.ac.lk</p>
+                <div className="user-dropdown absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-10">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-800">{userData.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{userData.email}</p>
                   </div>
                   <Link 
                     to="/dash/profile" 

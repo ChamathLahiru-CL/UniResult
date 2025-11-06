@@ -35,37 +35,63 @@ const Login = () => {
     setError('');
 
     try {
-      // Simulating API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create user object with additional security token
-      const user = { 
-        id: formData.username,
-        name: formData.username,
-        role: formData.role,
-        token: 'dummy-auth-token-' + Date.now(), // Add a token for auth persistence
-        loginTime: new Date().toISOString()
-      };
-      
-      // Log in the user using AuthContext
-      login(user);
-      
-      // Get the redirect path from location state or use default based on role
-      const locationState = location.state;
-      const redirectPath = locationState?.from || 
-        (formData.role === 'student' ? '/dash' :
-         formData.role === 'admin' ? '/admin' :
-         formData.role === 'examDiv' ? '/exam' : '/');
-      
-      // Navigate to the intended page or role-based dashboard
-      navigate(redirectPath, { replace: true });
-      
-      console.log('Login successful:', user);
-    } catch (err) {
-      console.error('Login failed:', err);
-      setError('Login failed. Please check your credentials.');
+        // Log the data being sent
+        console.log('Sending login request:', {
+            username: formData.username,
+            role: formData.role,
+            hasPassword: !!formData.password
+        });
+
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: formData.username,
+                password: formData.password,
+                role: formData.role
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed');
+        }
+
+        // Create user object from response
+        const user = {
+            id: data.data.user.id,
+            name: data.data.user.name,
+            role: data.data.user.role,
+            token: data.data.token,
+            loginTime: data.data.user.loginTime
+        };
+
+        // Store token and user data
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Log in the user using AuthContext
+        login(user);
+        
+        // Get the redirect path from location state or use default based on role
+        const locationState = location.state;
+        const redirectPath = locationState?.from || 
+            (user.role === 'student' ? '/dash' :
+             user.role === 'admin' ? '/admin' :
+             user.role === 'examDiv' ? '/exam' : '/');
+        
+        // Navigate to the intended page or role-based dashboard
+        navigate(redirectPath, { replace: true });
+        
+        console.log('Login successful:', user);
+    } catch (error) {
+        console.error('Login failed:', error);
+        setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 
