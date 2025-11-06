@@ -41,6 +41,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    phoneNumber: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    profileImage: {
+        type: String,
+        default: null
+    },
     agreeTerms: {
         type: Boolean,
         default: false

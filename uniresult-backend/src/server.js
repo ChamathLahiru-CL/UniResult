@@ -7,6 +7,7 @@ import process from 'process';
 import connectDB from './config/database.js';
 import config from './config/config.js';
 import authRoutes from './routes/auth.js';
+import userRoutes from './routes/user.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -52,11 +53,12 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 // Health check routes
 app.get('/', (req, res) => {
