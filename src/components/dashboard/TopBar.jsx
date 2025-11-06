@@ -297,17 +297,17 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                   <img 
                     src={userData.avatar} 
                     alt={userData.name} 
-                    className="h-8 w-8 rounded-full object-cover" 
+                    className="h-8 w-8 rounded-full object-cover flex-shrink-0" 
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <UserCircleIcon className="h-7 w-7 text-blue-600" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-700 hidden sm:block truncate max-w-[120px]">
                   {isLoadingUser ? 'Loading...' : userData.name}
                 </span>
-                <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-gray-500 hidden sm:block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
