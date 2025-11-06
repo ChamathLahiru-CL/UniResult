@@ -241,12 +241,12 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
             )}
 
             {/* Logo */}
-            <div className="flex items-center ml-1">
+            <Link to="/dash" className="flex items-center ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200">
               <h1 className="text-3xl font-bold">
                 <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
                 <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
               </h1>
-            </div>
+            </Link>
           </div>
 
           {/* Right section with date/time, notifications and user profile */}
