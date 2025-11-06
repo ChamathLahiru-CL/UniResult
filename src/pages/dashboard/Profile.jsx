@@ -417,7 +417,7 @@ const Profile = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <div className="">
+                <div className="flex space-x-2">
                   <input
                     type="tel"
                     value={userData.phoneNumber}

@@ -460,34 +460,36 @@ const ProfileAndSettings = () => {
                   className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500 sm:text-sm"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <div className="flex items-center space-x-3">
+                <div className="space-y-3">
                   <input
                     type="tel"
                     value={userData.phoneNumber}
                     onChange={handlePhoneNumberChange}
                     placeholder="Enter your phone number"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
-                  <button
-                    onClick={handlePhoneNumberSave}
-                    disabled={isSavingPhone}
-                    className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
-                      isSavingPhone 
-                        ? 'bg-blue-400 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    {isSavingPhone ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={handlePhoneNumberCancel}
-                    disabled={isSavingPhone}
-                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={handlePhoneNumberSave}
+                      disabled={isSavingPhone}
+                      className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                        isSavingPhone 
+                          ? 'bg-blue-400 cursor-not-allowed' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                    >
+                      {isSavingPhone ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={handlePhoneNumberCancel}
+                      disabled={isSavingPhone}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
