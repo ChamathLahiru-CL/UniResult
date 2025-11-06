@@ -1,0 +1,241 @@
+/* GPA Component Animations */
+
+@keyframes gpaCardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes numberPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmerEffect {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* GPA Card Base Styles */
+.gpa-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gpa-card:hover {
+  animation: gpaCardFloat 2s ease-in-out infinite;
+}
+
+/* Level Card Animations */
+.gpa-level-card {
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.gpa-level-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+  z-index: 1;
+}
+
+.gpa-level-card:hover::before {
+  left: 100%;
+}
+
+.gpa-level-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Number Animation */
+.gpa-number {
+  transition: all 0.3s ease;
+}
+
+.gpa-number:hover {
+  animation: numberPop 0.6s ease;
+}
+
+/* Progress Bar Animation */
+.gpa-progress-bar {
+  transition: width 0.8s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.gpa-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 50px 50px;
+  animation: shimmerEffect 2s linear infinite;
+}
+
+/* Decorative Elements */
+.gpa-decorative {
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.gpa-card:hover .gpa-decorative {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Current Level Indicator */
+.current-level-indicator {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Staggered Animation for Level Cards */
+.gpa-level-grid > :nth-child(1) {
+  animation: slideInUp 0.5s ease-out 0.1s both;
+}
+
+.gpa-level-grid > :nth-child(2) {
+  animation: slideInUp 0.5s ease-out 0.2s both;
+}
+
+.gpa-level-grid > :nth-child(3) {
+  animation: slideInUp 0.5s ease-out 0.3s both;
+}
+
+.gpa-level-grid > :nth-child(4) {
+  animation: slideInUp 0.5s ease-out 0.4s both;
+}
+
+/* Responsive Hover Effects */
+@media (hover: hover) {
+  .gpa-hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Click Animation */
+.gpa-click-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.gpa-click-effect:active {
+  transform: scale(0.98);
+}
+
+.gpa-click-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.gpa-click-effect:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Trend Icons Animation */
+.trend-icon {
+  transition: all 0.3s ease;
+}
+
+.trend-icon:hover {
+  transform: scale(1.2) rotate(5deg);
+}
+
+/* Analytics Button Animation */
+.analytics-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.analytics-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.analytics-button:hover::before {
+  left: 100%;
+}
+
+.analytics-button:hover {
+  transform: translateX(2px);
+  color: #2563eb;
+}

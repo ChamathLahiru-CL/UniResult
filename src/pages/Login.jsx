@@ -38,24 +38,27 @@ const Login = () => {
       // Simulating API call with timeout
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Create user object
+      // Create user object with additional security token
       const user = { 
         id: formData.username,
         name: formData.username,
-        role: formData.role 
+        role: formData.role,
+        token: 'dummy-auth-token-' + Date.now(), // Add a token for auth persistence
+        loginTime: new Date().toISOString()
       };
       
       // Log in the user using AuthContext
       login(user);
       
-      // Redirect based on selected role
-      if (formData.role === 'student') {
-        navigate('/dash');
-      } else if (formData.role === 'admin') {
-        navigate('/admin');
-      } else if (formData.role === 'examDiv') {
-        navigate('/exam');
-      }
+      // Get the redirect path from location state or use default based on role
+      const locationState = location.state;
+      const redirectPath = locationState?.from || 
+        (formData.role === 'student' ? '/dash' :
+         formData.role === 'admin' ? '/admin' :
+         formData.role === 'examDiv' ? '/exam' : '/');
+      
+      // Navigate to the intended page or role-based dashboard
+      navigate(redirectPath, { replace: true });
       
       console.log('Login successful:', user);
     } catch (err) {

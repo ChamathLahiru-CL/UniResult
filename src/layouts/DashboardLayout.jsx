@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopBar from '../components/dashboard/TopBar';
@@ -10,54 +10,81 @@ import Footer from '../components/dashboard/Footer';
  * Includes responsive sidebar, topbar, main content area, and footer
  */
 const DashboardLayout = () => {
-  // State to control sidebar visibility and collapse state
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Toggle sidebar visibility for all views
-  const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth <= 1024;
+      setIsMobile(isMobileView);
+      // Close mobile menu when switching to desktop
+      if (!isMobileView) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Toggle sidebar collapse (minimized state)
+  // Toggle sidebar collapse (minimized state) - for desktop only
   const toggleCollapse = () => {
-    if (!isSidebarVisible) {
-      setIsSidebarVisible(true);
+    if (!isMobile) {
+      setIsCollapsed(!isCollapsed);
     }
-    setIsCollapsed(!isCollapsed);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/30 to-white">
+      {/* Mobile backdrop */}
+      {isMobile && isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar component with transitions */}
-      <div className={`fixed inset-y-0 left-0 transform transition-all duration-300 ease-in-out z-30 ${
-        isSidebarVisible 
-          ? isCollapsed 
-            ? 'translate-x-0 w-16' 
+      <div className={`fixed inset-y-0 left-0 transform transition-all duration-300 ease-in-out ${
+        isMobile 
+          ? isMobileMenuOpen 
+            ? 'translate-x-0' 
+            : '-translate-x-full'
+          : isCollapsed 
+            ? 'translate-x-0 w-20' 
             : 'translate-x-0 w-64'
-          : '-translate-x-full w-64'
-      }`}>
-        <Sidebar isCollapsed={isCollapsed} />
+      } z-50`}>
+        <Sidebar 
+          isCollapsed={isCollapsed} 
+          isMobile={isMobile}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
+        />
       </div>
 
       {/* Main content area with dynamic margin */}
       <div className={`flex flex-col flex-grow transition-all duration-300 ${
-        isSidebarVisible 
-          ? isCollapsed 
-            ? 'ml-16' 
-            : 'ml-64' 
-          : 'ml-0'
+        !isMobile && (isCollapsed ? 'lg:ml-20' : 'lg:ml-64')
       }`}>
         {/* Top bar with toggle buttons for sidebar */}
         <TopBar 
-          toggleSidebar={toggleSidebar} 
-          toggleCollapse={toggleCollapse} 
+          toggleMobileMenu={toggleMobileMenu}
+          toggleCollapse={toggleCollapse}
           isCollapsed={isCollapsed}
-          isSidebarVisible={isSidebarVisible} />
+          isMobile={isMobile}
+          isMobileMenuOpen={isMobileMenuOpen}
+        />
         
         {/* Page content - rendered via React Router outlet */}
-        <main className="flex-grow px-3 py-2 overflow-y-auto bg-gradient-to-br from-gray-50/50 to-white">
-          <div className="w-full">
+        <main className="flex-grow p-6 overflow-y-auto bg-gradient-to-br from-gray-50/50 to-white">
+          <div className="max-w-full">
             <Outlet />
           </div>
         </main>

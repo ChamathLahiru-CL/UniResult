@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -10,21 +10,36 @@ import {
   QuestionMarkCircleIcon,
   UserIcon,
   XMarkIcon,
+  DocumentChartBarIcon,
+  SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
+  const location = useLocation();
+  
   const navigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/admin', current: true },
-    { name: 'Update Result', icon: DocumentTextIcon, href: '/admin/update-result', current: false },
     { name: 'Recent Activities', icon: ClockIcon, href: '/admin/activities', current: false },
-    { name: 'Exam Division', icon: AcademicCapIcon, href: '/admin/exam-division', current: false },
-    { name: 'Students', icon: UsersIcon, href: '/admin/students', current: false },
+    { name: 'Announcements', icon: SpeakerWaveIcon, href: '/admin/announcement', current: false },
+    { name: 'Exam Division', icon: UsersIcon, href: '/admin/exam-division', current: false },
+    { name: 'Compliance', icon: DocumentTextIcon, href: '/admin/compliance', current: false },
+    { name: 'Students', icon: AcademicCapIcon, href: '/admin/students', current: false },
+    { name: 'Results', icon: DocumentChartBarIcon, href: '/admin/results', current: false },
   ];
 
   const bottomNav = [
-    { name: 'Profile', icon: UserIcon, href: '/admin/profile' },
-    { name: 'Settings', icon: Cog6ToothIcon, href: '/admin/settings' },
-    { name: 'Help', icon: QuestionMarkCircleIcon, href: '/admin/help' },
+    { 
+      name: 'Profile & Settings', 
+      icon: UserIcon, 
+      href: '/admin/profile',
+      description: 'Manage your account and preferences'
+    },
+    { 
+      name: 'Help', 
+      icon: QuestionMarkCircleIcon, 
+      href: '/admin/help',
+      description: 'Get support and documentation'
+    },
   ];
 
   return (
@@ -39,14 +54,17 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:transform-none lg:relative ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } lg:translate-x-0 lg:fixed lg:top-0 lg:bottom-0`}
       >
         {/* Logo and close button */}
         <div className="flex items-center justify-between h-16 px-6">
           <Link to="/admin" className="text-2xl font-bold text-[#246BFD]">
-            UniResult
+            <h1 className="text-3xl font-bold">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
+              </h1>
           </Link>
           <button
             onClick={() => setIsOpen(false)}
@@ -57,14 +75,17 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex flex-col h-[calc(100%-4rem)] px-4">
-          <div className="flex-1 space-y-1 py-4">
+        <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-4 pt-2">
+          {/* Main Navigation */}
+          <div className="space-y-0.5">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={`flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-100 ${
-                  item.current ? 'bg-blue-50 text-[#246BFD]' : ''
+                  location.pathname === item.href || location.pathname.startsWith(`${item.href}/`) 
+                    ? 'bg-blue-50 text-[#246BFD]' 
+                    : ''
                 }`}
               >
                 <item.icon className="h-5 w-5 mr-3" />
@@ -74,17 +95,30 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </div>
 
           {/* Bottom Navigation */}
-          <div className="border-t border-gray-200 py-4 space-y-1">
-            {bottomNav.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-100"
-              >
-                <item.icon className="h-5 w-5 mr-3" />
-                {item.name}
-              </Link>
-            ))}
+          <div className="pb-4">
+            <div className="border-t border-gray-200 pt-3 space-y-2">
+              {bottomNav.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`block px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors ${
+                    location.pathname === item.href ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <item.icon className={`h-5 w-5 mr-3 ${
+                      location.pathname === item.href ? 'text-blue-600' : 'text-gray-500'
+                    }`} />
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  {item.description && (
+                    <p className="mt-0.5 ml-8 text-xs text-gray-500">
+                      {item.description}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
         </nav>
       </div>
