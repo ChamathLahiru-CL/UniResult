@@ -36,12 +36,65 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [userData, setUserData] = useState({
+    name: 'Loading...',
+    email: 'loading...',
+    avatar: null,
+    firstName: '',
+    lastName: ''
+  });
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // User data - In production, this would come from an authentication context or API
-  const user = {
-    name: 'Lahiru',
-    avatar: null, // Use null for default icon, otherwise would be a URL
-  };
+  /**
+   * Fetch user profile data from backend
+   */
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsLoadingUser(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/user/profile', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch user data');
+        }
+
+        // Set user data with proper display name
+        const displayName = data.data.firstName 
+          ? `${data.data.firstName}${data.data.lastName ? ' ' + data.data.lastName : ''}`
+          : data.data.name || 'User';
+
+        setUserData({
+          name: displayName,
+          email: data.data.email,
+          avatar: data.data.profileImage || null,
+          firstName: data.data.firstName || '',
+          lastName: data.data.lastName || ''
+        });
+
+        setIsLoadingUser(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   /**
    * Fetch notifications from backend
@@ -240,10 +293,10 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                 className="user-button flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
-                {user.avatar ? (
+                {userData.avatar ? (
                   <img 
-                    src={user.avatar} 
-                    alt={user.name} 
+                    src={userData.avatar} 
+                    alt={userData.name} 
                     className="h-8 w-8 rounded-full object-cover" 
                   />
                 ) : (
@@ -251,7 +304,9 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                     <UserCircleIcon className="h-7 w-7 text-blue-600" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {isLoadingUser ? 'Loading...' : userData.name}
+                </span>
                 <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -259,10 +314,10 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
 
               {/* User Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
-                  <div className="px-4 py-2">
-                    <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                    <p className="text-xs text-gray-500">student@uwu.ac.lk</p>
+                <div className="user-dropdown absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-10">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-800">{userData.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{userData.email}</p>
                   </div>
                   <Link 
                     to="/dash/profile" 
