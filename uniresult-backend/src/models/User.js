@@ -33,9 +33,20 @@ const userSchema = new mongoose.Schema({
     },
     enrollmentNumber: {
         type: String,
-        required: [true, 'Enrollment number is required'],
         trim: true,
-        unique: true
+        sparse: true,  // Allows multiple null/undefined values
+        unique: true,
+        // Only required for students, optional for admin and examDiv
+        validate: {
+            validator: function(value) {
+                // If role is student, enrollmentNumber is required
+                if (this.role === 'student' && !value) {
+                    return false;
+                }
+                return true;
+            },
+            message: 'Enrollment number is required for students'
+        }
     },
     department: {
         type: String,
