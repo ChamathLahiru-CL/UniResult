@@ -14,14 +14,51 @@ import { mockActivities } from '../../data/mockActivities';
 
 const AdminTopBar = ({ onMenuClick }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [adminData, setAdminData] = useState({
+    firstName: '',
+    lastName: '',
+    profileImage: ''
+  });
 
   // Get unread notification count
   const unreadCount = mockActivities.filter(activity => activity.status === 'NEW').length;
+
+  // Fetch admin profile data
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        if (!user?.token) {
+          console.log('No user token available');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAdminData({
+            firstName: data.data.firstName || '',
+            lastName: data.data.lastName || '',
+            profileImage: data.data.profileImage || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+      }
+    };
+
+    fetchAdminData();
+  }, [user]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -114,10 +151,20 @@ const AdminTopBar = ({ onMenuClick }) => {
               >
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
-                    <UserCircleIcon className="h-8 w-8 text-gray-600" />
+                    {adminData.profileImage ? (
+                      <img 
+                        src={adminData.profileImage}
+                        alt="Admin"
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <UserCircleIcon className="h-8 w-8 text-gray-600" />
+                    )}
                   </div>
                   <div className="hidden md:flex md:flex-col md:items-start">
-                    <span className="text-sm font-medium text-gray-700">Lahiru</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {adminData.firstName || user?.firstName || 'Admin'} {adminData.lastName || user?.lastName || ''}
+                    </span>
                     <span className="text-xs text-gray-500">Administrator</span>
                   </div>
                 </div>
@@ -126,23 +173,31 @@ const AdminTopBar = ({ onMenuClick }) => {
 
               {/* Profile Dropdown */}
               {showProfileMenu && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                   <div className="py-1" role="menu" aria-orientation="vertical">
                     <button
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                       role="menuitem"
+                      onClick={() => {
+                        navigate('/admin/profile');
+                        setShowProfileMenu(false);
+                      }}
                     >
                       Your Profile
                     </button>
                     <button
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                       role="menuitem"
+                      onClick={() => {
+                        navigate('/admin/profile');
+                        setShowProfileMenu(false);
+                      }}
                     >
                       Settings
                     </button>
                     <div className="h-px bg-gray-200 my-1"></div>
                     <button
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                       role="menuitem"
                       onClick={handleSignOut}
                     >
