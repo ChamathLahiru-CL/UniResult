@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { format, isAfter, subDays } from 'date-fns';
 import { 
   UsersIcon, 
@@ -25,19 +25,7 @@ const AdminExamDivisionPage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch exam division members from the database
-  useEffect(() => {
-    fetchMembers();
-    
-    // Set up auto-refresh every 2 minutes (120000 milliseconds)
-    const refreshInterval = setInterval(() => {
-      fetchMembers();
-    }, 120000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(refreshInterval);
-  }, [user]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -84,7 +72,20 @@ const AdminExamDivisionPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  // Set up auto-refresh and initial fetch
+  useEffect(() => {
+    fetchMembers();
+    
+    // Set up auto-refresh every 2 minutes (120000 milliseconds)
+    const refreshInterval = setInterval(() => {
+      fetchMembers();
+    }, 120000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, [fetchMembers]);
 
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({
