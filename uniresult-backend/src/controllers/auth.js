@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import { generateToken } from '../utils/jwt.js';
 import bcrypt from 'bcryptjs';
 
@@ -162,32 +163,66 @@ export const login = async (req, res) => {
             hasPassword: !!password 
         });
 
-        // Find user by username and role
-        const user = await User.findOne({ 
-            username,
-            role 
-        }).select('+password');
+        let user = null;
+        let isExamDivMember = false;
 
-        if (!user) {
-            console.log('❌ User not found:', { username, role });
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid credentials'
+        // Check if logging in as exam division member
+        if (role === 'examDiv') {
+            // Find exam division member by username
+            user = await ExamDivisionMember.findOne({ username }).select('+password');
+            isExamDivMember = true;
+
+            if (!user) {
+                console.log('❌ Exam Division member not found:', { username });
+                return res.status(401).json({
+                    success: false,
+                    message: 'Invalid credentials'
+                });
+            }
+
+            // Check if member is active
+            if (user.status !== 'Active') {
+                console.log('❌ Exam Division member is not active:', { username, status: user.status });
+                return res.status(403).json({
+                    success: false,
+                    message: `Your account is ${user.status}. Please contact the administrator.`
+                });
+            }
+
+            console.log('✅ Exam Division member found:', { 
+                username: user.username, 
+                position: user.position,
+                name: user.nameWithInitial,
+                hasPassword: !!user.password
+            });
+
+        } else {
+            // Find regular user by username and role
+            user = await User.findOne({ 
+                username,
+                role 
+            }).select('+password');
+
+            if (!user) {
+                console.log('❌ User not found:', { username, role });
+                return res.status(401).json({
+                    success: false,
+                    message: 'Invalid credentials'
+                });
+            }
+
+            console.log('✅ User found:', { 
+                username: user.username, 
+                role: user.role,
+                name: user.name,
+                hasPassword: !!user.password
             });
         }
-
-        console.log('✅ User found:', { 
-            username: user.username, 
-            role: user.role,
-            name: user.name,
-            hasPassword: !!user.password
-        });
 
         // Verify password using bcrypt directly
         const isPasswordValid = await bcrypt.compare(password, user.password);
         console.log('🔑 Password validation:', { 
             isValid: isPasswordValid,
-            providedPassword: password,
             hasStoredPassword: !!user.password
         });
         
@@ -199,12 +234,24 @@ export const login = async (req, res) => {
             });
         }
 
-        // Update last login
-        user.lastLogin = new Date();
+        // Update last active/login
+        if (isExamDivMember) {
+            user.lastActive = new Date();
+        } else {
+            user.lastLogin = new Date();
+        }
         await user.save();
 
-        // Generate token
-        const token = generateToken(user);
+        // Generate token with appropriate data
+        const tokenPayload = isExamDivMember ? {
+            id: user._id,
+            username: user.username,
+            role: 'examDiv',
+            position: user.position,
+            email: user.email
+        } : user;
+
+        const token = generateToken(tokenPayload);
 
         // Create response matching frontend expectations
         const response = {
@@ -212,15 +259,21 @@ export const login = async (req, res) => {
             message: 'Login successful',
             data: {
                 user: {
-                    id: user.username,
-                    name: user.name,
-                    role: user.role,
+                    id: isExamDivMember ? user.username : user.username,
+                    name: isExamDivMember ? user.nameWithInitial : user.name,
+                    firstName: isExamDivMember ? user.firstName : undefined,
+                    lastName: isExamDivMember ? user.lastName : undefined,
+                    email: user.email,
+                    role: isExamDivMember ? 'examDiv' : user.role,
+                    position: isExamDivMember ? user.position : undefined,
                     token: token,
                     loginTime: new Date().toISOString()
                 },
                 token
             }
         };
+
+        console.log('✅ Login successful for:', isExamDivMember ? 'Exam Division Member' : 'User');
 
         res.json(response);
 

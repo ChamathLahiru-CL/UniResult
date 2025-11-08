@@ -1,109 +1,91 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { format, isAfter, subDays } from 'date-fns';
 import { 
   UsersIcon, 
   CheckCircleIcon, 
   UserGroupIcon, 
-  ClockIcon 
+  ClockIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
+import AddExamMemberModal from '../../components/admin/AddExamMemberModal';
+import { useAuth } from '../../context/useAuth';
 
 const AdminExamDivisionPage = () => {
-  const [members, setMembers] = useState([
-    {
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      email: 'sarah.johnson@uniresult.edu',
-      phone: '(123) 456-7890',
-      universityId: 'EXM001',
-      role: 'Exam Officer',
-      status: 'Active',
-      joinDate: '2024-01-15',
-      lastActive: '2025-10-24T14:30:00Z'
-    },
-    {
-      id: '2',
-      name: 'Prof. Michael Chen',
-      email: 'michael.chen@uniresult.edu',
-      phone: '(123) 567-8901',
-      universityId: 'EXM002',
-      role: 'Coordinator',
-      status: 'Active',
-      joinDate: '2023-08-20',
-      lastActive: '2025-10-24T16:45:00Z'
-    },
-    {
-      id: '3',
-      name: 'Dr. Emily Rodriguez',
-      email: 'emily.rodriguez@uniresult.edu',
-      phone: '(123) 678-9012',
-      universityId: 'EXM003',
-      role: 'Exam Officer',
-      status: 'Inactive',
-      joinDate: '2024-03-10',
-      lastActive: '2025-09-28T11:15:00Z'
-    },
-    {
-      id: '4',
-      name: 'Dr. James Wilson',
-      email: 'james.wilson@uniresult.edu',
-      phone: '(123) 789-0123',
-      universityId: 'EXM004',
-      role: 'Assistant Coordinator',
-      status: 'Active',
-      joinDate: '2024-05-12',
-      lastActive: '2025-10-24T09:20:00Z'
-    },
-    {
-      id: '5',
-      name: 'Dr. Lisa Zhang',
-      email: 'lisa.zhang@uniresult.edu',
-      phone: '(123) 890-1234',
-      universityId: 'EXM005',
-      role: 'Exam Officer',
-      status: 'Active',
-      joinDate: '2024-02-28',
-      lastActive: '2025-10-24T12:10:00Z'
-    },
-    {
-      id: '6',
-      name: 'Prof. Robert Taylor',
-      email: 'robert.taylor@uniresult.edu',
-      phone: '(123) 901-2345',
-      universityId: 'EXM006',
-      role: 'Senior Coordinator',
-      status: 'Active',
-      joinDate: '2023-11-05',
-      lastActive: '2025-10-24T18:30:00Z'
-    },
-    {
-      id: '7',
-      name: 'Dr. Amanda Brown',
-      email: 'amanda.brown@uniresult.edu',
-      phone: '(123) 012-3456',
-      universityId: 'EXM007',
-      role: 'Exam Officer',
-      status: 'Suspended',
-      joinDate: '2024-06-18',
-      lastActive: '2025-10-10T15:45:00Z'
-    },
-    {
-      id: '8',
-      name: 'Dr. David Lee',
-      email: 'david.lee@uniresult.edu',
-      phone: '(123) 123-4567',
-      universityId: 'EXM008',
-      role: 'Assistant Coordinator',
-      status: 'Active',
-      joinDate: '2024-09-01',
-      lastActive: '2025-10-24T11:25:00Z'
-    }
-  ]);
+  const { user } = useAuth();
+  const [members, setMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [filters, setFilters] = useState({
     search: '',
     role: '',
     status: ''
   });
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Fetch exam division members from the database
+  const fetchMembers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!user?.token) {
+        console.log('No user token available');
+        return;
+      }
+
+      console.log('Fetching exam division members...');
+      const response = await fetch('http://localhost:5000/api/exam-division/members', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch exam division members');
+      }
+
+      const data = await response.json();
+      console.log('Exam division members fetched:', data);
+
+      if (data.success && data.data) {
+        // Transform the data to match the frontend format
+        const transformedMembers = data.data.map(member => ({
+          id: member._id,
+          name: member.nameWithInitial,
+          email: member.email,
+          phone: member.phoneNumber,
+          universityId: member.username,
+          role: member.position,
+          status: member.status,
+          joinDate: member.joinDate,
+          lastActive: member.lastActive
+        }));
+
+        setMembers(transformedMembers);
+      }
+    } catch (error) {
+      console.error('Error fetching exam division members:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Set up auto-refresh and initial fetch
+  useEffect(() => {
+    fetchMembers();
+    
+    // Set up auto-refresh every 2 minutes (120000 milliseconds)
+    const refreshInterval = setInterval(() => {
+      fetchMembers();
+    }, 120000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, [fetchMembers]);
 
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({
@@ -175,33 +157,108 @@ const AdminExamDivisionPage = () => {
     };
   }, [members]);
 
-  const handleSuspend = (id) => {
+  const handleSuspend = async (id) => {
     if (window.confirm('Are you sure you want to suspend this member?')) {
-      setMembers(members.map(member => 
-        member.id === id ? { ...member, status: 'Suspended' } : member
-      ));
+      try {
+        const response = await fetch(`http://localhost:5000/api/exam-division/members/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+          },
+          body: JSON.stringify({ status: 'Suspended' })
+        });
+
+        if (response.ok) {
+          alert('Member suspended successfully');
+          fetchMembers(); // Refresh the list
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to suspend member');
+        }
+      } catch (error) {
+        console.error('Error suspending member:', error);
+        alert('Error suspending member');
+      }
     }
   };
 
-  const handleActivate = (id) => {
+  const handleActivate = async (id) => {
     if (window.confirm('Are you sure you want to activate this member?')) {
-      setMembers(members.map(member => 
-        member.id === id ? { ...member, status: 'Active' } : member
-      ));
+      try {
+        const response = await fetch(`http://localhost:5000/api/exam-division/members/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+          },
+          body: JSON.stringify({ status: 'Active' })
+        });
+
+        if (response.ok) {
+          alert('Member activated successfully');
+          fetchMembers(); // Refresh the list
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to activate member');
+        }
+      } catch (error) {
+        console.error('Error activating member:', error);
+        alert('Error activating member');
+      }
     }
   };
 
-  const handleRemove = (id) => {
+  const handleRemove = async (id) => {
     if (window.confirm('Are you sure you want to remove this member? This action cannot be undone.')) {
-      setMembers(members.filter(member => member.id !== id));
+      try {
+        const response = await fetch(`http://localhost:5000/api/exam-division/members/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${user.token}`
+          }
+        });
+
+        if (response.ok) {
+          alert('Member removed successfully');
+          fetchMembers(); // Refresh the list
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to remove member');
+        }
+      } catch (error) {
+        console.error('Error removing member:', error);
+        alert('Error removing member');
+      }
     }
+  };
+
+  const handleMemberAdded = () => {
+    // Refresh the members list from the database
+    fetchMembers();
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Exam Division - Member Management</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-2xl font-bold text-gray-800">Exam Division - Member Management</h1>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Add Member
+          </button>
+        </div>
       </div>
+
+      {/* Add Member Modal */}
+      <AddExamMemberModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onMemberAdded={handleMemberAdded}
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -289,7 +346,31 @@ const AdminExamDivisionPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredMembers.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      <span className="ml-3 text-gray-500">Loading members...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <div className="text-red-500">
+                      <p className="font-medium">Error loading members</p>
+                      <p className="text-sm mt-1">{error}</p>
+                      <button
+                        onClick={fetchMembers}
+                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredMembers.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                     No members found matching your criteria.

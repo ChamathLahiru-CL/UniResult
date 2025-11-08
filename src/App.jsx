@@ -127,7 +127,7 @@ function App() {
         <Route path="students" element={<AdminStudentManagementPage />} />
         <Route path="results" element={<AdminStudentResultPage />} />
         <Route path="results/:id" element={<ResultDetailsPage />} />
-        <Route path="profile" element={<ProfileAndSettings />} />
+        <Route path="profile" element={<AdminProfileSettings />} />
         <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
         <Route path="announcement" element={<AdminAnnouncementPage />} />
         <Route path="help" element={<AdminHelpPage />} />
