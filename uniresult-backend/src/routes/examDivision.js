@@ -5,32 +5,43 @@ import {
     getExamMemberById,
     updateExamMember,
     updateMemberStatus,
-    deleteExamMember
+    deleteExamMember,
+    getProfile,
+    updateProfile,
+    updatePassword
 } from '../controllers/examDivision.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// All routes require authentication and admin role
+// All routes require authentication
 router.use(protect);
-router.use(authorize('admin'));
 
-// Create new exam division member
-router.post('/members', createExamMember);
+// Create new exam division member - admin only
+router.post('/members', authorize('admin'), createExamMember);
 
-// Get all exam division members
-router.get('/members', getAllExamMembers);
+// Get all exam division members - admin or examDiv
+router.get('/members', authorize('admin', 'examDiv'), getAllExamMembers);
 
-// Get single exam division member
-router.get('/members/:id', getExamMemberById);
+// Get single exam division member - admin or examDiv
+router.get('/members/:id', authorize('admin', 'examDiv'), getExamMemberById);
 
-// Update exam division member
-router.put('/members/:id', updateExamMember);
+// Update exam division member - admin only
+router.put('/members/:id', authorize('admin'), updateExamMember);
 
-// Update member status
-router.put('/members/:id/status', updateMemberStatus);
+// Update member status - admin only
+router.put('/members/:id/status', authorize('admin'), updateMemberStatus);
 
-// Delete exam division member
-router.delete('/members/:id', deleteExamMember);
+// Delete exam division member - admin only
+router.delete('/members/:id', authorize('admin'), deleteExamMember);
+
+// Get current exam division member's profile
+router.get('/profile', authorize('examDiv'), getProfile);
+
+// Update current exam division member's profile
+router.put('/profile', authorize('examDiv'), updateProfile);
+
+// Update current exam division member's password
+router.put('/profile/password', authorize('examDiv'), updatePassword);
 
 export default router;
