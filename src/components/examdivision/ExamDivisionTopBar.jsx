@@ -14,10 +14,11 @@ import { useAuth } from '../../context/useAuth';
 
 const ExamDivisionTopBar = ({ onMenuClick }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [profile, setProfile] = useState({ name: 'Loading...', role: 'Exam Officer' });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -25,6 +26,43 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.token) {
+        setProfile({ name: 'Guest', role: 'Exam Officer' });
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/exam-division/profile', {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const member = data.data;
+            setProfile({
+              name: `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'User',
+              role: member.position || 'Exam Officer'
+            });
+          }
+        } else {
+          console.error('Failed to fetch profile for topbar');
+          setProfile({ name: 'User', role: 'Exam Officer' });
+        }
+      } catch (error) {
+        console.error('Error fetching profile for topbar:', error);
+        setProfile({ name: 'User', role: 'Exam Officer' });
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const currentDate = currentDateTime.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -47,6 +85,16 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
   const confirmSignOut = () => {
     logout();
     navigate('/');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/exam/profile');
+    setShowProfileMenu(false);
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/exam/profile');
+    setShowProfileMenu(false);
   };
 
   return (
@@ -79,7 +127,7 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
                 <span className="text-sm">{currentTime}</span>
               </div>
               <div className="h-6 w-px bg-gray-200"></div>
-              <motion.button 
+              <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="p-2 rounded-full hover:bg-gray-100 relative"
@@ -103,8 +151,8 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
                     <UserCircleIcon className="h-8 w-8 text-gray-600" />
                   </div>
                   <div className="hidden md:flex md:flex-col md:items-start">
-                    <span className="text-sm font-medium text-gray-700">Lahiru</span>
-                    <span className="text-xs text-gray-500">Exam Officer</span>
+                    <span className="text-sm font-medium text-gray-700">{profile.name}</span>
+                    <span className="text-xs text-gray-500">{profile.role}</span>
                   </div>
                 </div>
                 <ChevronDownIcon className="h-5 w-5 text-gray-400" />
@@ -122,12 +170,14 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
                     <button
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       role="menuitem"
+                      onClick={handleProfileClick}
                     >
                       Your Profile
                     </button>
                     <button
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       role="menuitem"
+                      onClick={handleSettingsClick}
                     >
                       Settings
                     </button>
