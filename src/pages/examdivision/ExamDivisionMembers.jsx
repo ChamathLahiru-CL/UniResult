@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../context/useAuth';
 import { MemberCard } from '../../components/examdivision/members/MemberCard';
 import { SearchMembers } from '../../components/examdivision/members/SearchMembers';
 import { MemberDetailsModal } from '../../components/examdivision/members/MemberDetailsModal';
@@ -9,30 +10,69 @@ const ExamDivisionMembers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+  const { user } = useAuth();
 
-  // Sample data - replace with actual API call
-  const memberList = [
-    {
-      id: 1,
-      name: 'Dr. Sarah Johnson',
-      mobile: '+94 71 234 5678',
-      role: 'Coordinator',
-      lastActivity: '2025-10-18T14:30:00',
-      email: 'sarah.j@uniresult.edu',
-      nic: '199012345678',
-      joinDate: '2024-01-15',
-      activities: [
-        { type: 'result', date: '2025-10-18T14:30:00', description: 'Uploaded ICT1213 Results' },
-        { type: 'timetable', date: '2025-10-15T09:15:00', description: 'Updated Year 2 Timetable' },
-      ],
-      uploads: {
-        results: 45,
-        timetables: 12,
-        news: 8
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [memberList, setMemberList] = useState([]);
+
+  const fetchMembers = useCallback(async () => {
+    if (!user?.token) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('http://localhost:5000/api/exam-division/members', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Failed to fetch members');
       }
-    },
-    // Add more sample members...
-  ];
+
+      const payload = await res.json();
+
+      if (!payload || !payload.data) {
+        setMemberList([]);
+        return;
+      }
+
+      // Map backend member shape to the frontend components' expected shape
+      const mapped = payload.data.map(m => ({
+        id: m._id,
+        name: m.nameWithInitial || `${m.firstName || ''} ${m.lastName || ''}`.trim() || m.username,
+        mobile: m.phoneNumber || '',
+        role: m.position || m.role || 'Coordinator',
+        lastActivity: m.lastActive || m.joinDate || new Date().toISOString(),
+        email: m.email || '',
+        nic: m.nic || m.username || '',
+        joinDate: m.joinDate || m.createdAt || new Date().toISOString(),
+        activities: m.activities || [],
+        uploads: m.uploads || { results: 0, timetables: 0, news: 0 }
+      }));
+
+      setMemberList(mapped);
+    } catch (err) {
+      console.error('Error fetching exam division members:', err);
+      setError(err.message || 'Error fetching members');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user?.token) return;
+    fetchMembers();
+
+    const interval = setInterval(() => {
+      fetchMembers();
+    }, 120000); // 2 minutes
+
+    return () => clearInterval(interval);
+  }, [user, fetchMembers]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -56,10 +96,10 @@ const ExamDivisionMembers = () => {
 
   const filteredMembers = memberList.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         member.mobile.includes(searchQuery) ||
-                         member.role.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' ? true : 
-                         (statusFilter === 'active' ? isActiveMember(member.lastActivity) : !isActiveMember(member.lastActivity));
+      member.mobile.includes(searchQuery) ||
+      member.role.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' ? true :
+      (statusFilter === 'active' ? isActiveMember(member.lastActivity) : !isActiveMember(member.lastActivity));
     const matchesRole = roleFilter === 'all' ? true : member.role === roleFilter;
 
     return matchesSearch && matchesStatus && matchesRole;
@@ -83,13 +123,29 @@ const ExamDivisionMembers = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        {filteredMembers.map(member => (
-          <MemberCard
-            key={member.id}
-            member={member}
-            onViewMore={() => handleViewMember(member)}
-          />
-        ))}
+        {isLoading ? (
+          <div className="col-span-3 text-center text-gray-500">Loading members...</div>
+        ) : error ? (
+          <div className="col-span-3 text-center text-red-500">
+            <p>Error loading members: {error}</p>
+            <button
+              onClick={fetchMembers}
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="col-span-3 text-center text-gray-500">No members found.</div>
+        ) : (
+          filteredMembers.map(member => (
+            <MemberCard
+              key={member.id}
+              member={member}
+              onViewMore={() => handleViewMember(member)}
+            />
+          ))
+        )}
       </div>
 
       {selectedMember && (
