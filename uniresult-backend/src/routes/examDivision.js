@@ -5,7 +5,10 @@ import {
     getExamMemberById,
     updateExamMember,
     updateMemberStatus,
-    deleteExamMember
+    deleteExamMember,
+    getProfile,
+    updateProfile,
+    updatePassword
 } from '../controllers/examDivision.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -31,5 +34,14 @@ router.put('/members/:id/status', authorize('admin'), updateMemberStatus);
 
 // Delete exam division member - admin only
 router.delete('/members/:id', authorize('admin'), deleteExamMember);
+
+// Get current exam division member's profile
+router.get('/profile', authorize('examDiv'), getProfile);
+
+// Update current exam division member's profile
+router.put('/profile', authorize('examDiv'), updateProfile);
+
+// Update current exam division member's password
+router.put('/profile/password', authorize('examDiv'), updatePassword);
 
 export default router;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   UserCircleIcon,
   BellIcon,
@@ -23,26 +23,78 @@ import {
 } from '@heroicons/react/24/outline';
 import Toggle from '../../components/Toggle';
 import Button, { SuccessButton, LoadingButton } from '../../components/Button';
+import { useAuth } from '../../context/useAuth';
 
 const ExamProfileSettings = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  
-  // Profile state
-  const [profileData, setProfileData] = useState({
-    firstName: 'Chamath',
-    lastName: 'Lahiru',
-    employeeId: 'EMP2024001',
-    email: 'chamath.lahiru@university.lk',
-    phone: '+94 77 123 4567',
-    department: 'Exam Division',
-    position: 'Exam Officer',
-    joinDate: '2024-01-15',
-    address: '123 University Road, Colombo 07',
-    emergencyContact: '+94 77 987 6543',
-    profileImage: null
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch profile data
+  const fetchProfile = async () => {
+    if (!user?.token) {
+      console.log('❌ No token available');
+      setError('Please log in to view your profile');
+      setIsLoading(false);
+      return;
+    }
+
+    console.log('📡 Fetching profile with token:', user.token.substring(0, 20) + '...');
+    console.log('👤 Current user:', { id: user.id, name: user.name, role: user.role });
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/exam-division/profile', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📥 Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error:', errorText);
+        throw new Error(`Failed to fetch profile: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Profile data received:', data);
+
+      if (data.success && data.data) {
+        const member = data.data;
+        setProfileData({
+          firstName: member.firstName || '',
+          lastName: member.lastName || '',
+          employeeId: member.username || '',
+          email: member.email || '',
+          phone: member.phoneNumber || '',
+          department: member.department || 'Exam Division',
+          position: member.position || '',
+          joinDate: member.joinDate ? new Date(member.joinDate).toISOString().split('T')[0] : '',
+          address: member.address || '',
+          emergencyContact: member.emergencyContact || '',
+          profileImage: member.profileImage || null
+        });
+        console.log('✅ Profile data set successfully');
+      }
+    } catch (err) {
+      console.error('❌ Error fetching profile:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, [user]);
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -60,6 +112,21 @@ const ExamProfileSettings = () => {
     compactView: false,
     autoSave: true,
     language: 'en'
+  });
+
+  // Profile state
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    employeeId: '',
+    email: '',
+    phone: '',
+    department: 'Exam Division',
+    position: '',
+    joinDate: '',
+    address: '',
+    emergencyContact: '',
+    profileImage: null
   });
 
   // Password change state
@@ -84,22 +151,92 @@ const ExamProfileSettings = () => {
   };
 
   // Handle profile update
-  const handleProfileUpdate = (e) => {
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    console.log('Profile updated:', profileData);
-    alert('Profile updated successfully!');
+    if (!user?.token) return;
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const updateData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        email: profileData.email,
+        phoneNumber: profileData.phone,
+        position: profileData.position,
+        address: profileData.address,
+        emergencyContact: profileData.emergencyContact,
+        profileImage: profileData.profileImage
+      };
+
+      const response = await fetch('http://localhost:5000/api/exam-division/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Profile updated successfully!');
+        // Refresh profile data
+        fetchProfile();
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err.message);
+      alert('Error updating profile: ' + err.message);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   // Handle password change
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
+    if (!user?.token) return;
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('New passwords do not match!');
       return;
     }
-    console.log('Password change requested');
-    alert('Password changed successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/exam-division/profile/password', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update password');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Password changed successfully!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (err) {
+      console.error('Error updating password:', err);
+      setError(err.message);
+      alert('Error updating password: ' + err.message);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   // Handle setting change
@@ -141,11 +278,10 @@ const ExamProfileSettings = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === tab.id
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeTab === tab.id
                       ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <tab.icon className={`h-5 w-5 mr-3 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`} />
                   {tab.name}
@@ -163,167 +299,186 @@ const ExamProfileSettings = () => {
                   <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
                   <p className="text-sm text-gray-500">Update your personal and professional details</p>
                 </div>
-                
+
                 <div className="p-6">
-                  {/* Profile Picture */}
-                  <div className="flex items-center space-x-6 mb-8">
-                    <div className="relative">
-                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
-                        {profileData.profileImage ? (
-                          <img src={profileData.profileImage} alt="Profile" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
-                            <span className="text-2xl font-bold text-white">
-                              {profileData.firstName[0]}{profileData.lastName[0]}
-                            </span>
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                      <p className="mt-2 text-gray-500">Loading profile...</p>
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-500">Error loading profile: {error}</p>
+                      <button
+                        onClick={fetchProfile}
+                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Profile Picture */}
+                      <div className="flex items-center space-x-6 mb-8">
+                        <div className="relative">
+                          <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+                            {profileData.profileImage ? (
+                              <img src={profileData.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                                <span className="text-2xl font-bold text-white">
+                                  {profileData.firstName[0]}{profileData.lastName[0]}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <label className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition-colors shadow-lg">
-                        <PencilIcon className="h-4 w-4 text-white" />
-                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                      </label>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{`${profileData.firstName} ${profileData.lastName}`}</h3>
-                      <p className="text-gray-600">{profileData.position}</p>
-                      <p className="text-sm text-gray-500">ID: {profileData.employeeId}</p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleProfileUpdate}>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                      {/* Personal Information */}
-                      <div className="sm:col-span-2">
-                        <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                          <IdentificationIcon className="h-5 w-5 text-gray-400 mr-2" />
-                          Personal Information
-                        </h4>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">First Name</label>
-                        <input
-                          type="text"
-                          value={profileData.firstName}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                        <input
-                          type="text"
-                          value={profileData.lastName}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
+                          <label className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition-colors shadow-lg">
+                            <PencilIcon className="h-4 w-4 text-white" />
+                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                          </label>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{`${profileData.firstName} ${profileData.lastName}`}</h3>
+                          <p className="text-gray-600">{profileData.position}</p>
+                          <p className="text-sm text-gray-500">ID: {profileData.employeeId}</p>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Employee ID</label>
-                        <input
-                          type="text"
-                          value={profileData.employeeId}
-                          disabled
-                          className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
-                        />
-                      </div>
+                      <form onSubmit={handleProfileUpdate}>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                          {/* Personal Information */}
+                          <div className="sm:col-span-2">
+                            <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                              <IdentificationIcon className="h-5 w-5 text-gray-400 mr-2" />
+                              Personal Information
+                            </h4>
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Join Date</label>
-                        <input
-                          type="date"
-                          value={profileData.joinDate}
-                          disabled
-                          className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
-                        />
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">First Name</label>
+                            <input
+                              type="text"
+                              value={profileData.firstName}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                      {/* Contact Information */}
-                      <div className="sm:col-span-2">
-                        <h4 className="text-lg font-medium text-gray-900 mb-4 mt-6 flex items-center">
-                          <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
-                          Contact Information
-                        </h4>
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                            <input
+                              type="text"
+                              value={profileData.lastName}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input
-                          type="email"
-                          value={profileData.email}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Employee ID</label>
+                            <input
+                              type="text"
+                              value={profileData.employeeId}
+                              disabled
+                              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input
-                          type="tel"
-                          value={profileData.phone}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Join Date</label>
+                            <input
+                              type="date"
+                              value={profileData.joinDate}
+                              disabled
+                              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
-                        <input
-                          type="tel"
-                          value={profileData.emergencyContact}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, emergencyContact: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
+                          {/* Contact Information */}
+                          <div className="sm:col-span-2">
+                            <h4 className="text-lg font-medium text-gray-900 mb-4 mt-6 flex items-center">
+                              <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                              Contact Information
+                            </h4>
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Address</label>
-                        <input
-                          type="text"
-                          value={profileData.address}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input
+                              type="email"
+                              value={profileData.email}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                      {/* Professional Information */}
-                      <div className="sm:col-span-2">
-                        <h4 className="text-lg font-medium text-gray-900 mb-4 mt-6 flex items-center">
-                          <AcademicCapIcon className="h-5 w-5 text-gray-400 mr-2" />
-                          Professional Information
-                        </h4>
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input
+                              type="tel"
+                              value={profileData.phone}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Department</label>
-                        <input
-                          type="text"
-                          value={profileData.department}
-                          disabled
-                          className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
-                        />
-                      </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
+                            <input
+                              type="tel"
+                              value={profileData.emergencyContact}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, emergencyContact: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Position</label>
-                        <input
-                          type="text"
-                          value={profileData.position}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, position: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Address</label>
+                            <input
+                              type="text"
+                              value={profileData.address}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
 
-                    <div className="mt-8 flex justify-end">
-                      <SuccessButton type="submit">
-                        Save Changes
-                      </SuccessButton>
-                    </div>
-                  </form>
+                          {/* Professional Information */}
+                          <div className="sm:col-span-2">
+                            <h4 className="text-lg font-medium text-gray-900 mb-4 mt-6 flex items-center">
+                              <AcademicCapIcon className="h-5 w-5 text-gray-400 mr-2" />
+                              Professional Information
+                            </h4>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Department</label>
+                            <input
+                              type="text"
+                              value={profileData.department}
+                              disabled
+                              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Position</label>
+                            <input
+                              type="text"
+                              value={profileData.position}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, position: e.target.value }))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-8 flex justify-end">
+                          <SuccessButton type="submit" disabled={isUpdating}>
+                            {isUpdating ? 'Saving...' : 'Save Changes'}
+                          </SuccessButton>
+                        </div>
+                      </form>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -418,7 +573,7 @@ const ExamProfileSettings = () => {
                       label="Two-Factor Authentication"
                       description="Add an extra layer of security to your account"
                     />
-                    
+
                     <Toggle
                       enabled={settings.loginAlerts}
                       onChange={() => handleSettingChange('loginAlerts')}
@@ -467,7 +622,7 @@ const ExamProfileSettings = () => {
                           label="Email Notifications"
                           description="Receive updates via email"
                         />
-                        
+
                         <Toggle
                           enabled={settings.smsNotifications}
                           onChange={() => handleSettingChange('smsNotifications')}
@@ -497,7 +652,7 @@ const ExamProfileSettings = () => {
                           label="Exam Reminders"
                           description="Get notified about upcoming exams"
                         />
-                        
+
                         <Toggle
                           enabled={settings.resultNotifications}
                           onChange={() => handleSettingChange('resultNotifications')}
@@ -547,7 +702,7 @@ const ExamProfileSettings = () => {
                           label="Dark Mode"
                           description="Enable dark theme"
                         />
-                        
+
                         <Toggle
                           enabled={settings.compactView}
                           onChange={() => handleSettingChange('compactView')}

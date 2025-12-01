@@ -2,6 +2,16 @@ import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 
 export const generateToken = (user) => {
+    // Handle custom payload object (for exam division members)
+    if (user.id && !user._id) {
+        return jwt.sign(
+            user,
+            config.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+    }
+    
+    // Handle regular user object
     return jwt.sign(
         {
             id: user._id,

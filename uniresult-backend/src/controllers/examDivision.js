@@ -260,3 +260,147 @@ export const deleteExamMember = async (req, res) => {
         });
     }
 };
+
+// @desc    Get current exam division member's profile
+// @route   GET /api/exam-division/profile
+// @access  Private/ExamDiv
+export const getProfile = async (req, res) => {
+    try {
+        console.log('📋 Fetching profile for user:', req.user);
+        
+        const member = await ExamDivisionMember.findById(req.user.id).select('-password');
+
+        if (!member) {
+            console.log('❌ Profile not found for ID:', req.user.id);
+            return res.status(404).json({
+                success: false,
+                message: 'Profile not found'
+            });
+        }
+
+        console.log('✅ Profile found:', member.username, member.nameWithInitial);
+        res.status(200).json({
+            success: true,
+            data: member
+        });
+
+    } catch (error) {
+        console.error('❌ Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching profile',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Update current exam division member's profile
+// @route   PUT /api/exam-division/profile
+// @access  Private/ExamDiv
+export const updateProfile = async (req, res) => {
+    try {
+        const allowedUpdates = [
+            'firstName',
+            'lastName',
+            'email',
+            'phoneNumber',
+            'position',
+            'address',
+            'emergencyContact',
+            'profileImage'
+        ];
+
+        const updates = {};
+        Object.keys(req.body).forEach(key => {
+            if (allowedUpdates.includes(key)) {
+                updates[key] = req.body[key];
+            }
+        });
+
+        // Update nameWithInitial if firstName or lastName changed
+        if (updates.firstName || updates.lastName) {
+            const member = await ExamDivisionMember.findById(req.user.id);
+            if (member) {
+                updates.nameWithInitial = `${updates.firstName || member.firstName} ${updates.lastName || member.lastName}`;
+            }
+        }
+
+        const member = await ExamDivisionMember.findByIdAndUpdate(
+            req.user.id,
+            updates,
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!member) {
+            return res.status(404).json({
+                success: false,
+                message: 'Profile not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: member
+        });
+
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Update current exam division member's password
+// @route   PUT /api/exam-division/profile/password
+// @access  Private/ExamDiv
+export const updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password and new password are required'
+            });
+        }
+
+        const member = await ExamDivisionMember.findById(req.user.id);
+
+        if (!member) {
+            return res.status(404).json({
+                success: false,
+                message: 'Profile not found'
+            });
+        }
+
+        // Check current password
+        const isMatch = await member.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Update password
+        member.password = newPassword;
+        await member.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Password updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Update password error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating password',
+            error: error.message
+        });
+    }
+};

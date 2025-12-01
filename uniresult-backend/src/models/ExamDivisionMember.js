@@ -47,6 +47,18 @@ const examDivisionMemberSchema = new mongoose.Schema({
         required: [true, 'Position is required'],
         enum: ['Exam Officer', 'Senior Coordinator', 'Coordinator', 'Assistant Coordinator']
     },
+    address: {
+        type: String,
+        trim: true
+    },
+    emergencyContact: {
+        type: String,
+        trim: true
+    },
+    department: {
+        type: String,
+        default: 'Exam Division'
+    },
     status: {
         type: String,
         enum: ['Active', 'Inactive', 'Suspended'],
