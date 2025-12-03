@@ -12,7 +12,7 @@ const ExamTimeTableUploadPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [facultyFilter, setFacultyFilter] = useState('');
@@ -69,7 +69,7 @@ const ExamTimeTableUploadPage = () => {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(timeTable => 
+      filtered = filtered.filter(timeTable =>
         timeTable.fileName.toLowerCase().includes(query) ||
         timeTable.faculty.toLowerCase().includes(query) ||
         timeTable.year.toLowerCase().includes(query) ||
@@ -305,7 +305,7 @@ const ExamTimeTableUploadPage = () => {
               </div>
             </div>
           ) : (
-            <TimeTableHistoryList 
+            <TimeTableHistoryList
               timeTables={filteredTimeTables}
               onPreview={handlePreview}
             />

@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  EyeIcon, 
-  ArrowDownTrayIcon, 
-  DocumentIcon, 
+import {
+  EyeIcon,
+  ArrowDownTrayIcon,
+  DocumentIcon,
   PhotoIcon,
   ClockIcon,
-  UserIcon 
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../../utils/formatDate';
 
@@ -59,7 +59,7 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                 <div className="flex-shrink-0">
                   {getFileIcon(timeTable.type)}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <h4 className="text-lg font-medium text-gray-900 truncate">
@@ -72,12 +72,12 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                       {timeTable.year}
                     </span>
                   </div>
-                  
+
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <UserIcon className="h-4 w-4" />
                       <span>
-                        Uploaded by {timeTable.uploadedBy} 
+                        Uploaded by {timeTable.uploadedBy}
                         {timeTable.uploadedByUsername && ` (${timeTable.uploadedByUsername})`}
                         {timeTable.uploadedByRole && ` - ${timeTable.uploadedByRole}`}
                       </span>
@@ -112,11 +112,10 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                 <a
                   href={timeTable.fileUrl}
                   download={timeTable.fileName}
-                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                    timeTable.type === 'pdf'
+                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${timeTable.type === 'pdf'
                       ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
                       : 'text-green-600 hover:text-green-800 hover:bg-green-50'
-                  }`}
+                    }`}
                   title={`Download ${timeTable.type.toUpperCase()} file`}
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" />

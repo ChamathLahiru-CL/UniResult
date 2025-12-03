@@ -33,7 +33,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     }
 
     setSelectedFile(file);
-    
+
     // Create preview for images
     if (getFileType(file) === 'image') {
       const reader = new FileReader();
@@ -61,7 +61,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
       const interval = setInterval(() => {
         progress += Math.random() * 15 + 5; // Random progress increment
         setUploadProgress(Math.min(progress, 100));
-        
+
         if (progress >= 100) {
           clearInterval(interval);
           setTimeout(resolve, 500); // Small delay after reaching 100%
@@ -72,7 +72,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (!selectedFaculty || !selectedYear || !selectedFile) {
       setError('Please select faculty, year and file before uploading.');
       return;
@@ -226,8 +226,8 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
             <label
               htmlFor="file-upload"
               className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-                ${selectedFile 
-                  ? 'border-green-300 bg-green-50' 
+                ${selectedFile
+                  ? 'border-green-300 bg-green-50'
                   : 'border-slate-300 bg-slate-50 hover:bg-slate-100'
                 }
                 ${isUploading ? 'cursor-not-allowed opacity-50' : ''}
@@ -250,9 +250,9 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 {previewUrl ? (
-                  <img 
-                    src={previewUrl} 
-                    alt="Preview" 
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
                     className="w-16 h-16 object-cover rounded-lg border border-slate-300"
                   />
                 ) : (

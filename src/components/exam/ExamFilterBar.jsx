@@ -35,7 +35,7 @@ const ExamFilterBar = ({
       {/* Filters */}
       <div className="flex items-center gap-3">
         <FunnelIcon className="h-5 w-5 text-gray-500" />
-        
+
         {/* Faculty Filter */}
         <select
           value={facultyFilter}
