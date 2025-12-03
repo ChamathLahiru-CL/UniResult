@@ -41,10 +41,11 @@ const NewsUploadForm = () => {
   // Defines all faculties in the university system
   // Used for targeting news to specific faculty departments
   const faculties = [
-    { id: 'ICT', name: 'Information & Communication Technology' },
-    { id: 'CST', name: 'Computer Science & Technology' },
-    { id: 'EET', name: 'Electrical & Electronic Technology' },
-    { id: 'BBA', name: 'Business Administration' }
+    { id: 'TECH', name: 'Faculty of Technological Studies' },
+    { id: 'APPLIED', name: 'Faculty of Applied Science' },
+    { id: 'MGMT', name: 'Faculty of Management' },
+    { id: 'AGRI', name: 'Faculty of Agriculture' },
+    { id: 'MED', name: 'Faculty of Medicine' }
   ];
 
   // Form Submission Handler
@@ -224,9 +225,8 @@ const NewsUploadForm = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#246BFD] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#246BFD] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {isSubmitting ? 'Uploading...' : 'Post News'}
           </button>

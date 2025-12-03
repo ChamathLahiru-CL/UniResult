@@ -55,21 +55,6 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const simulateUpload = () => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 15 + 5; // Random progress increment
-        setUploadProgress(Math.min(progress, 100));
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(resolve, 500); // Small delay after reaching 100%
-        }
-      }, 200);
-    });
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
