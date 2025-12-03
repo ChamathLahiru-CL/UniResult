@@ -1,4 +1,9 @@
-import { allowedFileTypes } from '../data/mockTimeTables.js';
+export const allowedFileTypes = [
+  { type: "application/pdf", extension: ".pdf", name: "PDF" },
+  { type: "image/jpeg", extension: ".jpg", name: "JPEG" },
+  { type: "image/jpg", extension: ".jpg", name: "JPG" },
+  { type: "image/png", extension: ".png", name: "PNG" }
+];
 
 export const validateFileType = (file) => {
   if (!file) {

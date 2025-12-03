@@ -52,15 +52,16 @@ export const mockTimeTables = [
 ];
 
 export const facultyOptions = [
-  { value: "ICT", label: "Information & Communication Technology" },
-  { value: "CST", label: "Computer Science & Technology" },
-  { value: "EET", label: "Electrical & Electronic Technology" },
-  { value: "BST", label: "Biosystems Technology" }
+  { value: "Technological Studies", label: "Technological Studies" },
+  { value: "Applied Science", label: "Applied Science" },
+  { value: "Management", label: "Management" },
+  { value: "Agriculture", label: "Agriculture" },
+  { value: "Medicine", label: "Medicine" }
 ];
 
-export const allowedFileTypes = [
-  { type: "application/pdf", extension: ".pdf", name: "PDF" },
-  { type: "image/jpeg", extension: ".jpg", name: "JPEG" },
-  { type: "image/jpg", extension: ".jpg", name: "JPG" },
-  { type: "image/png", extension: ".png", name: "PNG" }
+export const yearOptions = [
+  { value: "1st Year", label: "1st Year" },
+  { value: "2nd Year", label: "2nd Year" },
+  { value: "3rd Year", label: "3rd Year" },
+  { value: "4th Year", label: "4th Year" }
 ];
