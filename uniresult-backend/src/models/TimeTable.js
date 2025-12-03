@@ -98,7 +98,7 @@ timeTableSchema.virtual('formattedFileSize').get(function() {
 timeTableSchema.methods.incrementDownloadCount = function() {
     this.downloadCount += 1;
     this.lastDownloaded = new Date();
-    return this.save();
+    return this.save({ validateBeforeSave: false });
 };
 
 const TimeTable = mongoose.model('TimeTable', timeTableSchema);

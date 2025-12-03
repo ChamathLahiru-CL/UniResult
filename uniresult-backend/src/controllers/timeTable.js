@@ -43,7 +43,7 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
         fileType: req.file.mimetype.split('/')[1],
         fileSize: req.file.size,
         uploadedBy: req.user.id,
-        uploadedByName: req.user.name,
+        uploadedByName: req.user.username || 'Unknown User',
         uploadedByUsername: req.user.username,
         uploadedByEmail: req.user.email,
         uploadedByRole: req.user.role
@@ -144,27 +144,59 @@ export const getTimeTable = asyncHandler(async (req, res, next) => {
 // @route   GET /api/timetable/:id/download
 // @access  Private
 export const downloadTimeTable = asyncHandler(async (req, res, next) => {
-    const timeTable = await TimeTable.findById(req.params.id);
+    try {
+        const timeTable = await TimeTable.findById(req.params.id);
 
-    if (!timeTable) {
-        return next(new ErrorResponse('Time table not found', 404));
+        if (!timeTable) {
+            return next(new ErrorResponse('Time table not found', 404));
+        }
+
+        console.log('📥 Download request for:', timeTable.originalFileName);
+        console.log('📂 File path:', timeTable.filePath);
+        console.log('📂 File exists:', fs.existsSync(timeTable.filePath));
+
+        // Check if file exists
+        if (!fs.existsSync(timeTable.filePath)) {
+            console.error('❌ File not found at path:', timeTable.filePath);
+            return next(new ErrorResponse('File not found on server', 404));
+        }
+
+        // Increment download count directly without validation
+        try {
+            await TimeTable.findByIdAndUpdate(
+                req.params.id,
+                { 
+                    $inc: { downloadCount: 1 },
+                    lastDownloaded: new Date()
+                },
+                { runValidators: false }
+            );
+            console.log('✅ Download count incremented');
+        } catch (downloadCountError) {
+            console.log('⚠️ Could not increment download count:', downloadCountError.message);
+            // Continue with download even if count increment fails
+        }
+
+        // Set headers for download
+        const contentType = timeTable.fileType === 'pdf' ? 'application/pdf' : `image/${timeTable.fileType}`;
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename="${timeTable.originalFileName}"`);
+
+        console.log('✅ Streaming file to client');
+
+        // Stream file
+        const fileStream = fs.createReadStream(timeTable.filePath);
+        
+        fileStream.on('error', (error) => {
+            console.error('❌ File stream error:', error);
+            return next(new ErrorResponse('Error reading file', 500));
+        });
+
+        fileStream.pipe(res);
+    } catch (error) {
+        console.error('❌ Download error:', error);
+        return next(new ErrorResponse('Download failed', 500));
     }
-
-    // Check if file exists
-    if (!fs.existsSync(timeTable.filePath)) {
-        return next(new ErrorResponse('File not found on server', 404));
-    }
-
-    // Increment download count
-    await timeTable.incrementDownloadCount();
-
-    // Set headers for download
-    res.setHeader('Content-Type', timeTable.fileType === 'pdf' ? 'application/pdf' : `image/${timeTable.fileType}`);
-    res.setHeader('Content-Disposition', `attachment; filename="${timeTable.originalFileName}"`);
-
-    // Stream file
-    const fileStream = fs.createReadStream(timeTable.filePath);
-    fileStream.pipe(res);
 });
 
 // @desc    Update time table

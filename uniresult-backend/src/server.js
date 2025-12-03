@@ -60,13 +60,25 @@ app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/exam-division', examDivisionRoutes);
 app.use('/api/timetable', timeTableRoutes);
+
+// Error handler middleware
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('❌ Error:', err.message);
+    console.error('Stack:', err.stack);
+    
+    res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || 'Server Error'
+    });
+});
 
 // Health check routes
 app.get('/', (req, res) => {

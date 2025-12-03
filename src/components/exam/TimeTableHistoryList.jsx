@@ -10,6 +10,40 @@ import {
 import { formatDate } from '../../utils/formatDate';
 
 const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
+  const handleDownload = async (timeTable) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/timetable/${timeTable.id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (response.ok) {
+        // Create a blob from the response
+        const blob = await response.blob();
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        // Create a temporary anchor element and trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = timeTable.fileName; // Use the original filename
+        document.body.appendChild(a);
+        a.click();
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const errorData = await response.json();
+        console.error('Download failed:', errorData);
+        alert(`Failed to download file: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('An error occurred while downloading the file.');
+    }
+  };
   if (timeTables.length === 0) {
     return (
       <div className="bg-white rounded-lg p-8 shadow-md text-center">
@@ -109,12 +143,11 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                 </button>
 
                 {/* Download button for all file types */}
-                <a
-                  href={timeTable.fileUrl}
-                  download={timeTable.fileName}
+                <button
+                  onClick={() => handleDownload(timeTable)}
                   className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${timeTable.type === 'pdf'
-                      ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
-                      : 'text-green-600 hover:text-green-800 hover:bg-green-50'
+                    ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
+                    : 'text-green-600 hover:text-green-800 hover:bg-green-50'
                     }`}
                   title={`Download ${timeTable.type.toUpperCase()} file`}
                 >
@@ -122,7 +155,7 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                   <span className="hidden sm:inline">
                     {timeTable.type === 'pdf' ? 'Download PDF' : 'Download Image'}
                   </span>
-                </a>
+                </button>
               </div>
             </div>
           </div>
