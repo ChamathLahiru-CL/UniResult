@@ -248,7 +248,8 @@ export const login = async (req, res) => {
             username: user.username,
             role: 'examDiv',
             position: user.position,
-            email: user.email
+            email: user.email,
+            name: user.nameWithInitial
         } : user;
 
         const token = generateToken(tokenPayload);

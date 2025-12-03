@@ -1,4 +1,6 @@
 import TimeTable from '../models/TimeTable.js';
+import User from '../models/User.js';
+import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 import fs from 'fs';
@@ -29,6 +31,30 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse('Invalid year selected', 400));
     }
 
+    // Get uploader details
+    let uploaderName = 'Unknown User';
+    let uploaderUsername = req.user.username || 'Unknown';
+    let uploaderEmail = req.user.email || 'unknown@example.com';
+    let uploaderRole = req.user.role || 'unknown';
+
+    if (req.user.role === 'examDiv') {
+        const examMember = await ExamDivisionMember.findById(req.user.id);
+        if (examMember) {
+            uploaderName = `${examMember.firstName} ${examMember.lastName}`;
+            uploaderUsername = examMember.username;
+            uploaderEmail = examMember.email;
+            uploaderRole = 'examDiv';
+        }
+    } else {
+        const user = await User.findById(req.user.id);
+        if (user) {
+            uploaderName = user.name;
+            uploaderUsername = user.username;
+            uploaderEmail = user.email;
+            uploaderRole = user.role;
+        }
+    }
+
     // Create file URL
     const fileUrl = `/uploads/timetables/${req.file.filename}`;
 
@@ -43,10 +69,10 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
         fileType: req.file.mimetype.split('/')[1],
         fileSize: req.file.size,
         uploadedBy: req.user.id,
-        uploadedByName: req.user.username || 'Unknown User',
-        uploadedByUsername: req.user.username,
-        uploadedByEmail: req.user.email,
-        uploadedByRole: req.user.role
+        uploadedByName: uploaderName,
+        uploadedByUsername: uploaderUsername,
+        uploadedByEmail: uploaderEmail,
+        uploadedByRole: uploaderRole
     });
 
     res.status(201).json({
