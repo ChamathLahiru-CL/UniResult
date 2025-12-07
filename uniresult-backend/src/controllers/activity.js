@@ -1,4 +1,5 @@
 import Activity from '../models/Activity.js';
+import TimeTable from '../models/TimeTable.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 
@@ -62,23 +63,40 @@ export const getActivities = asyncHandler(async (req, res) => {
     const total = await Activity.countDocuments(query);
 
     // Transform activities for frontend
-    const transformedActivities = activities.map(activity => ({
-        id: activity._id,
-        type: activity.activityType,
-        activityName: activity.activityName,
-        description: activity.description,
-        timestamp: activity.createdAt,
-        performedBy: activity.performedByName,
-        performedByUsername: activity.performedByUsername,
-        performedByEmail: activity.performedByEmail,
-        performedByRole: activity.performedByRole,
-        faculty: activity.faculty,
-        year: activity.year,
-        fileName: activity.fileName,
-        fileSize: activity.fileSize,
-        status: activity.status,
-        priority: activity.priority,
-        metadata: activity.metadata
+    const transformedActivities = await Promise.all(activities.map(async (activity) => {
+        let fileUrl = null;
+
+        // For timetable uploads, get the file URL from the related TimeTable
+        if (activity.activityType === 'TIMETABLE_UPLOAD' && activity.metadata?.timeTableId) {
+            try {
+                const timeTable = await TimeTable.findById(activity.metadata.timeTableId);
+                if (timeTable) {
+                    fileUrl = `http://localhost:5000${timeTable.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching timetable for activity:', error);
+            }
+        }
+
+        return {
+            id: activity._id,
+            type: activity.activityType,
+            activityName: activity.activityName,
+            description: activity.description,
+            timestamp: activity.createdAt,
+            performedBy: activity.performedByName,
+            performedByUsername: activity.performedByUsername,
+            performedByEmail: activity.performedByEmail,
+            performedByRole: activity.performedByRole,
+            faculty: activity.faculty,
+            year: activity.year,
+            fileName: activity.fileName,
+            fileSize: activity.fileSize,
+            fileUrl: fileUrl,
+            status: activity.status,
+            priority: activity.priority,
+            metadata: activity.metadata
+        };
     }));
 
     res.status(200).json({

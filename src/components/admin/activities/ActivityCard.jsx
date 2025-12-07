@@ -1,9 +1,8 @@
 import React from 'react';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { activityColors, activityLabels } from '../../../data/mockActivities';
 
-const ActivityCard = ({ activity, onView }) => {
+const ActivityCard = ({ activity }) => {
   // Handle both old mock data structure and new API structure
   const activityType = activity.activityType || activity.type;
   const activityName = activity.activityName || activityLabels[activityType] || activityType;
@@ -150,16 +149,40 @@ const ActivityCard = ({ activity, onView }) => {
           </div>
         </div>
 
-        {/* Action button */}
-        <div className="ml-4 flex-shrink-0">
-          <button
-            onClick={() => onView(activity)}
-            className={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${colors.text} hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200`}
-          >
-            View Details
-            <ChevronRightIcon className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Action buttons for timetable uploads */}
+        {activityType === 'TIMETABLE_UPLOAD' && activity.fileUrl && (
+          <div className="ml-4 flex-shrink-0 flex gap-2">
+            <button
+              onClick={() => window.open(activity.fileUrl, '_blank')}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors"
+            >
+              Preview
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch(activity.fileUrl);
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = fileName || 'timetable';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Download failed:', error);
+                  // Fallback to opening in new tab
+                  window.open(activity.fileUrl, '_blank');
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg text-green-600 hover:bg-green-50 border border-green-200 hover:border-green-300 transition-colors"
+            >
+              Download
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
