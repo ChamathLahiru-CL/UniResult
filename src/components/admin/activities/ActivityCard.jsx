@@ -4,8 +4,26 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { activityColors, activityLabels } from '../../../data/mockActivities';
 
 const ActivityCard = ({ activity, onView }) => {
-  const colors = activityColors[activity.type];
-  
+  // Handle both old mock data structure and new API structure
+  const activityType = activity.activityType || activity.type;
+  const activityName = activity.activityName || activityLabels[activityType] || activityType;
+  const timestamp = activity.timestamp;
+  const status = activity.status;
+  const priority = activity.priority;
+  const description = activity.description;
+  const performedBy = activity.performedBy;
+  const performedByUsername = activity.performedByUsername;
+  const faculty = activity.faculty;
+  const year = activity.year;
+  const fileName = activity.fileName;
+
+  const colors = activityColors[activityType] || {
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    text: 'text-blue-700',
+    icon: 'text-blue-600'
+  };
+
   const formatTimestamp = (timestamp) => {
     if (isToday(timestamp)) {
       return `Today, ${format(timestamp, 'HH:mm')}`;
@@ -21,99 +39,62 @@ const ActivityCard = ({ activity, onView }) => {
   };
 
   const renderMetadata = () => {
-    switch (activity.type) {
-      case 'COMPLIANCE':
-        return (
-          <div className="space-y-1">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">From:</span> {activity.metadata.sender}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Student ID:</span> {activity.metadata.studentId}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Module:</span> {activity.metadata.module}
-            </p>
-          </div>
-        );
-      
-      case 'RESULT_UPLOAD':
-        return (
-          <div className="space-y-1">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Uploaded by:</span> {activity.metadata.uploader}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Year:</span> {activity.metadata.year} • 
-              <span className="font-medium"> Results:</span> {activity.metadata.resultCount}
-              {activity.metadata.errors > 0 && (
-                <span className="text-red-600 font-medium"> • Errors: {activity.metadata.errors}</span>
-              )}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Department:</span> {activity.metadata.department}
-            </p>
-          </div>
-        );
-      
+    switch (activityType) {
       case 'TIMETABLE_UPLOAD':
         return (
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Uploaded by:</span> {activity.metadata.uploader}
+              <span className="font-medium">Faculty:</span> {faculty}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Faculty:</span> {activity.metadata.faculty} • 
-              <span className="font-medium"> Format:</span> {activity.metadata.format} • 
-              <span className="font-medium"> Size:</span> {activity.metadata.fileSize}
+              <span className="font-medium">Year:</span> {year}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">File:</span> {fileName}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Uploaded by:</span> {performedBy} ({performedByUsername})
             </p>
           </div>
         );
-      
-      case 'NEWS_UPLOAD':
+
+      case 'RESULT_UPLOAD':
         return (
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Posted by:</span> {activity.metadata.poster}
+              <span className="font-medium">Uploaded by:</span> {performedBy}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Target Faculties:</span> {activity.metadata.targetFaculties.join(', ')}
+              <span className="font-medium">Year:</span> {year}
             </p>
           </div>
         );
-      
-      case 'STUDENT_REGISTRATION':
+
+      case 'COMPLIANCE':
         return (
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Student:</span> {activity.metadata.studentName}
+              <span className="font-medium">From:</span> {performedBy}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Enrollment:</span> {activity.metadata.enrollmentNumber}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Program:</span> {activity.metadata.degree} - {activity.metadata.department}
+              <span className="font-medium">Student ID:</span> {performedByUsername}
             </p>
           </div>
         );
-      
-      case 'SYSTEM_MAINTENANCE':
-        return (
-          <div className="space-y-1">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Admin:</span> {activity.metadata.admin}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Type:</span> {activity.metadata.updateType}
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Affected:</span> {activity.metadata.affectedModules.join(', ')}
-            </p>
-          </div>
-        );
-      
+
       default:
-        return null;
+        return (
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Performed by:</span> {performedBy}
+            </p>
+            {performedByUsername && (
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Username:</span> {performedByUsername}
+              </p>
+            )}
+          </div>
+        );
     }
   };
 
@@ -123,22 +104,22 @@ const ActivityCard = ({ activity, onView }) => {
         <div className="flex-1">
           {/* Header with icon and badge */}
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-lg">{activity.icon}</span>
+            <span className="text-lg">📋</span>
             <div className="flex items-center gap-2">
               <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.badge}`}>
-                {activityLabels[activity.type]}
+                {activityName}
               </span>
-              {activity.status === 'NEW' && (
+              {status === 'NEW' && (
                 <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
                   New
                 </span>
               )}
-              {activity.priority === 'HIGH' && (
+              {priority === 'HIGH' && (
                 <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-200 text-red-800">
                   High Priority
                 </span>
               )}
-              {isToday(activity.timestamp) && (
+              {isToday(timestamp) && (
                 <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
                   Today
                 </span>
@@ -149,10 +130,10 @@ const ActivityCard = ({ activity, onView }) => {
           {/* Title and description */}
           <div className="mb-3">
             <h3 className={`text-lg font-semibold ${colors.text} mb-1`}>
-              {activity.title}
+              {activityName}
             </h3>
             <p className="text-gray-600 text-sm">
-              {activity.description}
+              {description}
             </p>
           </div>
 
@@ -163,9 +144,9 @@ const ActivityCard = ({ activity, onView }) => {
 
           {/* Timestamp */}
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span>{formatTimestamp(activity.timestamp)}</span>
+            <span>{formatTimestamp(timestamp)}</span>
             <span>•</span>
-            <span>{getRelativeTime(activity.timestamp)}</span>
+            <span>{getRelativeTime(timestamp)}</span>
           </div>
         </div>
 

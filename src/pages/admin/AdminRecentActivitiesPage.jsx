@@ -1,18 +1,24 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  ClockIcon, 
-  BellIcon, 
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  ClockIcon,
+  BellIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ArrowPathIcon 
+  ArrowPathIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
-import { isToday, isThisWeek, isThisMonth } from 'date-fns';
 import ActivityFilterBar from '../../components/admin/activities/ActivityFilterBar';
 import ActivityFeed from '../../components/admin/activities/ActivityFeed';
-import { mockActivities } from '../../data/mockActivities';
 
 const AdminRecentActivitiesPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [activities, setActivities] = useState([]);
+  const [activityStats, setActivityStats] = useState({
+    total: 0,
+    new: 0,
+    critical: 0,
+    today: 0
+  });
   const [filters, setFilters] = useState({
     timeRange: 'all',
     type: 'all',
@@ -20,55 +26,76 @@ const AdminRecentActivitiesPage = () => {
     priority: 'all'
   });
 
-  // Filter activities based on current filters
-  const filteredActivities = useMemo(() => {
-    let filtered = [...mockActivities];
+  // Fetch activities from API
+  const fetchActivities = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const queryParams = new URLSearchParams();
 
-    // Time range filter
-    if (filters.timeRange !== 'all') {
-      filtered = filtered.filter(activity => {
-        const activityDate = activity.timestamp;
-        switch (filters.timeRange) {
-          case 'today':
-            return isToday(activityDate);
-          case 'week':
-            return isThisWeek(activityDate);
-          case 'month':
-            return isThisMonth(activityDate);
-          default:
-            return true;
-        }
+      if (filters.timeRange !== 'all') queryParams.append('timeRange', filters.timeRange);
+      if (filters.type !== 'all') queryParams.append('type', filters.type);
+      if (filters.status !== 'all') queryParams.append('status', filters.status);
+      if (filters.priority !== 'all') queryParams.append('priority', filters.priority);
+
+      const response = await fetch(`http://localhost:5000/api/activities?${queryParams}`, {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
       });
-    }
 
-    // Type filter
-    if (filters.type !== 'all') {
-      filtered = filtered.filter(activity => activity.type === filters.type);
+      if (response.ok) {
+        const result = await response.json();
+        setActivities(result.data);
+      } else {
+        console.error('Failed to fetch activities');
+        setActivities([]);
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setActivities([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Status filter
-    if (filters.status !== 'all') {
-      filtered = filtered.filter(activity => activity.status === filters.status);
-    }
-
-    // Priority filter
-    if (filters.priority !== 'all') {
-      filtered = filtered.filter(activity => activity.priority === filters.priority);
-    }
-
-    // Sort by timestamp (newest first)
-    return filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   }, [filters]);
 
-  // Calculate activity statistics
-  const activityStats = useMemo(() => {
-    return {
-      total: mockActivities.length,
-      new: mockActivities.filter(a => a.status === 'NEW').length,
-      critical: mockActivities.filter(a => a.priority === 'HIGH').length,
-      today: mockActivities.filter(a => isToday(a.timestamp)).length
-    };
+  // Fetch activity statistics
+  const fetchActivityStats = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/activities/stats', {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setActivityStats(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching activity stats:', error);
+    }
   }, []);
+
+  // Load data on component mount and when filters change
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
+
+  useEffect(() => {
+    fetchActivityStats();
+  }, [fetchActivityStats]);
+
+  // Filter activities based on current filters (client-side filtering for additional control)
+  const filteredActivities = useMemo(() => {
+    let filtered = [...activities];
+
+    // Additional client-side filtering if needed
+    // (Most filtering is done server-side, but we can add client-side filters here)
+
+    return filtered;
+  }, [activities]);
 
   const handleFilterChange = (filterType, value) => {
     if (filterType === 'clear') {
@@ -94,9 +121,26 @@ const AdminRecentActivitiesPage = () => {
     }, 1500);
   };
 
-  const handleMarkAllAsRead = () => {
-    // In a real app, this would make an API call
-    console.log('Marking all activities as read...');
+  const handleMarkAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/activities/mark-all-read', {
+        method: 'PUT',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh activities to show updated status
+        fetchActivities();
+        fetchActivityStats();
+      } else {
+        console.error('Failed to mark activities as read');
+      }
+    } catch (error) {
+      console.error('Error marking activities as read:', error);
+    }
   };
 
   return (
@@ -113,7 +157,7 @@ const AdminRecentActivitiesPage = () => {
               Monitor and track all administrative activities and system events
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={handleRefresh}
@@ -123,7 +167,7 @@ const AdminRecentActivitiesPage = () => {
               <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            
+
             <button
               onClick={handleMarkAllAsRead}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
@@ -146,19 +190,19 @@ const AdminRecentActivitiesPage = () => {
       <div className="mb-4">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>
-            Showing {filteredActivities.length} of {mockActivities.length} activities
+            Showing {filteredActivities.length} of {activityStats.total} activities
           </span>
-          {filteredActivities.length !== mockActivities.length && (
+          {filteredActivities.length !== activityStats.total && (
             <span className="text-blue-600">
-              {mockActivities.length - filteredActivities.length} activities filtered out
+              {activityStats.total - filteredActivities.length} activities filtered out
             </span>
           )}
         </div>
       </div>
 
       {/* Activity Feed */}
-      <ActivityFeed 
-        activities={filteredActivities} 
+      <ActivityFeed
+        activities={filteredActivities}
         isLoading={isLoading}
       />
 

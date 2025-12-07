@@ -1,6 +1,7 @@
 import TimeTable from '../models/TimeTable.js';
 import User from '../models/User.js';
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
+import Activity from '../models/Activity.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 import fs from 'fs';
@@ -73,6 +74,28 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
         uploadedByUsername: uploaderUsername,
         uploadedByEmail: uploaderEmail,
         uploadedByRole: uploaderRole
+    });
+
+    // Create activity record for admin dashboard
+    await Activity.create({
+        activityType: 'TIMETABLE_UPLOAD',
+        activityName: 'Exam Time Table Update',
+        description: `Uploaded time table for ${faculty} - ${year}`,
+        performedBy: req.user.role === 'examDiv' ? req.user.id : null,
+        performedByName: uploaderName,
+        performedByUsername: uploaderUsername,
+        performedByEmail: uploaderEmail,
+        performedByRole: uploaderRole,
+        faculty: faculty,
+        year: year,
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+        status: 'NEW',
+        priority: 'MEDIUM',
+        metadata: {
+            timeTableId: timeTable._id,
+            fileType: req.file.mimetype.split('/')[1]
+        }
     });
 
     res.status(201).json({
