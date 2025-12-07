@@ -4,29 +4,21 @@ import {
     getActivityStats,
     markActivityAsRead,
     markAllActivitiesAsRead,
-    getActivity
+    getActivity,
+    getMyActivities
 } from '../controllers/activity.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// All routes require authentication and admin authorization
-router.use(protect);
-router.use(authorize('admin'));
+// Routes for exam division members (their own activities) - MUST be before /:id
+router.get('/my-activities', protect, authorize('examDiv'), getMyActivities);
 
-// Get all activities
-router.get('/', getActivities);
-
-// Get activity statistics
-router.get('/stats', getActivityStats);
-
-// Get single activity
-router.get('/:id', getActivity);
-
-// Mark activity as read
-router.put('/:id/read', markActivityAsRead);
-
-// Mark all activities as read
-router.put('/mark-all-read', markAllActivitiesAsRead);
+// Routes for admin (require admin authorization)
+router.get('/', protect, authorize('admin'), getActivities);
+router.get('/stats', protect, authorize('admin'), getActivityStats);
+router.put('/:id/read', protect, authorize('admin'), markActivityAsRead);
+router.put('/mark-all-read', protect, authorize('admin'), markAllActivitiesAsRead);
+router.get('/:id', protect, authorize('admin'), getActivity);
 
 export default router;

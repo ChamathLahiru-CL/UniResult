@@ -176,6 +176,59 @@ export const markAllActivitiesAsRead = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Get activities for current exam division member
+// @route   GET /api/activities/my-activities
+// @access  Private (examDiv)
+export const getMyActivities = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20, type } = req.query;
+
+    // Build query - only activities performed by current user
+    let query = { performedBy: req.user.id };
+
+    // Type filter
+    if (type && type !== 'all') {
+        query.activityType = type;
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const activities = await Activity.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await Activity.countDocuments(query);
+
+    // Transform activities for frontend
+    const transformedActivities = activities.map(activity => ({
+        id: activity._id,
+        title: activity.activityName,
+        description: activity.description,
+        time: activity.createdAt,
+        type: activity.activityType.toLowerCase(),
+        faculty: activity.faculty,
+        year: activity.year,
+        fileName: activity.fileName,
+        fileSize: activity.fileSize,
+        status: activity.status,
+        priority: activity.priority,
+        timestamp: activity.createdAt
+    }));
+
+    res.status(200).json({
+        success: true,
+        count: transformedActivities.length,
+        total,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            pages: Math.ceil(total / parseInt(limit))
+        },
+        data: transformedActivities
+    });
+});
+
 // @desc    Get single activity
 // @route   GET /api/activities/:id
 // @access  Private (admin)
