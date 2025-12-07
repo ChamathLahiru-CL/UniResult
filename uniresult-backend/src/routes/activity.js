@@ -5,7 +5,8 @@ import {
     markActivityAsRead,
     markAllActivitiesAsRead,
     getActivity,
-    getMyActivities
+    getMyActivities,
+    getAllExamDivisionActivities
 } from '../controllers/activity.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Routes for exam division members (their own activities) - MUST be before /:id
 router.get('/my-activities', protect, authorize('examDiv'), getMyActivities);
+router.get('/exam-division', protect, authorize('examDiv'), getAllExamDivisionActivities);
 
 // Routes for admin (require admin authorization)
 router.get('/', protect, authorize('admin'), getActivities);

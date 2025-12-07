@@ -247,6 +247,81 @@ export const getMyActivities = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Get all activities from exam division members
+// @route   GET /api/activities/exam-division
+// @access  Private (examDiv)
+export const getAllExamDivisionActivities = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20, type } = req.query;
+
+    // Build query - activities performed by any exam division member
+    let query = { performedByRole: 'examDiv' };
+
+    // Type filter
+    if (type && type !== 'all') {
+        query.activityType = type;
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const activities = await Activity.find(query)
+        .populate('performedBy', 'firstName lastName username')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await Activity.countDocuments(query);
+
+    // Transform activities for frontend
+    const transformedActivities = await Promise.all(activities.map(async (activity) => {
+        let fileUrl = null;
+
+        // For timetable uploads, get the file URL from the related TimeTable
+        if (activity.activityType === 'TIMETABLE_UPLOAD' && activity.metadata?.timeTableId) {
+            try {
+                const timeTable = await TimeTable.findById(activity.metadata.timeTableId);
+                if (timeTable) {
+                    fileUrl = `http://localhost:5000${timeTable.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching timetable for activity:', error);
+            }
+        }
+
+        return {
+            id: activity._id,
+            title: activity.activityName,
+            description: activity.description,
+            time: activity.createdAt,
+            type: activity.activityType.toLowerCase(),
+            faculty: activity.faculty,
+            year: activity.year,
+            fileName: activity.fileName,
+            fileSize: activity.fileSize,
+            fileUrl: fileUrl,
+            status: activity.status,
+            priority: activity.priority,
+            timestamp: activity.createdAt,
+            performedBy: activity.performedByName,
+            performedByUsername: activity.performedByUsername,
+            performedByName: activity.performedBy ? `${activity.performedBy.firstName} ${activity.performedBy.lastName}` : activity.performedByName,
+            performedByUser: activity.performedBy
+        };
+    }));
+
+    res.status(200).json({
+        success: true,
+        count: transformedActivities.length,
+        total,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            pages: Math.ceil(total / parseInt(limit))
+        },
+        data: transformedActivities
+    });
+});
+
 // @desc    Get single activity
 // @route   GET /api/activities/:id
 // @access  Private (admin)

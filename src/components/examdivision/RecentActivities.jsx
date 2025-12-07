@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ClockIcon,
   DocumentTextIcon,
@@ -16,12 +17,9 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchActivities();
-  }, [activeFilter]);
-
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -29,10 +27,14 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
       const token = localStorage.getItem('token');
       let url = 'http://localhost:5000/api/activities/my-activities';
 
+      if (activeFilter === 'all') {
+        url = 'http://localhost:5000/api/activities/exam-division';
+      }
+
       // Add type filter based on activeFilter
       const typeMap = {
         my: 'TIMETABLE_UPLOAD',
-        all: '' // Show all activity types for current user
+        all: '' // Show all activity types
       };
 
       if (activeFilter !== 'all' && typeMap[activeFilter]) {
@@ -60,7 +62,11 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeFilter]);
+
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   const getActivityIcon = (type) => {
     switch (type) {
@@ -188,6 +194,12 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                         {activity.year && ` • Year: ${activity.year}`}
                       </p>
                     )}
+                    {activeFilter === 'all' && activity.performedByName && (
+                      <p className="text-xs text-purple-600 mt-1">
+                        By: {activity.performedByName}
+                        {activity.performedByUsername && ` (${activity.performedByUsername})`}
+                      </p>
+                    )}
                     <div className="flex items-center mt-2 text-xs text-gray-500 space-x-4">
                       <div className="flex items-center">
                         <ClockIcon className="w-4 h-4 mr-1" />
@@ -200,12 +212,55 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                     </div>
                   </div>
 
-                  <button
-                    className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-150"
-                  >
-                    View Details
-                    <ChevronRightIcon className="w-4 h-4 ml-1" />
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    {/* Action buttons for timetable uploads */}
+                    {activity.type === 'timetable_upload' && activity.fileUrl && (
+                      <div className="flex space-x-1 mr-2">
+                        <button
+                          onClick={() => window.open(activity.fileUrl, '_blank')}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors"
+                          title="Preview document"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(activity.fileUrl);
+                              const blob = await response.blob();
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = activity.fileName || 'timetable';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                              console.error('Download failed:', error);
+                              window.open(activity.fileUrl, '_blank');
+                            }
+                          }}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-green-600 hover:bg-green-50 border border-green-200 hover:border-green-300 transition-colors"
+                          title="Download document"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        if (activity.type === 'timetable_upload') {
+                          navigate('/exam/time-table');
+                        }
+                      }}
+                      className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-150"
+                    >
+                      View Details
+                      <ChevronRightIcon className="w-4 h-4 ml-1" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
