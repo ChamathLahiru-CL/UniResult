@@ -13,7 +13,7 @@ const ProfileAndSettings = () => {
   console.log('🎯 ProfileAndSettings component mounted/re-rendered');
   console.log('📍 Current URL:', window.location.href);
   console.log('💾 Token in localStorage:', localStorage.getItem('token') ? 'EXISTS' : 'NOT FOUND');
-  
+
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -44,6 +44,7 @@ const ProfileAndSettings = () => {
     email: '',
     firstName: '',
     lastName: '',
+    faculty: '',
     phoneNumber: '',
     profileImage: null
   });
@@ -52,9 +53,9 @@ const ProfileAndSettings = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('token');
-      
+
       console.log('🔍 Fetching profile with token:', token ? `Token exists (${token.substring(0, 20)}...)` : 'No token');
-      
+
       if (!token) {
         console.error('❌ No token found, redirecting to login');
         setError('Please login to view your profile');
@@ -91,10 +92,11 @@ const ProfileAndSettings = () => {
         email: data.data.email || '',
         firstName: data.data.firstName || '',
         lastName: data.data.lastName || '',
+        faculty: data.data.faculty || '',
         phoneNumber: phoneNum,
         profileImage: data.data.profileImage || null
       });
-      
+
       // Store original phone number for cancel functionality
       setOriginalPhoneNumber(phoneNum);
 
@@ -104,7 +106,7 @@ const ProfileAndSettings = () => {
       console.error('Error details:', err.message);
       setError(err.message);
       setIsLoading(false);
-      
+
       // If unauthorized, redirect to login
       if (err.message.includes('authorized') || err.message.includes('token')) {
         console.log('🔒 Unauthorized, clearing storage and redirecting');
@@ -148,10 +150,10 @@ const ProfileAndSettings = () => {
       setIsSavingPhone(true);
       setError('');
       setSuccessMessage('');
-      
+
       console.log('📞 Saving phone number:', userData.phoneNumber);
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:5000/api/user/phone', {
         method: 'PUT',
         headers: {
@@ -163,7 +165,7 @@ const ProfileAndSettings = () => {
 
       const data = await response.json();
       console.log('📡 Phone update response:', data);
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to update phone number');
       }
@@ -172,7 +174,7 @@ const ProfileAndSettings = () => {
       setOriginalPhoneNumber(userData.phoneNumber);
       setSuccessMessage('Phone number updated successfully!');
       setIsSavingPhone(false);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
@@ -193,7 +195,7 @@ const ProfileAndSettings = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setError('New passwords do not match');
       return;
@@ -202,7 +204,7 @@ const ProfileAndSettings = () => {
     try {
       console.log('🔑 Changing password...');
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:5000/api/user/change-password', {
         method: 'PUT',
         headers: {
@@ -216,7 +218,7 @@ const ProfileAndSettings = () => {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to change password');
       }
@@ -245,7 +247,7 @@ const ProfileAndSettings = () => {
       try {
         console.log('🗑️ Deleting account...');
         const token = localStorage.getItem('token');
-        
+
         const response = await fetch('http://localhost:5000/api/user/account', {
           method: 'DELETE',
           headers: {
@@ -255,7 +257,7 @@ const ProfileAndSettings = () => {
         });
 
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.message || 'Failed to delete account');
         }
@@ -276,11 +278,11 @@ const ProfileAndSettings = () => {
     if (file) {
       try {
         console.log('🖼️ Image selected, uploading...');
-        
+
         const reader = new FileReader();
         reader.onloadend = async () => {
           const token = localStorage.getItem('token');
-          
+
           const response = await fetch('http://localhost:5000/api/user/profile-image', {
             method: 'PUT',
             headers: {
@@ -291,7 +293,7 @@ const ProfileAndSettings = () => {
           });
 
           const data = await response.json();
-          
+
           if (!response.ok) {
             throw new Error(data.message || 'Failed to update profile image');
           }
@@ -354,31 +356,28 @@ const ProfileAndSettings = () => {
         <div className="flex space-x-4 mb-6 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${
-              activeTab === 'profile'
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'profile'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             Profile
           </button>
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${
-              activeTab === 'notifications'
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'notifications'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             Notifications
           </button>
           <button
             onClick={() => setActiveTab('security')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${
-              activeTab === 'security'
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'security'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             Security
           </button>
@@ -461,6 +460,15 @@ const ProfileAndSettings = () => {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Faculty</label>
+                <input
+                  type="text"
+                  value={userData.faculty}
+                  disabled
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500 sm:text-sm"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                 <div className="space-y-3">
                   <input
@@ -474,11 +482,10 @@ const ProfileAndSettings = () => {
                     <button
                       onClick={handlePhoneNumberSave}
                       disabled={isSavingPhone}
-                      className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
-                        isSavingPhone 
-                          ? 'bg-blue-400 cursor-not-allowed' 
+                      className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${isSavingPhone
+                          ? 'bg-blue-400 cursor-not-allowed'
                           : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
+                        }`}
                     >
                       {isSavingPhone ? 'Saving...' : 'Save'}
                     </button>
@@ -732,11 +739,10 @@ const ProfileAndSettings = () => {
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmation !== 'DELETE'}
-                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
-                  deleteConfirmation === 'DELETE'
+                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${deleteConfirmation === 'DELETE'
                     ? 'bg-red-600 hover:bg-red-700'
                     : 'bg-gray-300 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Delete Account
               </button>
