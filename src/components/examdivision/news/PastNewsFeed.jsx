@@ -54,7 +54,13 @@ const PastNewsFeed = ({ activeFilter = 'all' }) => {
         // Filter for "my" news if activeFilter is 'my'
         if (activeFilter === 'my') {
           const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          filteredNews = filteredNews.filter(item => item.uploadedBy === currentUser.id);
+          const currentUserId = currentUser.userId || currentUser.id;
+
+          filteredNews = filteredNews.filter(item => {
+            // item.uploadedBy is an object from populate, so compare its _id with userId
+            const itemUserId = item.uploadedBy._id ? String(item.uploadedBy._id) : String(item.uploadedBy);
+            return itemUserId === String(currentUserId);
+          });
         }
 
         // Apply search filter
@@ -283,10 +289,10 @@ const PastNewsFeed = ({ activeFilter = 'all' }) => {
           </div>
         ) : (
           news.map((item) => {
-            const isExpanded = expandedNews.has(item.id);
+            const isExpanded = expandedNews.has(item._id);
             return (
               <div
-                key={item.id}
+                key={item._id}
                 className="p-4 transition-colors duration-200 hover:bg-gray-50"
               >
                 <div className="flex items-start justify-between">
@@ -362,7 +368,7 @@ const PastNewsFeed = ({ activeFilter = 'all' }) => {
 
                     {/* Expand/Collapse */}
                     <button
-                      onClick={() => toggleExpanded(item.id)}
+                      onClick={() => toggleExpanded(item._id)}
                       className="flex items-center text-sm text-blue-600 hover:text-blue-700 transition-colors"
                     >
                       {isExpanded ? (

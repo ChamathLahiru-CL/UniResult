@@ -35,63 +35,64 @@ const Login = () => {
     setError('');
 
     try {
-        // Log the data being sent
-        console.log('Sending login request:', {
-            username: formData.username,
-            role: formData.role,
-            hasPassword: !!formData.password
-        });
+      // Log the data being sent
+      console.log('Sending login request:', {
+        username: formData.username,
+        role: formData.role,
+        hasPassword: !!formData.password
+      });
 
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: formData.username,
-                password: formData.password,
-                role: formData.role
-            })
-        });
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          role: formData.role
+        })
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Login failed');
-        }
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
 
-        // Create user object from response
-        const user = {
-            id: data.data.user.id,
-            name: data.data.user.name,
-            role: data.data.user.role,
-            token: data.data.token,
-            loginTime: data.data.user.loginTime
-        };
+      // Create user object from response
+      const user = {
+        id: data.data.user.id,
+        userId: data.data.user.userId,
+        name: data.data.user.name,
+        role: data.data.user.role,
+        token: data.data.token,
+        loginTime: data.data.user.loginTime
+      };
 
-        // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        // Log in the user using AuthContext
-        login(user);
-        
-        // Get the redirect path from location state or use default based on role
-        const locationState = location.state;
-        const redirectPath = locationState?.from || 
-            (user.role === 'student' ? '/dash' :
-             user.role === 'admin' ? '/admin' :
-             user.role === 'examDiv' ? '/exam' : '/');
-        
-        // Navigate to the intended page or role-based dashboard
-        navigate(redirectPath, { replace: true });
-        
-        console.log('Login successful:', user);
+      // Store token and user data
+      localStorage.setItem('token', data.data.token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Log in the user using AuthContext
+      login(user);
+
+      // Get the redirect path from location state or use default based on role
+      const locationState = location.state;
+      const redirectPath = locationState?.from ||
+        (user.role === 'student' ? '/dash' :
+          user.role === 'admin' ? '/admin' :
+            user.role === 'examDiv' ? '/exam' : '/');
+
+      // Navigate to the intended page or role-based dashboard
+      navigate(redirectPath, { replace: true });
+
+      console.log('Login successful:', user);
     } catch (error) {
-        console.error('Login failed:', error);
-        setError(error.message || 'Login failed. Please check your credentials.');
+      console.error('Login failed:', error);
+      setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -104,7 +105,7 @@ const Login = () => {
           {/* Subtle decorative elements */}
           <div className="absolute top-0 left-0 w-24 h-24 bg-blue-50 rounded-br-full opacity-50"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-50 rounded-tl-full opacity-50"></div>
-          
+
           <div className="relative z-10">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold">
@@ -139,15 +140,15 @@ const Login = () => {
                   onChange={handleChange}
                   placeholder="Enter your password"
                   icon={() => (
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                       strokeLinejoin="round"
                       className="text-gray-400"
                     >
@@ -158,22 +159,21 @@ const Login = () => {
                   onIconClick={() => setShowPassword(!showPassword)}
                 />
               </div>
-              
+
               <div className="mt-4 mb-2">
                 <div className="flex justify-between items-center mb-2">
                   <label htmlFor="role" className="block text-gray-700 text-sm font-medium">
                     Select Your Role
                   </label>
                   <div className="flex items-center">
-                    <div 
-                      className={`w-3 h-3 rounded-full mr-1.5 ${
-                        formData.role === 'student' ? 'bg-blue-500' : 
-                        formData.role === 'admin' ? 'bg-green-500' : 'bg-amber-500'
-                      }`}
+                    <div
+                      className={`w-3 h-3 rounded-full mr-1.5 ${formData.role === 'student' ? 'bg-blue-500' :
+                          formData.role === 'admin' ? 'bg-green-500' : 'bg-amber-500'
+                        }`}
                     ></div>
                     <span className="text-xs font-medium text-gray-600">
-                      {formData.role === 'student' ? 'Student Access' : 
-                       formData.role === 'admin' ? 'Admin Access' : 'Exam Division Access'}
+                      {formData.role === 'student' ? 'Student Access' :
+                        formData.role === 'admin' ? 'Admin Access' : 'Exam Division Access'}
                     </span>
                   </div>
                 </div>
@@ -216,11 +216,11 @@ const Login = () => {
                   {error}
                 </div>
               )}
-              
+
               <div className="mt-2">
-                <Button 
-                  type="submit" 
-                  fullWidth 
+                <Button
+                  type="submit"
+                  fullWidth
                   disabled={isLoading}
                   className="py-3 text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 bg-gradient-to-r from-blue-500 to-blue-600"
                 >
@@ -273,7 +273,7 @@ const Login = () => {
             <div className="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-blue-400 mix-blend-multiply filter blur-xl opacity-70"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-blue-200 mix-blend-multiply filter blur-lg opacity-70"></div>
           </div> */}
-          
+
           {/* Content */}
           <div className="relative h-full flex flex-col items-center justify-center p-8 text-center z-10">
             {/* Animated logo container with glow effect */}
@@ -281,22 +281,22 @@ const Login = () => {
               <div className="absolute -inset-1 bg-blue-200 opacity-30 rounded-full blur-xl animate-pulse"></div>
               {/* <div className="relative bg-white bg-opacity-80 rounded-full p-5 shadow-xl"> */}
               <div>
-                <img 
-                  src={logo} 
-                  alt="UniResult Logo" 
-                  className="w-100 h-100 object-contain drop-shadow-lg" 
+                <img
+                  src={logo}
+                  alt="UniResult Logo"
+                  className="w-100 h-100 object-contain drop-shadow-lg"
                 />
               </div>
               <div className="absolute -bottom-2 w-full h-4 bg-blue-1000 opacity-20 blur-md"></div>
             </div>
-            
+
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               Welcome to the <span className="text-blue-600">UniResult</span> Platform
             </h1>
             <p className="text-base md:text-lg text-gray-700 max-w-md mb-6">
               Please input your username & password to continue
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-lg mb-8">
               <div className="bg-white bg-opacity-70 p-3 rounded-lg shadow-sm text-center">
                 <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-100 flex items-center justify-center">
@@ -307,7 +307,7 @@ const Login = () => {
                 <h3 className="font-semibold text-gray-900">Students</h3>
                 <p className="text-xs text-gray-600 mt-1">View exam results</p>
               </div>
-              
+
               <div className="bg-white bg-opacity-70 p-3 rounded-lg shadow-sm text-center">
                 <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-amber-100 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -317,7 +317,7 @@ const Login = () => {
                 <h3 className="font-semibold text-gray-900">Exam Division</h3>
                 <p className="text-xs text-gray-600 mt-1">Manage exams</p>
               </div>
-              
+
               <div className="bg-white bg-opacity-70 p-3 rounded-lg shadow-sm text-center">
                 <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-green-100 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">

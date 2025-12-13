@@ -261,6 +261,7 @@ export const login = async (req, res) => {
             data: {
                 user: {
                     id: isExamDivMember ? user.username : user.username,
+                    userId: String(user._id),
                     name: isExamDivMember ? user.nameWithInitial : user.name,
                     firstName: isExamDivMember ? user.firstName : undefined,
                     lastName: isExamDivMember ? user.lastName : undefined,

@@ -111,7 +111,7 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                     <div className="flex items-center gap-1">
                       <UserIcon className="h-4 w-4" />
                       <span>
-                        Uploaded by {timeTable.uploadedBy}
+                        Uploaded by {timeTable.uploadedByName}
                         {timeTable.uploadedByUsername && ` (${timeTable.uploadedByUsername})`}
                         {timeTable.uploadedByRole && ` - ${timeTable.uploadedByRole}`}
                       </span>
