@@ -12,6 +12,7 @@ import userRoutes from './routes/user.js';
 import examDivisionRoutes from './routes/examDivision.js';
 import timeTableRoutes from './routes/timeTable.js';
 import activityRoutes from './routes/activity.js';
+import newsRoutes from './routes/news.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -69,6 +70,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/exam-division', examDivisionRoutes);
 app.use('/api/timetable', timeTableRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/news', newsRoutes);
 
 // Error handler middleware
 // eslint-disable-next-line no-unused-vars

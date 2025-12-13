@@ -2,17 +2,18 @@
  * News Management System for UniResult
  * ===================================
  * This module is part of the News page development (October 2025)
- * 
+ *
  * Purpose:
  * - Provides a form interface for uploading and managing news items
- * - Supports multiple news types (Exam, Result, Time Table, etc.)
+ * - Supports multiple news types (Announcement, Important Notice, etc.)
  * - Handles file attachments and faculty-specific news
- * 
+ *
  * Features:
  * - News type categorization
  * - Faculty-specific targeting
  * - File attachment support
  * - Form validation
+ * - API integration
  * - Responsive design
  */
 
@@ -21,61 +22,91 @@ import { useForm } from 'react-hook-form';
 import { DocumentArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 // News Upload Form Component - Handles creation and submission of news items
-const NewsUploadForm = () => {
+const NewsUploadForm = ({ onNewsUploaded }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm();
 
   // News Types Configuration
   // Defines all possible types of news that can be posted in the system
   // Each type includes an ID, display name, and helpful description
   const newsTypes = [
-    { id: 'exam', name: 'Exam News', description: 'Examination schedules and updates' },
-    { id: 'result', name: 'Result News', description: 'Result announcements and grades' },
-    { id: 'timetable', name: 'Time Table', description: 'Academic schedules and timetables' },
-    { id: 'assessment', name: 'Assessment', description: 'Quizzes and assignments information' },
-    { id: 'announcement', name: 'General Announcement', description: 'Other important announcements' }
+    { id: 'Announcement', name: 'Announcement', description: 'General announcements and updates' },
+    { id: 'Important Notice', name: 'Important Notice', description: 'Critical information requiring attention' },
+    { id: 'Exam Update', name: 'Exam Update', description: 'Examination schedules and updates' },
+    { id: 'General Information', name: 'General Information', description: 'General information and notices' },
+    { id: 'Urgent Alert', name: 'Urgent Alert', description: 'Urgent alerts requiring immediate action' }
   ];
 
   // Faculty List Configuration
   // Defines all faculties in the university system
   // Used for targeting news to specific faculty departments
   const faculties = [
-    { id: 'TECH', name: 'Faculty of Technological Studies' },
-    { id: 'APPLIED', name: 'Faculty of Applied Science' },
-    { id: 'MGMT', name: 'Faculty of Management' },
-    { id: 'AGRI', name: 'Faculty of Agriculture' },
-    { id: 'MED', name: 'Faculty of Medicine' }
+    { id: 'Technological Studies', name: 'Faculty of Technological Studies' },
+    { id: 'Applied Science', name: 'Faculty of Applied Science' },
+    { id: 'Management', name: 'Faculty of Management' },
+    { id: 'Agriculture', name: 'Faculty of Agriculture' },
+    { id: 'Medicine', name: 'Faculty of Medicine' },
+    { id: 'All Faculties', name: 'All Faculties' }
   ];
 
   // Form Submission Handler
   // Processes the news submission with file attachment support
-  // TODO: Replace mock API call with actual backend integration
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
     try {
-      const formData = new FormData();
-      formData.append('topic', data.topic);
-      formData.append('faculty', data.faculty);
-      formData.append('newsType', data.newsType);
-      formData.append('message', data.message);
-      if (selectedFile) {
-        formData.append('file', selectedFile);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
       }
 
-      // Mock API call - replace with actual API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Form submitted:', formData);
+      const formData = new FormData();
+      formData.append('newsTopic', data.newsTopic);
+      formData.append('faculty', data.faculty);
+      formData.append('newsType', data.newsType);
+      formData.append('newsMessage', data.newsMessage);
+      formData.append('priority', data.priority || 'normal');
 
-      // Reset form
-      reset();
-      setSelectedFile(null);
+      if (selectedFile) {
+        formData.append('attachment', selectedFile);
+      }
 
-      // Show success message (you can implement toast notification here)
-      alert('News uploaded successfully!');
+      const response = await fetch('http://localhost:5000/api/news', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('News uploaded successfully:', result);
+
+        // Reset form
+        reset();
+        setSelectedFile(null);
+        setSubmitSuccess(true);
+
+        // Notify parent component
+        if (onNewsUploaded) {
+          onNewsUploaded();
+        }
+
+        // Hide success message after 3 seconds
+        setTimeout(() => setSubmitSuccess(false), 3000);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload news');
+      }
     } catch (error) {
       console.error('Error uploading news:', error);
-      alert('Failed to upload news. Please try again.');
+      setSubmitError(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,6 +118,11 @@ const NewsUploadForm = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
       setSelectedFile(file);
     }
   };
@@ -97,28 +133,40 @@ const NewsUploadForm = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
+      {submitSuccess && (
+        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
+          News uploaded successfully!
+        </div>
+      )}
+
+      {submitError && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+          {submitError}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* News Topic */}
         <div>
-          <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1">
-            News Topic
+          <label htmlFor="newsTopic" className="block text-sm font-medium text-gray-700 mb-1">
+            News Topic *
           </label>
           <input
             type="text"
-            id="topic"
-            {...register('topic', { required: 'Topic is required' })}
+            id="newsTopic"
+            {...register('newsTopic', { required: 'News topic is required' })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter news topic"
           />
-          {errors.topic && (
-            <p className="mt-1 text-sm text-red-600">{errors.topic.message}</p>
+          {errors.newsTopic && (
+            <p className="mt-1 text-sm text-red-600">{errors.newsTopic.message}</p>
           )}
         </div>
 
         {/* News Type Selector */}
         <div>
           <label htmlFor="newsType" className="block text-sm font-medium text-gray-700 mb-1">
-            News Type
+            News Type *
           </label>
           <select
             id="newsType"
@@ -143,7 +191,7 @@ const NewsUploadForm = () => {
         {/* Faculty Selector */}
         <div>
           <label htmlFor="faculty" className="block text-sm font-medium text-gray-700 mb-1">
-            Select Faculty
+            Target Faculty *
           </label>
           <select
             id="faculty"
@@ -162,20 +210,35 @@ const NewsUploadForm = () => {
           )}
         </div>
 
+        {/* Priority Level */}
+        <div>
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+            Priority Level
+          </label>
+          <select
+            id="priority"
+            {...register('priority')}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="normal">Normal</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+
         {/* News Message */}
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-            News Message
+          <label htmlFor="newsMessage" className="block text-sm font-medium text-gray-700 mb-1">
+            News Message *
           </label>
           <textarea
-            id="message"
-            {...register('message', { required: 'Message is required' })}
+            id="newsMessage"
+            {...register('newsMessage', { required: 'News message is required' })}
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             placeholder="Enter your news message here..."
           />
-          {errors.message && (
-            <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+          {errors.newsMessage && (
+            <p className="mt-1 text-sm text-red-600">{errors.newsMessage.message}</p>
           )}
         </div>
 
