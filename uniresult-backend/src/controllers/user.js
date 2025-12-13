@@ -34,6 +34,7 @@ export const getUserProfile = async (req, res) => {
                 lastName: lastName,
                 phoneNumber: user.phoneNumber || '',
                 profileImage: user.profileImage || null,
+                faculty: user.faculty || '',
                 username: user.username,
                 enrollmentNumber: user.enrollmentNumber,
                 department: user.department,

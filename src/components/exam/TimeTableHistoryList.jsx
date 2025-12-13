@@ -1,15 +1,49 @@
 import React from 'react';
-import { 
-  EyeIcon, 
-  ArrowDownTrayIcon, 
-  DocumentIcon, 
+import {
+  EyeIcon,
+  ArrowDownTrayIcon,
+  DocumentIcon,
   PhotoIcon,
   ClockIcon,
-  UserIcon 
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../../utils/formatDate';
 
 const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
+  const handleDownload = async (timeTable) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/timetable/${timeTable.id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (response.ok) {
+        // Create a blob from the response
+        const blob = await response.blob();
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        // Create a temporary anchor element and trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = timeTable.fileName; // Use the original filename
+        document.body.appendChild(a);
+        a.click();
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const errorData = await response.json();
+        console.error('Download failed:', errorData);
+        alert(`Failed to download file: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('An error occurred while downloading the file.');
+    }
+  };
   if (timeTables.length === 0) {
     return (
       <div className="bg-white rounded-lg p-8 shadow-md text-center">
@@ -32,10 +66,11 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
 
   const getFacultyBadgeColor = (faculty) => {
     const colors = {
-      ICT: 'bg-blue-100 text-blue-700 border-blue-200',
-      CST: 'bg-green-100 text-green-700 border-green-200', 
-      EET: 'bg-purple-100 text-purple-700 border-purple-200',
-      BST: 'bg-orange-100 text-orange-700 border-orange-200'
+      'Technological Studies': 'bg-blue-100 text-blue-700 border-blue-200',
+      'Applied Science': 'bg-green-100 text-green-700 border-green-200',
+      'Management': 'bg-purple-100 text-purple-700 border-purple-200',
+      'Agriculture': 'bg-orange-100 text-orange-700 border-orange-200',
+      'Medicine': 'bg-red-100 text-red-700 border-red-200'
     };
     return colors[faculty] || 'bg-gray-100 text-gray-700 border-gray-200';
   };
@@ -58,7 +93,7 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                 <div className="flex-shrink-0">
                   {getFileIcon(timeTable.type)}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <h4 className="text-lg font-medium text-gray-900 truncate">
@@ -67,12 +102,19 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getFacultyBadgeColor(timeTable.faculty)}`}>
                       {timeTable.faculty}
                     </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
+                      {timeTable.year}
+                    </span>
                   </div>
-                  
+
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <UserIcon className="h-4 w-4" />
-                      <span>Uploaded by {timeTable.uploadedBy}</span>
+                      <span>
+                        Uploaded by {timeTable.uploadedByName}
+                        {timeTable.uploadedByUsername && ` (${timeTable.uploadedByUsername})`}
+                        {timeTable.uploadedByRole && ` - ${timeTable.uploadedByRole}`}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <ClockIcon className="h-4 w-4" />
@@ -101,21 +143,19 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
                 </button>
 
                 {/* Download button for all file types */}
-                <a
-                  href={timeTable.fileUrl}
-                  download={timeTable.fileName}
-                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                    timeTable.type === 'pdf'
-                      ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
-                      : 'text-green-600 hover:text-green-800 hover:bg-green-50'
-                  }`}
+                <button
+                  onClick={() => handleDownload(timeTable)}
+                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${timeTable.type === 'pdf'
+                    ? 'text-red-600 hover:text-red-800 hover:bg-red-50'
+                    : 'text-green-600 hover:text-green-800 hover:bg-green-50'
+                    }`}
                   title={`Download ${timeTable.type.toUpperCase()} file`}
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">
                     {timeTable.type === 'pdf' ? 'Download PDF' : 'Download Image'}
                   </span>
-                </a>
+                </button>
               </div>
             </div>
           </div>

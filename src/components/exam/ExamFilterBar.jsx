@@ -1,12 +1,14 @@
 import React from 'react';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import { facultyOptions } from '../../data/mockTimeTables';
+import { facultyOptions, yearOptions } from '../../data/mockTimeTables';
 
 const ExamFilterBar = ({
   searchQuery,
   onSearchChange,
   facultyFilter,
   onFacultyFilterChange,
+  yearFilter,
+  onYearFilterChange,
   timeRangeFilter,
   onTimeRangeFilterChange
 }) => {
@@ -33,7 +35,7 @@ const ExamFilterBar = ({
       {/* Filters */}
       <div className="flex items-center gap-3">
         <FunnelIcon className="h-5 w-5 text-gray-500" />
-        
+
         {/* Faculty Filter */}
         <select
           value={facultyFilter}
@@ -43,7 +45,21 @@ const ExamFilterBar = ({
           <option value="">All Faculties</option>
           {facultyOptions.map((faculty) => (
             <option key={faculty.value} value={faculty.value}>
-              {faculty.value}
+              {faculty.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Year Filter */}
+        <select
+          value={yearFilter}
+          onChange={(e) => onYearFilterChange(e.target.value)}
+          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent text-sm bg-white"
+        >
+          <option value="">All Years</option>
+          {yearOptions.map((year) => (
+            <option key={year.value} value={year.value}>
+              {year.label}
             </option>
           ))}
         </select>

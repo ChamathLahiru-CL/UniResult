@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { UserIcon, UsersIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { UserIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import RecentActivities from '../../components/examdivision/RecentActivities';
 
 const ExamActivities = () => {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('my');
 
   const tabs = [
-    { id: 'all', name: 'All Activity', icon: GlobeAltIcon },
     { id: 'my', name: 'My Activity', icon: UserIcon },
-    { id: 'others', name: "Others' Activity", icon: UsersIcon },
+    { id: 'all', name: 'All Activity Types', icon: GlobeAltIcon },
   ];
 
   return (

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { facultyOptions } from '../../data/mockTimeTables';
+import { facultyOptions, yearOptions } from '../../data/mockTimeTables';
 import { validateFileType, getFileType, formatFileSize } from '../../utils/validateFileType';
 import { notificationDispatcher, showNotificationToast } from '../../utils/notificationDispatcher';
 import UploadProgressBar from './UploadProgressBar';
 
 const TimeTableUploadForm = ({ onUploadSuccess }) => {
   const [selectedFaculty, setSelectedFaculty] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -32,7 +33,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     }
 
     setSelectedFile(file);
-    
+
     // Create preview for images
     if (getFileType(file) === 'image') {
       const reader = new FileReader();
@@ -54,26 +55,11 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const simulateUpload = () => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 15 + 5; // Random progress increment
-        setUploadProgress(Math.min(progress, 100));
-        
-        if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(resolve, 500); // Small delay after reaching 100%
-        }
-      }, 200);
-    });
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
-    if (!selectedFaculty || !selectedFile) {
-      setError('Please select both faculty and file before uploading.');
+
+    if (!selectedFaculty || !selectedYear || !selectedFile) {
+      setError('Please select faculty, year and file before uploading.');
       return;
     }
 
@@ -82,37 +68,64 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     setError('');
 
     try {
-      // Simulate file upload with progress
-      await simulateUpload();
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('faculty', selectedFaculty);
+      formData.append('year', selectedYear);
 
-      // Create upload data
-      const uploadData = {
-        id: `tt_${Date.now()}`,
-        faculty: selectedFaculty,
-        uploadedBy: 'Current User', // In real app, get from auth context
-        fileName: selectedFile.name,
-        fileUrl: `/uploads/${selectedFile.name}`, // Simulated URL
-        type: getFileType(selectedFile) === 'pdf' ? 'pdf' : 'image',
-        uploadedAt: new Date().toISOString(),
-        fileSize: formatFileSize(selectedFile.size)
-      };
+      // Get token from localStorage (assuming auth is implemented)
+      const token = localStorage.getItem('token');
+
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch('http://localhost:5000/api/timetable/upload', {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Upload failed');
+      }
+
+      const result = await response.json();
 
       // Dispatch notifications
-      await notificationDispatcher(uploadData);
-
-      // Call success callback
-      onUploadSuccess(uploadData);
+      await notificationDispatcher(result.data);
 
       // Show success message
-      showNotificationToast('success', `Time table uploaded successfully for ${selectedFaculty}!`);
+      showNotificationToast('success', `Time table uploaded successfully for ${selectedFaculty} - ${selectedYear}!`);
 
       // Reset form
       resetForm();
 
+      // Call success callback with transformed data
+      const transformedData = {
+        id: result.data._id,
+        faculty: result.data.faculty,
+        year: result.data.year,
+        uploadedBy: result.data.uploadedByName,
+        uploadedByUsername: result.data.uploadedByUsername,
+        uploadedByEmail: result.data.uploadedByEmail,
+        uploadedByRole: result.data.uploadedByRole,
+        fileName: result.data.originalFileName,
+        fileUrl: result.data.fileUrl,
+        type: result.data.fileType === 'pdf' ? 'pdf' : 'image',
+        uploadedAt: result.data.createdAt,
+        fileSize: formatFileSize(result.data.fileSize)
+      };
+
+      onUploadSuccess(transformedData);
+
     } catch (error) {
       console.error('Upload failed:', error);
-      setError('Upload failed. Please try again.');
-      showNotificationToast('error', 'Upload failed. Please try again.');
+      setError(error.message || 'Upload failed. Please try again.');
+      showNotificationToast('error', error.message || 'Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
@@ -121,6 +134,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
 
   const resetForm = () => {
     setSelectedFaculty('');
+    setSelectedYear('');
     setSelectedFile(null);
     setPreviewUrl(null);
     setError('');
@@ -128,7 +142,7 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const isFormValid = selectedFaculty && selectedFile && !isUploading;
+  const isFormValid = selectedFaculty && selectedYear && selectedFile && !isUploading;
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-md">
@@ -159,6 +173,27 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
           </select>
         </div>
 
+        {/* Year Selection */}
+        <div>
+          <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
+            Select Year <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="year"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            disabled={isUploading}
+            className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">Choose a year...</option>
+            {yearOptions.map((year) => (
+              <option key={year.value} value={year.value}>
+                {year.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* File Upload */}
         <div>
           <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
@@ -176,8 +211,8 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
             <label
               htmlFor="file-upload"
               className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-                ${selectedFile 
-                  ? 'border-green-300 bg-green-50' 
+                ${selectedFile
+                  ? 'border-green-300 bg-green-50'
                   : 'border-slate-300 bg-slate-50 hover:bg-slate-100'
                 }
                 ${isUploading ? 'cursor-not-allowed opacity-50' : ''}
@@ -200,9 +235,9 @@ const TimeTableUploadForm = ({ onUploadSuccess }) => {
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 {previewUrl ? (
-                  <img 
-                    src={previewUrl} 
-                    alt="Preview" 
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
                     className="w-16 h-16 object-cover rounded-lg border border-slate-300"
                   />
                 ) : (
