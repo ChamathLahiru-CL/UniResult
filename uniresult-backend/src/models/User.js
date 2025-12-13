@@ -50,7 +50,14 @@ const userSchema = new mongoose.Schema({
     },
     department: {
         type: String,
-        trim: true
+        required: function() {
+            return this.role === 'student';
+        },
+        trim: true,
+        enum: {
+            values: ['ICT', 'ET', 'BST', 'SET', 'CST', 'IIT', 'ENM', 'EAG', 'English Lit', 'TEA', 'DOC'],
+            message: 'Please select a valid department'
+        }
     },
     faculty: {
         type: String,

@@ -219,6 +219,87 @@ export const changePassword = async (req, res) => {
     }
 };
 
+// Update department
+export const updateDepartment = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { department } = req.body;
+
+        console.log('\n🏫 Updating department for user:', userId);
+
+        if (!department) {
+            return res.status(400).json({
+                success: false,
+                message: 'Department is required'
+            });
+        }
+
+        // Get user to validate faculty and enrollment number
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Validate department based on faculty
+        const facultyDepartments = {
+            'Faculty of Technological Studies': ['ICT', 'ET', 'BST'],
+            'Faculty of Applied Science': ['SET', 'CST', 'IIT'],
+            'Faculty of Management': ['ENM', 'EAG', 'English Lit'],
+            'Faculty of Agriculture': ['TEA'],
+            'Faculty of Medicine': ['DOC']
+        };
+
+        const validDepartments = facultyDepartments[user.faculty] || [];
+        if (!validDepartments.includes(department)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid department for ${user.faculty}. Valid departments: ${validDepartments.join(', ')}`
+            });
+        }
+
+        // Validate department against enrollment number format
+        // Expected format: UWU/DEPARTMENT/YY/NNN
+        const enrollmentParts = user.enrollmentNumber.split('/');
+        if (enrollmentParts.length >= 4) {
+            const enrollmentDept = enrollmentParts[1]; // Department part
+            if (enrollmentDept !== department) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Department '${department}' does not match your enrollment number format. Expected: ${enrollmentDept}`
+                });
+            }
+        }
+
+        // Update department
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { department },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        console.log('✅ Department updated successfully');
+
+        res.json({
+            success: true,
+            message: 'Department updated successfully',
+            data: {
+                department: updatedUser.department
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error updating department:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating department',
+            error: error.message
+        });
+    }
+};
+
 // Delete account
 export const deleteAccount = async (req, res) => {
     try {

@@ -5,7 +5,8 @@ import {
     updateProfileImage,
     changePassword,
     deleteAccount,
-    getUserStats
+    getUserStats,
+    updateDepartment
 } from '../controllers/user.js';
 import { protect } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ router.use(protect);
 router.get('/profile', getUserProfile);
 router.put('/phone', updatePhoneNumber);
 router.put('/profile-image', updateProfileImage);
+router.put('/department', updateDepartment);
 router.put('/change-password', changePassword);
 router.delete('/account', deleteAccount);
 router.get('/stats', getUserStats);
