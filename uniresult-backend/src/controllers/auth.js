@@ -12,6 +12,7 @@ export const register = async (req, res) => {
             password,
             confirmPassword,
             agreeTerms,
+            faculty,
             role = 'student',
             department
         } = req.body;
@@ -26,7 +27,7 @@ export const register = async (req, res) => {
         });
 
         // Validation
-        if (!fullName || !email || !enrollmentNumber || !password || !confirmPassword) {
+        if (!fullName || !email || !enrollmentNumber || !password || !confirmPassword || !faculty) {
             return res.status(400).json({
                 success: false,
                 message: 'All fields are required'
@@ -65,6 +66,15 @@ export const register = async (req, res) => {
             });
         }
 
+        // Validate faculty
+        const validFaculties = ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine'];
+        if (!validFaculties.includes(faculty)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select a valid faculty'
+            });
+        }
+
         // Check if user already exists
         const userExists = await User.findOne({ 
             $or: [
@@ -93,6 +103,7 @@ export const register = async (req, res) => {
             password,
             name: fullName,
             role,
+            faculty,
             department: department || 'Not specified',
             agreeTerms,
             isActive: true,

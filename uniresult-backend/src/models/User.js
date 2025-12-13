@@ -52,6 +52,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    faculty: {
+        type: String,
+        required: [true, 'Faculty is required'],
+        enum: {
+            values: ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine'],
+            message: 'Please select a valid faculty'
+        }
+    },
     phoneNumber: {
         type: String,
         trim: true,

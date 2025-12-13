@@ -12,6 +12,7 @@ const SignUp = () => {
     fullName: "",
     email: "",
     enrollmentNumber: "",
+    faculty: "",
     password: "",
     confirmPassword: "",
     agreeTerms: false,
@@ -37,6 +38,7 @@ const SignUp = () => {
       !formData.fullName ||
       !formData.email ||
       !formData.enrollmentNumber ||
+      !formData.faculty ||
       !formData.password ||
       !formData.confirmPassword
     ) {
@@ -66,6 +68,7 @@ const SignUp = () => {
         fullName: formData.fullName,
         email: fullEmail,
         enrollmentNumber: formData.enrollmentNumber,
+        faculty: formData.faculty,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         agreeTerms: formData.agreeTerms,
@@ -87,13 +90,13 @@ const SignUp = () => {
       }
 
       console.log('Registration successful:', data);
-      
+
       // Optionally store token if you want to auto-login after registration
       // localStorage.setItem('token', data.data.token);
-      
+
       // Show success message before redirecting
       alert('Registration successful! Please login to continue.');
-      
+
       navigate('/'); // Redirect to login page after successful registration
     } catch (err) {
       console.error("Registration failed:", err);
@@ -280,6 +283,58 @@ const SignUp = () => {
                       autoComplete="off"
                       className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                     />
+                  </div>
+                </div>
+              </div>
+
+              <div className="transition-all duration-300 transform hover:-translate-y-1">
+                <div className="relative">
+                  <label
+                    htmlFor="faculty"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
+                    Faculty <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="text-blue-500"
+                      >
+                        <path
+                          d="M12 14L16 10H13V4H11V10H8L12 14Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <select
+                      id="faculty"
+                      name="faculty"
+                      value={formData.faculty}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    >
+                      <option value="">Select your faculty</option>
+                      <option value="Faculty of Technological Studies">Faculty of Technological Studies</option>
+                      <option value="Faculty of Applied Science">Faculty of Applied Science</option>
+                      <option value="Faculty of Management">Faculty of Management</option>
+                      <option value="Faculty of Agriculture">Faculty of Agriculture</option>
+                      <option value="Faculty of Medicine">Faculty of Medicine</option>
+                    </select>
                   </div>
                 </div>
               </div>
