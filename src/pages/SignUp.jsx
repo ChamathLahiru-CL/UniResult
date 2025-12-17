@@ -13,6 +13,7 @@ const SignUp = () => {
     email: "",
     enrollmentNumber: "",
     faculty: "",
+    department: "",
     password: "",
     confirmPassword: "",
     agreeTerms: false,
@@ -30,6 +31,18 @@ const SignUp = () => {
     }));
   };
 
+  // Department options based on faculty
+  const getDepartmentOptions = () => {
+    const facultyDepartments = {
+      'Faculty of Technological Studies': ['ICT', 'ET', 'BST'],
+      'Faculty of Applied Science': ['SET', 'CST', 'IIT'],
+      'Faculty of Management': ['ENM', 'EAG', 'English Lit'],
+      'Faculty of Agriculture': ['TEA'],
+      'Faculty of Medicine': ['DOC']
+    };
+    return facultyDepartments[formData.faculty] || [];
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,6 +52,7 @@ const SignUp = () => {
       !formData.email ||
       !formData.enrollmentNumber ||
       !formData.faculty ||
+      !formData.department ||
       !formData.password ||
       !formData.confirmPassword
     ) {
@@ -69,6 +83,7 @@ const SignUp = () => {
         email: fullEmail,
         enrollmentNumber: formData.enrollmentNumber,
         faculty: formData.faculty,
+        department: formData.department,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         agreeTerms: formData.agreeTerms,
@@ -334,6 +349,64 @@ const SignUp = () => {
                       <option value="Faculty of Management">Faculty of Management</option>
                       <option value="Faculty of Agriculture">Faculty of Agriculture</option>
                       <option value="Faculty of Medicine">Faculty of Medicine</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="transition-all duration-300 transform hover:-translate-y-1">
+                <div className="relative">
+                  <label
+                    htmlFor="department"
+                    className="block text-gray-700 text-sm font-medium mb-1"
+                  >
+                    Department <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 2L2 7L12 12L22 7L12 2Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2 17L12 22L22 17"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2 12L12 17L22 12"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <select
+                      id="department"
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    >
+                      <option value="">Select your department</option>
+                      {getDepartmentOptions().map(dept => (
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
