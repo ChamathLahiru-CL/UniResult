@@ -1,5 +1,5 @@
 
-# UniResult - University Login Page
+# UniResult - University Exam Management Application
 
 A modern, mobile-responsive login page for the UniResult university web application built with React and TailwindCSS.
 
