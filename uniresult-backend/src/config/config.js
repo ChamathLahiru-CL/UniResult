@@ -18,10 +18,10 @@ const config = {
     PORT: env.PORT || 5000,
     
     // MongoDB Configuration
-    MONGODB_URI: env.MONGODB_URI || 'mongodb+srv://LahiruJY:Uni2025@uniresultdb.osxeohy.mongodb.net/UniResultDB?retryWrites=true&w=majority',
+    MONGODB_URI: env.MONGODB_URI,
     
     // JWT Configuration
-    JWT_SECRET: env.JWT_SECRET || 'uniresult-secret-key-2025',
+    JWT_SECRET: env.JWT_SECRET,
     JWT_EXPIRE: env.JWT_EXPIRE || '7d',
     JWT_COOKIE_EXPIRE: env.JWT_COOKIE_EXPIRE || 7,
     
