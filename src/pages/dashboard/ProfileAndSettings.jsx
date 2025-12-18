@@ -24,7 +24,7 @@ const ProfileAndSettings = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [originalPhoneNumber, setOriginalPhoneNumber] = useState('');
-  const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [isSavingAll, setIsSavingAll] = useState(false);
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
     resultAlerts: true,
@@ -45,6 +45,7 @@ const ProfileAndSettings = () => {
     firstName: '',
     lastName: '',
     faculty: '',
+    department: '',
     phoneNumber: '',
     profileImage: null
   });
@@ -93,9 +94,12 @@ const ProfileAndSettings = () => {
         firstName: data.data.firstName || '',
         lastName: data.data.lastName || '',
         faculty: data.data.faculty || '',
+        department: data.data.department || '',
         phoneNumber: phoneNum,
         profileImage: data.data.profileImage || null
       });
+
+      console.log('🏫 Loaded faculty:', data.data.faculty, 'department:', data.data.department);
 
       // Store original phone number for cancel functionality
       setOriginalPhoneNumber(phoneNum);
@@ -145,52 +149,110 @@ const ProfileAndSettings = () => {
     });
   };
 
-  const handlePhoneNumberSave = async () => {
+  // Department options based on faculty
+  const getDepartmentOptions = () => {
+    const facultyDepartments = {
+      'Faculty of Technological Studies': ['ICT', 'ET', 'BST'],
+      'Faculty of Applied Science': ['SET', 'CST', 'IIT'],
+      'Faculty of Management': ['ENM', 'EAG', 'English Lit'],
+      'Faculty of Agriculture': ['TEA'],
+      'Faculty of Medicine': ['DOC']
+    };
+
+    const options = facultyDepartments[userData.faculty] || [];
+    console.log('🏫 Faculty:', userData.faculty, 'Available departments:', options);
+
+    return options;
+  };
+
+  const handleDepartmentChange = (e) => {
+    setUserData({
+      ...userData,
+      department: e.target.value
+    });
+  };
+
+  const handleSaveAllChanges = async () => {
     try {
-      setIsSavingPhone(true);
+      setIsSavingAll(true);
       setError('');
       setSuccessMessage('');
 
-      console.log('📞 Saving phone number:', userData.phoneNumber);
       const token = localStorage.getItem('token');
+      const updates = [];
 
-      const response = await fetch('http://localhost:5000/api/user/phone', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ phoneNumber: userData.phoneNumber })
-      });
+      console.log('💾 Saving all profile changes...');
 
-      const data = await response.json();
-      console.log('📡 Phone update response:', data);
+      // Update department if changed
+      if (userData.department) {
+        try {
+          console.log('🏫 Updating department:', userData.department);
+          const deptResponse = await fetch('http://localhost:5000/api/user/department', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ department: userData.department })
+          });
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update phone number');
+          if (!deptResponse.ok) {
+            const deptData = await deptResponse.json();
+            throw new Error(`Department update failed: ${deptData.message}`);
+          }
+
+          updates.push('department');
+          console.log('✅ Department updated successfully');
+        } catch (deptError) {
+          console.error('❌ Department update error:', deptError);
+          throw deptError;
+        }
       }
 
-      console.log('✅ Phone number updated successfully in database');
-      setOriginalPhoneNumber(userData.phoneNumber);
-      setSuccessMessage('Phone number updated successfully!');
-      setIsSavingPhone(false);
+      // Update phone number if changed
+      if (userData.phoneNumber !== originalPhoneNumber) {
+        try {
+          console.log('📞 Updating phone number:', userData.phoneNumber);
+          const phoneResponse = await fetch('http://localhost:5000/api/user/phone', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ phoneNumber: userData.phoneNumber })
+          });
+
+          if (!phoneResponse.ok) {
+            const phoneData = await phoneResponse.json();
+            throw new Error(`Phone number update failed: ${phoneData.message}`);
+          }
+
+          updates.push('phone number');
+          setOriginalPhoneNumber(userData.phoneNumber);
+          console.log('✅ Phone number updated successfully');
+        } catch (phoneError) {
+          console.error('❌ Phone update error:', phoneError);
+          throw phoneError;
+        }
+      }
+
+      if (updates.length === 0) {
+        setSuccessMessage('No changes to save');
+        setIsSavingAll(false);
+        return;
+      }
+
+      console.log('✅ All updates completed successfully');
+      setSuccessMessage(`Successfully updated: ${updates.join(', ')}`);
+      setIsSavingAll(false);
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('❌ Error updating phone:', err);
+      console.error('❌ Error saving changes:', err);
       setError(err.message);
-      setIsSavingPhone(false);
+      setIsSavingAll(false);
     }
-  };
-
-  const handlePhoneNumberCancel = () => {
-    console.log('↩️ Canceling phone number edit');
-    setUserData({
-      ...userData,
-      phoneNumber: originalPhoneNumber
-    });
-    setError('');
   };
 
   const handlePasswordSubmit = async (e) => {
@@ -357,8 +419,8 @@ const ProfileAndSettings = () => {
           <button
             onClick={() => setActiveTab('profile')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'profile'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
           >
             Profile
@@ -366,8 +428,8 @@ const ProfileAndSettings = () => {
           <button
             onClick={() => setActiveTab('notifications')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'notifications'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
           >
             Notifications
@@ -375,8 +437,8 @@ const ProfileAndSettings = () => {
           <button
             onClick={() => setActiveTab('security')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${activeTab === 'security'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
           >
             Security
@@ -469,36 +531,44 @@ const ProfileAndSettings = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <div className="space-y-3">
-                  <input
-                    type="tel"
-                    value={userData.phoneNumber}
-                    onChange={handlePhoneNumberChange}
-                    placeholder="Enter your phone number"
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={handlePhoneNumberSave}
-                      disabled={isSavingPhone}
-                      className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${isSavingPhone
-                          ? 'bg-blue-400 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
-                    >
-                      {isSavingPhone ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={handlePhoneNumberCancel}
-                      disabled={isSavingPhone}
-                      className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select
+                  value={userData.department}
+                  onChange={handleDepartmentChange}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="">Select your department...</option>
+                  {getDepartmentOptions().map(dept => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={userData.phoneNumber}
+                  onChange={handlePhoneNumberChange}
+                  placeholder="Enter your phone number"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Save Changes Button */}
+            <div className="flex justify-end pt-6 border-t border-gray-200">
+              <button
+                onClick={handleSaveAllChanges}
+                disabled={isSavingAll}
+                className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors ${isSavingAll
+                    ? 'bg-blue-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+              >
+                {isSavingAll ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         )}
@@ -740,8 +810,8 @@ const ProfileAndSettings = () => {
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmation !== 'DELETE'}
                 className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${deleteConfirmation === 'DELETE'
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-gray-300 cursor-not-allowed'
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-gray-300 cursor-not-allowed'
                   }`}
               >
                 Delete Account
