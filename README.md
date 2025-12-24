@@ -20,6 +20,7 @@
 - [✨ Features](#-features)
 - [🛠️ Technology Stack](#️-technology-stack)
 - [📋 Prerequisites](#-prerequisites)
+- [⚠️ Security Setup](#️-security-setup-important)
 - [🚀 Installation & Setup](#-installation--setup)
 - [🔐 Authentication](#-authentication)
 - [📁 Project Structure](#-project-structure)
@@ -107,6 +108,20 @@
 - MongoDB Atlas account (recommended) or local MongoDB instance
 - Git for version control
 - Modern web browser (Chrome, Firefox, Safari, Edge)
+
+---
+
+## ⚠️ Security Setup (IMPORTANT)
+
+**Before running this application:**
+
+1. **Never commit `.env` files** to version control
+2. **Create your own `.env` file** from `.env.example`:
+   ```bash
+   cd uniresult-backend
+   cp .env.example .env
+   # Edit .env with your actual credentials
+   ```
 
 ---
 
