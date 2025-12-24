@@ -4,6 +4,7 @@ import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import Activity from '../models/Activity.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
+import { parseEnrollmentNumber } from '../utils/enrollmentParser.js';
 import fs from 'fs';
 
 // @desc    Upload time table
@@ -21,7 +22,7 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
     }
 
     // Validate faculty and year
-    const validFaculties = ['Technological Studies', 'Applied Science', 'Management', 'Agriculture', 'Medicine'];
+    const validFaculties = ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine'];
     const validYears = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
     if (!validFaculties.includes(faculty)) {
@@ -150,25 +151,53 @@ export const getTimeTables = asyncHandler(async (req, res) => {
 // @route   GET /api/timetable/student
 // @access  Private (student)
 export const getTimeTablesForStudent = asyncHandler(async (req, res, next) => {
-    // In a real app, you'd get the student's faculty from their profile
-    // For now, we'll assume it's passed in the query or from auth
-    const { faculty } = req.query;
+    // Get student details from authenticated user
+    const student = await User.findById(req.user.id);
 
-    if (!faculty) {
-        return next(new ErrorResponse('Faculty is required', 400));
+    if (!student) {
+        return next(new ErrorResponse('Student not found', 404));
     }
 
-    const timeTables = await TimeTable.find({
-        faculty,
+    // Get student's faculty from their profile
+    const studentFaculty = student.faculty;
+
+    // Determine student's year from enrollment number
+    let studentYear = null;
+    if (student.enrollmentNumber) {
+        const parsed = parseEnrollmentNumber(student.enrollmentNumber);
+        if (parsed && parsed.year) {
+            // Convert year format (e.g., "22" -> "3rd Year" based on current year)
+            const currentYear = new Date().getFullYear();
+            const enrollmentYear = parseInt(`20${parsed.year}`);
+            const yearDifference = currentYear - enrollmentYear;
+
+            if (yearDifference === 0) studentYear = '1st Year';
+            else if (yearDifference === 1) studentYear = '2nd Year';
+            else if (yearDifference === 2) studentYear = '3rd Year';
+            else if (yearDifference === 3) studentYear = '4th Year';
+        }
+    }
+
+    // Build query - filter by faculty only (show all years for the faculty)
+    const query = {
+        faculty: studentFaculty,
         isActive: true
-    })
-    .populate('uploadedBy', 'name')
-    .sort({ createdAt: -1 });
+    };
+
+    // Get all timetables for the student's faculty (all years)
+    const timeTables = await TimeTable.find(query)
+        .populate('uploadedBy', 'name')
+        .sort({ year: 1, createdAt: -1 }); // Sort by year first, then by creation date
 
     res.status(200).json({
         success: true,
         count: timeTables.length,
-        data: timeTables
+        data: timeTables,
+        studentInfo: {
+            faculty: studentFaculty,
+            year: studentYear,
+            enrollmentNumber: student.enrollmentNumber
+        }
     });
 });
 
@@ -267,7 +296,7 @@ export const updateTimeTable = asyncHandler(async (req, res, next) => {
 
     // Validate if provided
     if (faculty) {
-        const validFaculties = ['Technological Studies', 'Applied Science', 'Management', 'Agriculture', 'Medicine'];
+        const validFaculties = ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine'];
         if (!validFaculties.includes(faculty)) {
             return next(new ErrorResponse('Invalid faculty selected', 400));
         }

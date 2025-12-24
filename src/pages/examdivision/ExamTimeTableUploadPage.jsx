@@ -173,9 +173,9 @@ const ExamTimeTableUploadPage = () => {
               <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-green-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Technological Studies</p>
+                    <p className="text-sm font-medium text-gray-600">Faculty of Technological Studies</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {timeTables.filter(tt => tt.faculty === 'Technological Studies').length}
+                      {timeTables.filter(tt => tt.faculty === 'Faculty of Technological Studies').length}
                     </p>
                   </div>
                   <ClockIcon className="h-8 w-8 text-green-500" />

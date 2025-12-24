@@ -23,12 +23,71 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Department mapping for parsing enrollment numbers
+  const departmentMapping = {
+    'ICT': { faculty: 'Faculty of Technological Studies', department: 'ICT' },
+    'ET': { faculty: 'Faculty of Technological Studies', department: 'ET' },
+    'BST': { faculty: 'Faculty of Technological Studies', department: 'BST' },
+    'SET': { faculty: 'Faculty of Applied Science', department: 'SET' },
+    'CST': { faculty: 'Faculty of Applied Science', department: 'CST' },
+    'IIT': { faculty: 'Faculty of Applied Science', department: 'IIT' },
+    'ENM': { faculty: 'Faculty of Management', department: 'ENM' },
+    'EAG': { faculty: 'Faculty of Management', department: 'EAG' },
+    'English Lit': { faculty: 'Faculty of Management', department: 'English Lit' },
+    'TEA': { faculty: 'Faculty of Agriculture', department: 'TEA' },
+    'DOC': { faculty: 'Faculty of Medicine', department: 'DOC' }
+  };
+
+  // Parse enrollment number to get faculty and department
+  const parseEnrollmentNumber = (enrollmentNumber) => {
+    if (!enrollmentNumber || typeof enrollmentNumber !== 'string') {
+      return null;
+    }
+
+    const parts = enrollmentNumber.split('/');
+    if (parts.length !== 4) {
+      return null;
+    }
+
+    const [university, deptCode] = parts;
+
+    if (university !== 'UWU') {
+      return null;
+    }
+
+    const deptInfo = departmentMapping[deptCode];
+    if (!deptInfo) {
+      return null;
+    }
+
+    return deptInfo;
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const newValue = type === "checkbox" ? checked : value;
+
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: newValue,
+      };
+
+      // Auto-populate faculty and department when enrollment number changes
+      if (name === 'enrollmentNumber') {
+        const parsed = parseEnrollmentNumber(value);
+        if (parsed) {
+          updated.faculty = parsed.faculty;
+          updated.department = parsed.department;
+        } else {
+          // Clear faculty and department if enrollment number is invalid
+          updated.faculty = '';
+          updated.department = '';
+        }
+      }
+
+      return updated;
+    });
   };
 
   // Department options based on faculty
@@ -51,12 +110,23 @@ const SignUp = () => {
       !formData.fullName ||
       !formData.email ||
       !formData.enrollmentNumber ||
-      !formData.faculty ||
-      !formData.department ||
       !formData.password ||
       !formData.confirmPassword
     ) {
       setError("All fields are required");
+      return;
+    }
+
+    // Validate enrollment number format
+    const parsedEnrollment = parseEnrollmentNumber(formData.enrollmentNumber);
+    if (!parsedEnrollment) {
+      setError("Invalid enrollment number format. Please use UWU/DEPT/YY/NNN format.");
+      return;
+    }
+
+    // Check if faculty and department were auto-filled
+    if (!formData.faculty || !formData.department) {
+      setError("Unable to determine faculty and department from enrollment number. Please check your enrollment number.");
       return;
     }
 
@@ -294,7 +364,7 @@ const SignUp = () => {
                       name="enrollmentNumber"
                       value={formData.enrollmentNumber}
                       onChange={handleChange}
-                      placeholder="Enter your enrollment number (exp/01/012)"
+                      placeholder="UWU/ICT/22/001"
                       autoComplete="off"
                       className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                     />
@@ -341,9 +411,10 @@ const SignUp = () => {
                       name="faculty"
                       value={formData.faculty}
                       onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                      disabled
+                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 bg-gray-50 text-gray-500 sm:text-sm rounded-md cursor-not-allowed"
                     >
-                      <option value="">Select your faculty</option>
+                      <option value="">Auto-filled from enrollment number</option>
                       <option value="Faculty of Technological Studies">Faculty of Technological Studies</option>
                       <option value="Faculty of Applied Science">Faculty of Applied Science</option>
                       <option value="Faculty of Management">Faculty of Management</option>
@@ -399,9 +470,10 @@ const SignUp = () => {
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                      disabled
+                      className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 bg-gray-50 text-gray-500 sm:text-sm rounded-md cursor-not-allowed"
                     >
-                      <option value="">Select your department</option>
+                      <option value="">Auto-filled from enrollment number</option>
                       {getDepartmentOptions().map(dept => (
                         <option key={dept} value={dept}>
                           {dept}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { format, isAfter, subDays } from 'date-fns';
 import { 
   UsersIcon, 
@@ -9,165 +9,9 @@ import {
 import FilterBar from '../../components/admin/students/FilterBar';
 
 const AdminStudentManagementPage = () => {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@uniresult.edu',
-      department: 'ICT',
-      program: 'BSc in Computer Science',
-      degree: 'BSc in Computer Science',
-      year: 2,
-      matricNumber: 'EN20241001',
-      status: 'Active',
-      registrationDate: '2025-10-20'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@uniresult.edu',
-      department: 'BBA',
-      program: 'BBA in Marketing',
-      degree: 'BBA in Marketing',
-      year: 3,
-      matricNumber: 'EN20231002',
-      status: 'Active',
-      registrationDate: '2025-10-23'
-    },
-    {
-      id: 3,
-      name: 'Alex Johnson',
-      email: 'alex.johnson@uniresult.edu',
-      department: 'ICT',
-      program: 'BSc in IT',
-      degree: 'BSc in IT',
-      year: 1,
-      matricNumber: 'EN20251003',
-      status: 'Suspended',
-      registrationDate: '2025-09-15'
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      email: 'sarah.wilson@uniresult.edu',
-      department: 'BBA',
-      program: 'BBA in Finance',
-      degree: 'BBA in Finance',
-      year: 4,
-      matricNumber: 'EN20201004',
-      status: 'Active',
-      registrationDate: '2025-10-19'
-    },
-    {
-      id: 5,
-      name: 'Mike Chen',
-      email: 'mike.chen@uniresult.edu',
-      department: 'CST',
-      program: 'BSc in Data Science',
-      degree: 'BSc in Data Science',
-      year: 2,
-      matricNumber: 'EN20241005',
-      status: 'Active',
-      registrationDate: '2025-10-21'
-    },
-    {
-      id: 6,
-      name: 'Emily Rodriguez',
-      email: 'emily.rodriguez@uniresult.edu',
-      department: 'EET',
-      program: 'BSc in Electrical Engineering',
-      degree: 'BSc in Electrical Engineering',
-      year: 3,
-      matricNumber: 'EN20231006',
-      status: 'Active',
-      registrationDate: '2025-10-18'
-    },
-    {
-      id: 7,
-      name: 'David Kumar',
-      email: 'david.kumar@uniresult.edu',
-      department: 'BBST',
-      program: 'BSc in Business Studies',
-      degree: 'BSc in Business Studies',
-      year: 1,
-      matricNumber: 'EN20251007',
-      status: 'Active',
-      registrationDate: '2025-10-22'
-    },
-    {
-      id: 8,
-      name: 'Lisa Thompson',
-      email: 'lisa.thompson@uniresult.edu',
-      department: 'CST',
-      program: 'BSc in Artificial Intelligence',
-      degree: 'BSc in Artificial Intelligence',
-      year: 4,
-      matricNumber: 'EN20201008',
-      status: 'Suspended',
-      registrationDate: '2025-09-20'
-    },
-    {
-      id: 9,
-      name: 'Robert Zhang',
-      email: 'robert.zhang@uniresult.edu',
-      department: 'Technological Studies',
-      program: 'BSc in Technology Management',
-      degree: 'BSc in Technology Management',
-      year: 2,
-      matricNumber: 'EN20241009',
-      status: 'Active',
-      registrationDate: '2025-10-19'
-    },
-    {
-      id: 10,
-      name: 'Maria Garcia',
-      email: 'maria.garcia@uniresult.edu',
-      department: 'Applied Science',
-      program: 'BSc in Applied Physics',
-      degree: 'BSc in Applied Physics',
-      year: 3,
-      matricNumber: 'EN20231010',
-      status: 'Active',
-      registrationDate: '2025-10-17'
-    },
-    {
-      id: 11,
-      name: 'Ahmed Hassan',
-      email: 'ahmed.hassan@uniresult.edu',
-      department: 'Medicine',
-      program: 'MBBS',
-      degree: 'MBBS',
-      year: 1,
-      matricNumber: 'EN20251011',
-      status: 'Active',
-      registrationDate: '2025-10-21'
-    },
-    {
-      id: 12,
-      name: 'Jennifer Lee',
-      email: 'jennifer.lee@uniresult.edu',
-      department: 'Agriculture',
-      program: 'BSc in Agriculture',
-      degree: 'BSc in Agriculture',
-      year: 2,
-      matricNumber: 'EN20241012',
-      status: 'Active',
-      registrationDate: '2025-10-16'
-    },
-    {
-      id: 13,
-      name: 'Michael Brown',
-      email: 'michael.brown@uniresult.edu',
-      department: 'Finance',
-      program: 'BSc in Banking & Finance',
-      degree: 'BSc in Banking & Finance',
-      year: 4,
-      matricNumber: 'EN20201013',
-      status: 'Suspended',
-      registrationDate: '2025-09-25'
-    }
-  ]);
-  const [loading] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     search: '',
     year: '',
@@ -175,6 +19,51 @@ const AdminStudentManagementPage = () => {
     degree: '',
     status: ''
   });
+
+  // Fetch students data on component mount
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/users/students', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Access denied. Admin privileges required.');
+        }
+        throw new Error('Failed to fetch students');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setStudents(result.data);
+      } else {
+        setError(result.message || 'Failed to load students');
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      setError(error.message || 'Failed to load students');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     if (key === 'clear') {
@@ -196,7 +85,7 @@ const AdminStudentManagementPage = () => {
     const csvContent = [
       headers.join(','),
       ...filteredStudents.map(student => [
-        `"${student.name}"`,
+        `"${student.name || 'Unknown'}"`,
         `"${student.email}"`,
         `"${student.department}"`,
         `"${student.program}"`,
@@ -228,7 +117,7 @@ const AdminStudentManagementPage = () => {
   const filteredStudents = useMemo(() => {
     return students.filter(student => {
       const matchesSearch = !filters.search || 
-        student.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+        (student.name && student.name.toLowerCase().includes(filters.search.toLowerCase())) ||
         student.email.toLowerCase().includes(filters.search.toLowerCase()) ||
         student.matricNumber.toLowerCase().includes(filters.search.toLowerCase());
 
@@ -261,25 +150,82 @@ const AdminStudentManagementPage = () => {
     };
   }, [students]);
 
-  const handleSuspend = (id) => {
-    if (window.confirm('Are you sure you want to suspend this student?')) {
+  const handleSuspend = async (id) => {
+    if (!window.confirm('Are you sure you want to suspend this student?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/users/${id}/suspend`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: 'Suspended by admin' })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to suspend student');
+      }
+
+      // Update local state
       setStudents(students.map(student => 
         student.id === id ? { ...student, status: 'Suspended' } : student
       ));
+    } catch (error) {
+      console.error('Error suspending student:', error);
+      alert('Failed to suspend student. Please try again.');
     }
   };
 
-  const handleActivate = (id) => {
-    if (window.confirm('Are you sure you want to activate this student?')) {
+  const handleActivate = async (id) => {
+    if (!window.confirm('Are you sure you want to activate this student?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/users/${id}/activate`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to activate student');
+      }
+
+      // Update local state
       setStudents(students.map(student => 
         student.id === id ? { ...student, status: 'Active' } : student
       ));
+    } catch (error) {
+      console.error('Error activating student:', error);
+      alert('Failed to activate student. Please try again.');
     }
   };
 
-  const handleRemove = (id) => {
-    if (window.confirm('Are you sure you want to remove this student? This action cannot be undone.')) {
+  const handleRemove = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this student? This action cannot be undone.')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove student');
+      }
+
+      // Update local state
       setStudents(students.filter(student => student.id !== id));
+    } catch (error) {
+      console.error('Error removing student:', error);
+      alert('Failed to remove student. Please try again.');
     }
   };
 
@@ -287,6 +233,11 @@ const AdminStudentManagementPage = () => {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Student Management</h1>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Statistics Cards */}
@@ -398,14 +349,14 @@ const AdminStudentManagementPage = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                             <span className="text-gray-600 font-medium">
-                              {student.name.split(' ').map(n => n[0]).join('')}
+                              {student.name ? student.name.split(' ').map(n => n[0]).join('') : 'U'}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="flex items-center gap-2">
                             <div className="text-sm font-medium text-gray-900">
-                              {student.name}
+                              {student.name || 'Unknown Student'}
                             </div>
                             {isNewStudent(student.registrationDate) && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

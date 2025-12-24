@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import { generateToken } from '../utils/jwt.js';
+import { validateFacultyDepartmentFromEnrollment } from '../utils/enrollmentParser.js';
 import bcrypt from 'bcryptjs';
 
 export const register = async (req, res) => {
@@ -63,6 +64,14 @@ export const register = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Please use a valid university email address'
+            });
+        }
+
+        // Validate enrollment number format and faculty/department match
+        if (!validateFacultyDepartmentFromEnrollment(enrollmentNumber, faculty, department)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Your entered faculty or department does not match the information from your enrollment number. Please check again.'
             });
         }
 
