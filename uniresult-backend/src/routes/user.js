@@ -6,7 +6,11 @@ import {
     changePassword,
     deleteAccount,
     getUserStats,
-    updateDepartment
+    updateDepartment,
+    getAllStudents,
+    suspendStudent,
+    activateStudent,
+    deleteStudent
 } from '../controllers/user.js';
 import { protect } from '../middleware/auth.js';
 
@@ -23,5 +27,11 @@ router.put('/department', updateDepartment);
 router.put('/change-password', changePassword);
 router.delete('/account', deleteAccount);
 router.get('/stats', getUserStats);
+
+// Admin routes
+router.get('/students', getAllStudents);
+router.put('/:id/suspend', suspendStudent);
+router.put('/:id/activate', activateStudent);
+router.delete('/:id', deleteStudent);
 
 export default router;

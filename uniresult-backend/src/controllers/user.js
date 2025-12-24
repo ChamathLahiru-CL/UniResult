@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import { parseEnrollmentNumber } from '../utils/enrollmentParser.js';
 
 // Get user profile
 export const getUserProfile = async (req, res) => {
@@ -373,6 +374,246 @@ export const getUserStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching user statistics',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get all students (for admin)
+// @route   GET /api/users/students
+// @access  Private (admin only)
+export const getAllStudents = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin role required.'
+            });
+        }
+
+        console.log('\n👥 Fetching all students for admin:', req.user.username);
+
+        // Get all students with their details
+        const students = await User.find({ role: 'student' })
+            .select('-password') // Exclude password
+            .sort({ createdAt: -1 }); // Sort by newest first
+
+        // Format the data for frontend
+        const formattedStudents = students.map(student => {
+            // Calculate year from enrollment number
+            let year = null;
+            if (student.enrollmentNumber) {
+                const parsed = parseEnrollmentNumber(student.enrollmentNumber);
+                if (parsed && parsed.year) {
+                    const currentYear = new Date().getFullYear();
+                    const enrollmentYear = parseInt(`20${parsed.year}`);
+                    const yearDifference = currentYear - enrollmentYear;
+                    if (yearDifference >= 0 && yearDifference <= 3) {
+                        year = yearDifference + 1; // Convert to 1st, 2nd, 3rd, 4th year
+                    }
+                }
+            }
+
+            return {
+                id: student._id,
+                name: student.name || 'Unknown Student',
+                email: student.email,
+                username: student.username,
+                enrollmentNumber: student.enrollmentNumber,
+                department: student.department || '',
+                faculty: student.faculty || '',
+                year: year,
+                matricNumber: student.enrollmentNumber, // Use enrollment number as matric number
+                status: student.isActive ? 'Active' : 'Suspended',
+                registrationDate: student.createdAt,
+                phoneNumber: student.phoneNumber || '',
+                lastLogin: student.lastLogin,
+                program: student.department ? `${student.department} Program` : '', // Generate program name
+                degree: student.department ? `BSc in ${student.department}` : '' // Generate degree name
+            };
+        });
+
+        console.log(`✅ Found ${formattedStudents.length} students`);
+
+        res.json({
+            success: true,
+            count: formattedStudents.length,
+            data: formattedStudents
+        });
+    } catch (error) {
+        console.error('❌ Error fetching students:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching students',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Suspend a student (admin only)
+// @route   PUT /api/users/:id/suspend
+// @access  Private (admin only)
+export const suspendStudent = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin role required.'
+            });
+        }
+
+        const { id } = req.params;
+        const { reason } = req.body;
+
+        console.log(`\n🚫 Suspending student ${id} by admin:`, req.user.username);
+
+        const student = await User.findById(id);
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student not found'
+            });
+        }
+
+        if (student.role !== 'student') {
+            return res.status(400).json({
+                success: false,
+                message: 'Can only suspend student accounts'
+            });
+        }
+
+        student.isActive = false;
+        await student.save();
+
+        console.log(`✅ Student ${student.username} suspended`);
+
+        res.json({
+            success: true,
+            message: 'Student suspended successfully',
+            data: {
+                id: student._id,
+                username: student.username,
+                name: student.name || 'Unknown Student',
+                status: 'Suspended'
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error suspending student:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error suspending student',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Activate a student (admin only)
+// @route   PUT /api/users/:id/activate
+// @access  Private (admin only)
+export const activateStudent = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin role required.'
+            });
+        }
+
+        const { id } = req.params;
+
+        console.log(`\n✅ Activating student ${id} by admin:`, req.user.username);
+
+        const student = await User.findById(id);
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student not found'
+            });
+        }
+
+        if (student.role !== 'student') {
+            return res.status(400).json({
+                success: false,
+                message: 'Can only activate student accounts'
+            });
+        }
+
+        student.isActive = true;
+        await student.save();
+
+        console.log(`✅ Student ${student.username} activated`);
+
+        res.json({
+            success: true,
+            message: 'Student activated successfully',
+            data: {
+                id: student._id,
+                username: student.username,
+                name: student.name || 'Unknown Student',
+                status: 'Active'
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error activating student:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error activating student',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Delete a student (admin only)
+// @route   DELETE /api/users/:id
+// @access  Private (admin only)
+export const deleteStudent = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin role required.'
+            });
+        }
+
+        const { id } = req.params;
+
+        console.log(`\n🗑️ Deleting student ${id} by admin:`, req.user.username);
+
+        const student = await User.findById(id);
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student not found'
+            });
+        }
+
+        if (student.role !== 'student') {
+            return res.status(400).json({
+                success: false,
+                message: 'Can only delete student accounts'
+            });
+        }
+
+        await User.findByIdAndDelete(id);
+
+        console.log(`✅ Student ${student.username} deleted`);
+
+        res.json({
+            success: true,
+            message: 'Student deleted successfully'
+        });
+    } catch (error) {
+        console.error('❌ Error deleting student:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting student',
             error: error.message
         });
     }
