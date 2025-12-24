@@ -1,13 +1,14 @@
-import React from 'react';
-import { 
-  ClockIcon, 
+import React, { useState, useEffect } from 'react';
+import {
+  ClockIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
   CheckCircleIcon,
   DocumentTextIcon,
   CalendarIcon,
   ArrowTopRightOnSquareIcon,
-  BellIcon
+  BellIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow, isToday, isYesterday, format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -15,9 +16,73 @@ import { mockActivities, ACTIVITY_TYPES, activityColors } from '../../data/mockA
 
 const AdminRecentActivities = () => {
   const navigate = useNavigate();
+  const [activities, setActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Get last 10 activities sorted by timestamp
-  const recentActivities = mockActivities
+  // Fetch activities from API
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+
+        const response = await fetch('http://localhost:5000/api/activities?limit=10', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Authentication failed');
+          }
+          throw new Error('Failed to fetch activities');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Transform API data to match component expectations
+          const transformedActivities = result.data.map(activity => ({
+            id: activity.id,
+            type: activity.type,
+            title: activity.activityName || activity.description || 'Activity',
+            description: activity.description,
+            timestamp: activity.timestamp,
+            status: activity.status || 'READ',
+            priority: activity.priority || 'NORMAL',
+            user: activity.performedBy || activity.performedByName || 'System',
+            link: activity.link
+          }));
+
+          setActivities(transformedActivities);
+        } else {
+          // Fallback to mock data if API fails
+          console.warn('API failed, using mock data');
+          setActivities(mockActivities.slice(0, 10));
+        }
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setError(error.message);
+        // Fallback to mock data
+        setActivities(mockActivities.slice(0, 10));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
+  // Get activities (use fetched data or fallback to mock)
+  const recentActivities = activities.length > 0 ? activities : mockActivities
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .slice(0, 10);
 
@@ -63,30 +128,9 @@ const AdminRecentActivities = () => {
     return colors?.bg || 'bg-gray-50';
   };
 
-  const handleActivityClick = (activity) => {
-    if (activity.link) {
-      navigate(activity.link);
-    } else {
-      // Default navigation based on activity type
-      switch (activity.type) {
-        case ACTIVITY_TYPES.COMPLIANCE:
-          navigate('/admin/compliance');
-          break;
-        case ACTIVITY_TYPES.RESULT_UPLOAD:
-        case ACTIVITY_TYPES.STUDENT_REGISTRATION:
-          navigate('/admin/students');
-          break;
-        case ACTIVITY_TYPES.TIMETABLE_UPLOAD:
-        case ACTIVITY_TYPES.NEWS_UPLOAD:
-          navigate('/admin/exam-division');
-          break;
-        case ACTIVITY_TYPES.SYSTEM_MAINTENANCE:
-          navigate('/admin/activities');
-          break;
-        default:
-          navigate('/admin/activities');
-      }
-    }
+  const handleActivityClick = () => {
+    // Navigate to the activities page for all activity types
+    navigate('/admin/activities');
   };
 
   const handleViewAllActivities = () => {
@@ -117,7 +161,42 @@ const AdminRecentActivities = () => {
 
       {/* Activities List */}
       <div className="space-y-3">
-        {recentActivities.map((activity) => (
+        {isLoading ? (
+          // Loading skeleton
+          Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-start justify-between p-4 rounded-lg border border-gray-100 bg-gray-50 animate-pulse">
+              <div className="flex items-start space-x-4 flex-1">
+                <div className="flex-shrink-0 p-2 bg-gray-200 rounded-lg w-10 h-10"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="h-3 bg-gray-200 rounded w-16"></div>
+            </div>
+          ))
+        ) : error ? (
+          // Error state
+          <div className="text-center py-8">
+            <ExclamationTriangleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Failed to load activities</h3>
+            <p className="text-sm text-gray-500">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : recentActivities.length === 0 ? (
+          // Empty state
+          <div className="text-center py-8">
+            <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-sm font-medium text-gray-900 mb-2">No recent activities</h3>
+            <p className="text-sm text-gray-500">Activities will appear here as they occur.</p>
+          </div>
+        ) : (
+          recentActivities.map((activity) => (
           <div
             key={activity.id}
             onClick={() => handleActivityClick(activity)}
@@ -199,14 +278,14 @@ const AdminRecentActivities = () => {
               </div>
             )}
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">
-            Showing {recentActivities.length} of {mockActivities.length} activities
+            Showing {recentActivities.length} recent activities
           </span>
           <button
             onClick={handleViewAllActivities}
