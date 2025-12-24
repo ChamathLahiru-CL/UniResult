@@ -5,7 +5,7 @@ const timeTableSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Faculty is required'],
         enum: {
-            values: ['Technological Studies', 'Applied Science', 'Management', 'Agriculture', 'Medicine'],
+            values: ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine'],
             message: 'Please select a valid faculty'
         }
     },

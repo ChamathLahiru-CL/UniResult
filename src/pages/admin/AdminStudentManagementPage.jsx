@@ -110,7 +110,7 @@ const AdminStudentManagementPage = () => {
       id: 9,
       name: 'Robert Zhang',
       email: 'robert.zhang@uniresult.edu',
-      department: 'Technological Studies',
+      department: 'Faculty of Technological Studies',
       program: 'BSc in Technology Management',
       degree: 'BSc in Technology Management',
       year: 2,

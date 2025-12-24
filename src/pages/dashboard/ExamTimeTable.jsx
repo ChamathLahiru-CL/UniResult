@@ -1,28 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * ExamTimeTable Component
  * Displays examination schedules for different levels
  */
 const ExamTimeTable = () => {
-  const [activeLevel, setActiveLevel] = useState('100');
-  const [downloading, setDownloading] = useState(false);
+  const [timeTables, setTimeTables] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [studentInfo, setStudentInfo] = useState(null);
 
-  // Function to handle timetable download
-  const handleDownload = async (level) => {
+  useEffect(() => {
+    fetchTimeTables();
+  }, []);
+
+  const fetchTimeTables = async () => {
     try {
-      setDownloading(true);
-      const response = await fetch(`/timetables/${level}-level-timetable.png`);
+      setLoading(true);
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('http://localhost:5000/api/timetable/student', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch timetables');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setTimeTables(result.data);
+        setStudentInfo(result.studentInfo);
+      } else {
+        setError(result.message || 'Failed to load timetables');
+      }
+    } catch (error) {
+      console.error('Error fetching timetables:', error);
+      setError(error.message || 'Failed to load timetables');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = async (timeTable) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`http://localhost:5000/api/timetable/${timeTable._id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
       const blob = await response.blob();
-      
+
       // Create a URL for the blob
       const url = window.URL.createObjectURL(blob);
-      
+
       // Create temporary link element
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${level}-Level-Timetable.png`;
-      
+      link.download = timeTable.originalFileName || `${timeTable.faculty}_${timeTable.year}_timetable.${timeTable.fileType}`;
+
       // Append to document, click, and clean up
       document.body.appendChild(link);
       link.click();
@@ -31,26 +78,34 @@ const ExamTimeTable = () => {
     } catch (error) {
       console.error('Download failed:', error);
       alert('Failed to download timetable. Please try again.');
-    } finally {
-      setDownloading(false);
     }
   };
 
-  // Level tabs configuration
-  const levels = [
-    { id: '100', name: '100 Level' },
-    { id: '200', name: '200 Level' },
-    { id: '300', name: '300 Level' },
-    { id: '400', name: '400 Level' }
-  ];
+  if (loading) {
+    return (
+      <div className="animate-fadeIn p-4">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
-  // Sample exam table data (replace with actual data)
-  const examTables = {
-    '100': '/timetables/100-level-timetable.png',
-    '200': '/timetables/200-level-timetable.png',
-    '300': '/timetables/300-level-timetable.png',
-    '400': '/timetables/400-level-timetable.png'
-  };
+  if (error) {
+    return (
+      <div className="animate-fadeIn p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={fetchTimeTables}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fadeIn p-4">
@@ -59,115 +114,107 @@ const ExamTimeTable = () => {
         <div className="absolute top-0 left-0 w-12 h-12 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
         <div className="absolute top-2 right-12 w-16 h-12 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
         <h1 className="relative text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-2">
-          Examination Time Table
+          Examination Time Tables
         </h1>
         <p className="text-gray-500 text-sm">
-          Academic year 2024/2025 - Semester II Examination Schedule
+          All examination schedules for your faculty - Academic year 2024/2025
         </p>
-      </div>
-
-      {/* Level Selection Tabs */}
-      <div className="mb-8">
-        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-2">
-          <nav className="flex gap-2" aria-label="Tabs">
-            {levels.map((level) => (
-              <button
-                key={level.id}
-                onClick={() => setActiveLevel(level.id)}
-                className={`
-                  relative px-6 py-2.5 rounded-xl font-medium text-sm transition-all duration-200
-                  focus:outline-none transform
-                  ${activeLevel === level.id
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20'
-                    : 'text-gray-600 hover:bg-white hover:shadow-sm active:scale-95'
-                  }
-                `}
-              >
-                {level.name}
-                {activeLevel === level.id && (
-                  <span className="absolute inset-0 rounded-xl bg-white/20 animate-pulse-slow"></span>
-                )}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Timetable Display Section */}
-      <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300">
-        <div className="overflow-hidden rounded-xl bg-gradient-to-b from-gray-50 to-white">
-          <div className="flex justify-center items-center p-4">
-            <img
-              src={examTables[activeLevel]}
-              alt={`${activeLevel} Level Exam Timetable`}
-              className="w-auto max-h-[1024px] object-contain rounded-lg shadow-sm transition-transform duration-300 hover:scale-[1.02]"
-              style={{ maxWidth: '90%' }}
-            />
+        {studentInfo && (
+          <div className="mt-2 text-sm text-gray-600">
+            <p><strong>Faculty:</strong> {studentInfo.faculty}</p>
+            {studentInfo.year && <p><strong>Year:</strong> {studentInfo.year}</p>}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Download Button */}
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={() => handleDownload(activeLevel)}
-            disabled={downloading}
-            className={`
-              group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-xl
-              transition-all duration-200 ease-in-out focus:outline-none
-              ${downloading 
-                ? 'bg-blue-400/90 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-95 active:scale-[0.98]'
+      {/* Timetables List - Grouped by Year */}
+      <div className="space-y-8">
+        {timeTables.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 text-center">
+            <div className="text-gray-500">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No timetables available</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Time tables for your faculty will be uploaded soon.
+              </p>
+            </div>
+          </div>
+        ) : (
+          // Group timetables by year
+          Object.entries(
+            timeTables.reduce((acc, timeTable) => {
+              if (!acc[timeTable.year]) {
+                acc[timeTable.year] = [];
               }
-              text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30
-            `}
-          >
-            <span className="relative flex items-center">
-              {downloading ? (
-                <>
-                  <svg 
-                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-white/90" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    fill="none" 
-                    viewBox="0 0 24 24"
-                  >
-                    <circle 
-                      className="opacity-25" 
-                      cx="12" 
-                      cy="12" 
-                      r="10" 
-                      stroke="currentColor" 
-                      strokeWidth="4"
-                    />
-                    <path 
-                      className="opacity-75" 
-                      fill="currentColor" 
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  <span className="text-white/90">Downloading...</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:translate-y-0.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  <span>Download Timetable</span>
-                </>
-              )}
-            </span>
-          </button>
-        </div>
+              acc[timeTable.year].push(timeTable);
+              return acc;
+            }, {})
+          )
+          .sort(([a], [b]) => {
+            // Sort years: 1st Year, 2nd Year, 3rd Year, 4th Year
+            const yearOrder = { '1st Year': 1, '2nd Year': 2, '3rd Year': 3, '4th Year': 4 };
+            return yearOrder[a] - yearOrder[b];
+          })
+          .map(([year, yearTimeTables]) => (
+            <div key={year} className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">
+                {year} Examination Time Tables
+              </h2>
+              <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+                {yearTimeTables.map((timeTable) => (
+                  <div key={timeTable._id} className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {timeTable.faculty} - {timeTable.year}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Uploaded by {timeTable.uploadedBy?.name || timeTable.uploadedByName || 'Unknown'} on {new Date(timeTable.createdAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          File: {timeTable.originalFileName} ({(timeTable.fileSize / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDownload(timeTable)}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-lg hover:opacity-95 active:scale-[0.98] transition-all duration-200"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download
+                      </button>
+                    </div>
+
+                    {/* File Preview */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      {timeTable.fileType === 'pdf' ? (
+                        <div className="bg-gray-100 p-8 text-center">
+                          <svg className="mx-auto h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <p className="mt-2 text-sm text-gray-600">PDF Document</p>
+                          <p className="text-xs text-gray-500">Click download to view</p>
+                        </div>
+                      ) : (
+                        <img
+                          src={`http://localhost:5000${timeTable.fileUrl}`}
+                          alt={`${timeTable.faculty} ${timeTable.year} timetable`}
+                          className="w-full h-auto max-h-96 object-contain"
+                          onError={(e) => {
+                            e.target.src = '/placeholder-timetable.png';
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

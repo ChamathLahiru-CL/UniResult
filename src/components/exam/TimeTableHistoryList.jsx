@@ -66,11 +66,11 @@ const TimeTableHistoryList = ({ timeTables = [], onPreview }) => {
 
   const getFacultyBadgeColor = (faculty) => {
     const colors = {
-      'Technological Studies': 'bg-blue-100 text-blue-700 border-blue-200',
-      'Applied Science': 'bg-green-100 text-green-700 border-green-200',
-      'Management': 'bg-purple-100 text-purple-700 border-purple-200',
-      'Agriculture': 'bg-orange-100 text-orange-700 border-orange-200',
-      'Medicine': 'bg-red-100 text-red-700 border-red-200'
+      'Faculty of Technological Studies': 'bg-blue-100 text-blue-700 border-blue-200',
+      'Faculty of Applied Science': 'bg-green-100 text-green-700 border-green-200',
+      'Faculty of Management': 'bg-purple-100 text-purple-700 border-purple-200',
+      'Faculty of Agriculture': 'bg-orange-100 text-orange-700 border-orange-200',
+      'Faculty of Medicine': 'bg-red-100 text-red-700 border-red-200'
     };
     return colors[faculty] || 'bg-gray-100 text-gray-700 border-gray-200';
   };

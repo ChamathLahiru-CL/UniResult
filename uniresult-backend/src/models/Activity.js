@@ -38,7 +38,7 @@ const activitySchema = new mongoose.Schema({
     },
     faculty: {
         type: String,
-        enum: ['Technological Studies', 'Applied Science', 'Management', 'Agriculture', 'Medicine']
+        enum: ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine']
     },
     year: {
         type: String,

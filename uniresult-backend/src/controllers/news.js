@@ -16,7 +16,7 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
     }
 
     // Validate faculty
-    const validFaculties = ['Technological Studies', 'Applied Science', 'Management', 'Agriculture', 'Medicine', 'All Faculties'];
+    const validFaculties = ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine', 'All Faculties'];
     if (!validFaculties.includes(faculty)) {
         return next(new ErrorResponse('Invalid faculty selected', 400));
     }

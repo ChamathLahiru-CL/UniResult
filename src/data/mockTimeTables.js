@@ -52,11 +52,11 @@ export const mockTimeTables = [
 ];
 
 export const facultyOptions = [
-  { value: "Technological Studies", label: "Technological Studies" },
-  { value: "Applied Science", label: "Applied Science" },
-  { value: "Management", label: "Management" },
-  { value: "Agriculture", label: "Agriculture" },
-  { value: "Medicine", label: "Medicine" }
+  { value: "Faculty of Technological Studies", label: "Faculty of Technological Studies" },
+  { value: "Faculty of Applied Science", label: "Faculty of Applied Science" },
+  { value: "Faculty of Management", label: "Faculty of Management" },
+  { value: "Faculty of Agriculture", label: "Faculty of Agriculture" },
+  { value: "Faculty of Medicine", label: "Faculty of Medicine" }
 ];
 
 export const yearOptions = [

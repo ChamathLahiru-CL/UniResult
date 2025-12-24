@@ -44,11 +44,11 @@ const NewsUploadForm = ({ onNewsUploaded }) => {
   // Defines all faculties in the university system
   // Used for targeting news to specific faculty departments
   const faculties = [
-    { id: 'Technological Studies', name: 'Faculty of Technological Studies' },
-    { id: 'Applied Science', name: 'Faculty of Applied Science' },
-    { id: 'Management', name: 'Faculty of Management' },
-    { id: 'Agriculture', name: 'Faculty of Agriculture' },
-    { id: 'Medicine', name: 'Faculty of Medicine' },
+    { id: 'Faculty of Technological Studies', name: 'Faculty of Technological Studies' },
+    { id: 'Faculty of Applied Science', name: 'Faculty of Applied Science' },
+    { id: 'Faculty of Management', name: 'Faculty of Management' },
+    { id: 'Faculty of Agriculture', name: 'Faculty of Agriculture' },
+    { id: 'Faculty of Medicine', name: 'Faculty of Medicine' },
     { id: 'All Faculties', name: 'All Faculties' }
   ];
 

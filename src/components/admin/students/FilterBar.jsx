@@ -8,10 +8,10 @@ const departments = [
   { id: 'EET', name: 'EET' },
   { id: 'BBST', name: 'BBST' },
   { id: 'BBA', name: 'BBA' },
-  { id: 'Technological Studies', name: 'Technological Studies' },
-  { id: 'Applied Science', name: 'Applied Science' },
-  { id: 'Medicine', name: 'Medicine' },
-  { id: 'Agriculture', name: 'Agriculture' },
+  { id: 'Faculty of Technological Studies', name: 'Faculty of Technological Studies' },
+  { id: 'Faculty of Applied Science', name: 'Faculty of Applied Science' },
+  { id: 'Faculty of Medicine', name: 'Faculty of Medicine' },
+  { id: 'Faculty of Agriculture', name: 'Faculty of Agriculture' },
   { id: 'Finance', name: 'Finance' }
 ];
 
@@ -43,22 +43,22 @@ const degrees = {
     'BBA in Human Resources',
     'BBA in Operations Management'
   ],
-  'Technological Studies': [
+  'Faculty of Technological Studies': [
     'BSc in Technology Management',
     'BSc in Industrial Technology',
     'BSc in Manufacturing Technology'
   ],
-  'Applied Science': [
+  'Faculty of Applied Science': [
     'BSc in Applied Physics',
     'BSc in Applied Chemistry',
     'BSc in Applied Mathematics'
   ],
-  'Medicine': [
+  'Faculty of Medicine': [
     'MBBS',
     'BSc in Nursing',
     'BSc in Medical Technology'
   ],
-  'Agriculture': [
+  'Faculty of Agriculture': [
     'BSc in Agriculture',
     'BSc in Agricultural Technology',
     'BSc in Food Science'

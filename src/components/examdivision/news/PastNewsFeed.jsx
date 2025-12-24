@@ -251,11 +251,11 @@ const PastNewsFeed = ({ activeFilter = 'all' }) => {
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Faculties</option>
-            <option value="Technological Studies">Technological Studies</option>
-            <option value="Applied Science">Applied Science</option>
-            <option value="Management">Management</option>
-            <option value="Agriculture">Agriculture</option>
-            <option value="Medicine">Medicine</option>
+            <option value="Faculty of Technological Studies">Faculty of Technological Studies</option>
+            <option value="Faculty of Applied Science">Faculty of Applied Science</option>
+            <option value="Faculty of Management">Faculty of Management</option>
+            <option value="Faculty of Agriculture">Faculty of Agriculture</option>
+            <option value="Faculty of Medicine">Faculty of Medicine</option>
             <option value="All Faculties">All Faculties</option>
           </select>
 
