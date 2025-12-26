@@ -2,7 +2,10 @@ export const allowedFileTypes = [
   { type: "application/pdf", extension: ".pdf", name: "PDF" },
   { type: "image/jpeg", extension: ".jpg", name: "JPEG" },
   { type: "image/jpg", extension: ".jpg", name: "JPG" },
-  { type: "image/png", extension: ".png", name: "PNG" }
+  { type: "image/png", extension: ".png", name: "PNG" },
+  { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", extension: ".docx", name: "DOCX" },
+  { type: "application/vnd.ms-excel", extension: ".xls", name: "Excel" },
+  { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", extension: ".xlsx", name: "Excel" }
 ];
 
 export const validateFileType = (file) => {
@@ -18,7 +21,7 @@ export const validateFileType = (file) => {
   if (!isValidType) {
     return {
       isValid: false,
-      error: 'Invalid file type. Please upload PDF, JPG, or PNG files only.'
+      error: 'Invalid file type. Please upload PDF, JPG, PNG, DOCX, or Excel files only.'
     };
   }
 
@@ -36,10 +39,12 @@ export const validateFileType = (file) => {
 
 export const getFileType = (file) => {
   if (!file) return 'unknown';
-  
+
   if (file.type === 'application/pdf') return 'pdf';
   if (file.type.startsWith('image/')) return 'image';
-  
+  if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'docx';
+  if (file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return 'excel';
+
   return 'unknown';
 };
 
