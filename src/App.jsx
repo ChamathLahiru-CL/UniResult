@@ -33,6 +33,7 @@ import ExamNewsPage from './pages/examdivision/ExamNewsPage';
 import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
 import ExamProfileSettings from './pages/examdivision/ExamProfileSettings';
 import ExamDivisionHelp from './pages/examdivision/ExamDivisionHelp';
+import ExamResultUploadPage from './pages/examdivision/ExamResultUploadPage';
 
 // Import Admin Compliance components
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
@@ -98,7 +99,7 @@ function App() {
         }
       >
         <Route index element={<ExamDivision />} />
-        <Route path="new-result" element={<div className="p-8"><h1 className="text-2xl font-bold">New Result Upload</h1></div>} />
+        <Route path="new-result" element={<ExamResultUploadPage />} />
         <Route path="time-table" element={<ExamTimeTableUploadPage />} />
         <Route path="news" element={<ExamNewsPage />} />
         <Route path="compliance" element={<ExamCompliance />} />
