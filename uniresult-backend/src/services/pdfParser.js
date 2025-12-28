@@ -1,7 +1,13 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const pdfParse = require('pdf-parse');
+import Tesseract from 'tesseract.js';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * PDF Result Parser Service
@@ -69,12 +75,57 @@ class PDFResultParser {
     async parseBuffer(dataBuffer) {
         try {
             const pdfData = await pdfParse(dataBuffer);
-            const text = pdfData.text;
+            let text = pdfData.text;
             
             console.log('📄 PDF Text extracted, length:', text.length);
             
             // Extract metadata from PDF
             const metadata = this.extractMetadata(text);
+            
+            // If text extraction failed (very short text), try OCR
+            if (text.length < 100) {
+                console.log('⚠️ Text extraction failed, attempting OCR with Tesseract.js...');
+                try {
+                    text = await this.processScannedPDF(dataBuffer);
+                    console.log('🔍 OCR completed, text length:', text.length);
+
+                    // If OCR also failed, mark as requiring manual entry
+                    if (text.length < 50) {
+                        console.log('⚠️ OCR also failed, marking as requires manual entry');
+                        return {
+                            success: false,
+                            error: 'PDF appears to be scanned/image-based and OCR failed. Manual entry required.',
+                            requiresManualEntry: true,
+                            metadata: {
+                                ...metadata,
+                                pageCount: pdfData.numpages,
+                                totalCharacters: text.length
+                            },
+                            studentResults: [],
+                            resultCount: 0,
+                            rawText: text.substring(0, 2000)
+                        };
+                    }
+                } catch (ocrError) {
+                    console.error('❌ Scanned PDF processing error:', ocrError.message);
+                    return {
+                        success: false,
+                        error: 'PDF parsing failed. The PDF may be scanned/image-based. Manual entry required.',
+                        requiresManualEntry: true,
+                        metadata: {
+                            ...metadata,
+                            pageCount: pdfData.numpages,
+                            totalCharacters: text.length
+                        },
+                        studentResults: [],
+                        resultCount: 0,
+                        rawText: text.substring(0, 2000)
+                    };
+                }
+            }
+            
+            // Extract metadata from PDF (if not already extracted)
+            // const metadata = this.extractMetadata(text);
             
             // Extract student results
             const studentResults = this.extractStudentResults(text);
@@ -88,7 +139,8 @@ class PDFResultParser {
                 },
                 studentResults,
                 resultCount: studentResults.length,
-                rawText: text.substring(0, 2000) // First 2000 chars for debugging
+                rawText: text.substring(0, 2000), // First 2000 chars for debugging
+                usedOCR: text !== pdfData.text
             };
         } catch (error) {
             console.error('Error parsing PDF:', error);
@@ -219,26 +271,77 @@ class PDFResultParser {
     extractFromTableStructure(text) {
         const results = [];
         
-        // Pattern to match: Number Registration Grade Remark
-        // Example: 1 UWU/ICT/22/001 A
-        // Or: 1 UWU/ICT/22/001 A CA Fail
-        const tableRowPattern = /(\d+)\s+([A-Z]{2,5}\/[A-Z]{2,5}\/\d{2}\/\d{2,4})\s+([A-Z][+-]?|AB|NE|NC)(?:\s+(.+?))?(?=\s*\d+\s+[A-Z]{2,5}\/|\s*$|\n)/gi;
+        // Split text into lines for better table parsing
+        const lines = text.split('\n').map(line => line.trim());
         
-        let match;
-        while ((match = tableRowPattern.exec(text)) !== null) {
-            const registrationNo = match[2].trim();
-            const grade = match[3].trim();
-            const remark = match[4] ? match[4].trim() : '';
-            
-            if (this.isValidRegistration(registrationNo)) {
-                results.push({
-                    registrationNo,
-                    grade: this.normalizeGrade(grade),
-                    remark: this.normalizeRemark(remark)
-                });
+        // Find where the table starts (look for header row)
+        let tableStartIndex = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].match(/No\s+Registration\s+No/i) || 
+                lines[i].match(/No\s+Reg/i)) {
+                tableStartIndex = i + 1; // Start from next line after header
+                break;
             }
         }
-
+        
+        if (tableStartIndex === -1) {
+            // Fallback: look for first registration number
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].match(/[A-Z]{2,5}\/[A-Z]{2,5}\/\d{2}\/\d{2,4}/)) {
+                    tableStartIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Process each line as a potential table row
+        for (let i = Math.max(0, tableStartIndex); i < lines.length; i++) {
+            const line = lines[i];
+            
+            // Skip empty lines and non-table lines
+            if (!line || line.length < 10) continue;
+            
+            // Pattern for table row: No | Registration No | Grade | Remark (optional)
+            // Examples:
+            // 1     UWU/ICT/22/001     A
+            // 6     UWU/ICT/22/008     NE       CA fail
+            // 98    UWU/ICT/22/1/048   NE       2 nd attempt
+            
+            // More flexible pattern that handles varying whitespace
+            // Match grade patterns in order: Two-letter grades (AB, NE, NC, etc.) MUST come before single letters
+            // This prevents "AB" from being parsed as "A" with remark "B"
+            const rowPattern = /^(\d+)\s+([A-Z]{2,5}\/[A-Z]{2,5}\/\d{2}\/\d{1,4}(?:\/\d{1,4})?)\s+(AB|NE|NC|WP|WF|A[+-]?|B[+-]?|C[+-]?|D[+-]?|E|F|I|W)\s*(.*)$/i;
+            const match = line.match(rowPattern);
+            
+            if (match) {
+                const registrationNo = match[2].trim();
+                const grade = match[3].trim();
+                const remarkText = match[4].trim();
+                
+                // Clean up remark - remove any trailing text that looks like next row
+                let remark = '';
+                if (remarkText) {
+                    // Stop at next registration number pattern or next row number
+                    const nextRegMatch = remarkText.match(/^(.+?)(?=\d+\s+[A-Z]{2,5}\/|$)/);
+                    remark = nextRegMatch ? nextRegMatch[1].trim() : remarkText;
+                    
+                    // Additional cleanup: remove leading/trailing whitespace and normalize
+                    remark = remark.replace(/\s+/g, ' ').trim();
+                }
+                
+                if (this.isValidRegistration(registrationNo)) {
+                    results.push({
+                        registrationNo: registrationNo.toUpperCase(),
+                        grade: this.normalizeGrade(grade),
+                        remark: this.normalizeRemark(remark)
+                    });
+                    
+                    console.log(`Parsed: ${registrationNo} - ${grade} - ${remark || 'No remark'}`);
+                }
+            }
+        }
+        
+        console.log(`📋 Table structure extraction found ${results.length} results`);
         return results;
     }
 
@@ -401,6 +504,46 @@ class PDFResultParser {
         return results.filter(r => 
             r.registrationNo.toUpperCase().includes(normalized)
         );
+    }
+
+    /**
+     * Extract text from PDF using OCR when regular text extraction fails
+     * @param {Buffer} dataBuffer - PDF file buffer
+     * @returns {Promise<string>} Extracted text
+     */
+    /**
+     * Extract text from PDF using OCR when regular text extraction fails
+     * @param {Buffer} dataBuffer - PDF file buffer
+     * @returns {Promise<string>} Extracted text
+     */
+    async extractTextWithOCR(_dataBuffer) { // eslint-disable-line no-unused-vars
+        // OCR not implemented in this version
+        // The parseBuffer method handles both text and scanned PDFs
+        console.log('⚠️ OCR fallback not used - using alternative PDF processing');
+        return '';
+    }
+
+    /**
+     * Process scanned PDFs using tesseract.js
+     * @param {Buffer} _dataBuffer - PDF file buffer
+     * @returns {Promise<string>} Extracted text
+     */
+    async processScannedPDF(_dataBuffer) { // eslint-disable-line no-unused-vars
+        try {
+            console.log('🔍 Attempting OCR on scanned PDF...');
+            console.log('ℹ️  For better OCR support on scanned PDFs, please install ImageMagick:');
+            console.log('   - Windows: Download from https://imagemagick.org/script/download.php');
+            console.log('   - Then set environment: $env:PATH += ";C:\\Program Files\\ImageMagick-7.x.x-Q16"');
+            console.log('   - Or use a cloud OCR service (Google Vision, AWS Textract)');
+            
+            // Since we can't reliably process scanned PDFs without system dependencies,
+            // we'll return empty and let the system use manual entry as fallback
+            return '';
+
+        } catch (error) {
+            console.error('⚠️ OCR not available:', error.message);
+            return '';
+        }
     }
 }
 

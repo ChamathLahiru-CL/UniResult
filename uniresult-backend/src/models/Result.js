@@ -38,15 +38,17 @@ const resultSchema = new mongoose.Schema({
         trim: true,
         default: ''
     },
-    year: {
+    level: {
         type: String,
-        required: [true, 'Academic year is required'],
+        required: [true, 'Academic level is required'],
+        enum: ['100', '200', '300', '400'],
         trim: true
     },
     semester: {
         type: String,
-        trim: true,
-        default: ''
+        required: [true, 'Semester is required'],
+        enum: ['1st Semester', '2nd Semester', '3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester'],
+        trim: true
     },
     academicYear: {
         type: String,
@@ -97,7 +99,7 @@ const resultSchema = new mongoose.Schema({
     // Parsing status
     parseStatus: {
         type: String,
-        enum: ['pending', 'processing', 'completed', 'failed'],
+        enum: ['pending', 'processing', 'completed', 'failed', 'requires_manual_entry'],
         default: 'pending'
     },
     parseError: {
@@ -136,7 +138,7 @@ const resultSchema = new mongoose.Schema({
 
 // Index for efficient querying
 resultSchema.index({ 'studentResults.registrationNo': 1 });
-resultSchema.index({ faculty: 1, department: 1, year: 1 });
+resultSchema.index({ faculty: 1, department: 1, level: 1, semester: 1 });
 resultSchema.index({ courseCode: 1 });
 resultSchema.index({ createdAt: -1 });
 

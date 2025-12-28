@@ -17,20 +17,20 @@ export const uploadResult = async (req, res) => {
         const {
             faculty,
             department,
-            year,
+            level,
+            semester,
             credits,
             subjectName,
             courseCode,
-            semester,
             academicYear,
             degreeProgram
         } = req.body;
 
         // Validate required fields
-        if (!faculty || !department || !year || !subjectName) {
+        if (!faculty || !department || !level || !semester || !subjectName) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide faculty, department, year, and subject name'
+                message: 'Please provide faculty, department, level, semester, and subject name'
             });
         }
 
@@ -49,11 +49,11 @@ export const uploadResult = async (req, res) => {
         const result = await Result.create({
             faculty,
             department,
-            year,
+            level,
+            semester,
             credits: credits ? parseInt(credits) : 0,
             subjectName,
             courseCode: courseCode || '',
-            semester: semester || '',
             academicYear: academicYear || '',
             degreeProgram: degreeProgram || '',
             originalFileName: req.file.originalname,
@@ -71,9 +71,23 @@ export const uploadResult = async (req, res) => {
         // Parse the PDF asynchronously
         try {
             console.log('📄 Starting PDF parsing for:', req.file.originalname);
+            console.log('📂 File path:', filePath);
+            
             const parseResult = await pdfParser.parseFile(filePath);
+            console.log('\n📊 Parse result:', {
+                success: parseResult.success,
+                studentCount: parseResult.studentResults?.length || 0,
+                metadataExtracted: !!parseResult.metadata
+            });
             
             if (parseResult.success && parseResult.studentResults.length > 0) {
+                console.log(`\n✅ PDF parsed successfully: ${parseResult.studentResults.length} results extracted`);
+                console.log('Sample results:', parseResult.studentResults.slice(0, 3).map(r => ({
+                    reg: r.registrationNo,
+                    grade: r.grade,
+                    remark: r.remark
+                })));
+                
                 // Update result with parsed data
                 result.studentResults = parseResult.studentResults;
                 result.resultCount = parseResult.studentResults.length;
@@ -92,18 +106,38 @@ export const uploadResult = async (req, res) => {
                 }
                 
                 await result.save();
+                console.log('💾 Result sheet saved to database');
 
                 // Create individual StudentResult entries for each student
-                await createStudentResults(result, parseResult.studentResults);
+                console.log('\n📝 Creating individual student result entries...');
+                const createResult = await createStudentResults(result, parseResult.studentResults);
+                console.log(`\n✅ Student results created: ${createResult.total} total, ${createResult.registered} registered, ${createResult.unregistered} not registered yet`);
 
-                console.log(`✅ PDF parsed successfully: ${parseResult.studentResults.length} results extracted`);
-            } else {
-                result.parseStatus = 'completed';
+            } else if (parseResult.requiresManualEntry) {
+                // PDF is scanned/image-based and requires manual entry
+                console.log('⚠️ PDF requires manual entry:', parseResult.error);
+                
+                result.parseStatus = 'requires_manual_entry';
                 result.resultCount = 0;
+                result.parseError = parseResult.error || 'PDF appears to be scanned/image-based. Manual entry required.';
                 result.parsedAt = new Date();
                 await result.save();
                 
-                console.log('⚠️ PDF parsed but no results found');
+                console.log('💾 Result sheet saved with manual entry required');
+                
+            } else {
+                // PDF parsing failed or returned no results
+                console.log('⚠️ PDF parsing completed but no results extracted');
+                console.log('Used OCR:', parseResult.usedOCR || false);
+                console.log('Raw text sample:', parseResult.rawText?.substring(0, 200));
+                
+                result.parseStatus = 'requires_manual_entry';
+                result.resultCount = 0;
+                result.parseError = 'PDF parsing failed to extract student results. Manual data entry required.';
+                result.parsedAt = new Date();
+                await result.save();
+                
+                console.log('💾 Result sheet saved with manual entry required');
             }
         } catch (parseError) {
             console.error('❌ PDF parsing error:', parseError);
@@ -142,9 +176,14 @@ export const uploadResult = async (req, res) => {
 // Helper function to create individual student result entries
 async function createStudentResults(resultSheet, studentResults) {
     try {
+        console.log(`\n📝 Creating student result entries for ${studentResults.length} students...`);
         const studentResultDocs = [];
+        let studentsFound = 0;
+        let studentsNotFound = 0;
 
         for (const sr of studentResults) {
+            console.log(`\n  Processing: ${sr.registrationNo} - Grade: ${sr.grade} - Remark: ${sr.remark || 'None'}`);
+            
             // Check if student exists with this registration number
             const student = await User.findOne({
                 $or: [
@@ -153,38 +192,64 @@ async function createStudentResults(resultSheet, studentResults) {
                 ]
             });
 
+            if (student) {
+                console.log(`  ✅ Found student: ${student.name} (${student.enrollmentNumber || student.username})`);
+                studentsFound++;
+            } else {
+                console.log(`  ⚠️ Student not registered yet: ${sr.registrationNo}`);
+                studentsNotFound++;
+            }
+
             studentResultDocs.push({
                 student: student ? student._id : null,
                 registrationNo: sr.registrationNo,
                 resultSheet: resultSheet._id,
                 grade: sr.grade,
-                remark: sr.remark,
+                remark: sr.remark || '',
                 subjectName: resultSheet.subjectName,
                 courseCode: resultSheet.courseCode,
                 credits: resultSheet.credits,
                 faculty: resultSheet.faculty,
                 department: resultSheet.department,
-                academicYear: resultSheet.academicYear,
+                level: resultSheet.level,
                 semester: resultSheet.semester,
-                year: resultSheet.year,
-                fileUrl: resultSheet.fileUrl
+                academicYear: resultSheet.academicYear,
+                fileUrl: resultSheet.fileUrl,
+                isViewed: false
             });
         }
 
         // Use insertMany with ordered: false to continue on duplicates
         if (studentResultDocs.length > 0) {
-            await StudentResult.insertMany(studentResultDocs, { ordered: false }).catch(err => {
-                // Ignore duplicate key errors
-                if (err.code !== 11000) {
+            console.log(`\n💾 Saving ${studentResultDocs.length} results to database...`);
+            
+            const result = await StudentResult.insertMany(studentResultDocs, { ordered: false })
+                .catch(err => {
+                    // Ignore duplicate key errors
+                    if (err.code === 11000) {
+                        console.log('⚠️ Some duplicate results were skipped');
+                        return { insertedCount: err.insertedDocs?.length || 0 };
+                    }
                     throw err;
-                }
-                console.log('Some duplicate results were skipped');
-            });
+                });
+            
+            console.log(`✅ Successfully saved ${result.insertedCount || studentResultDocs.length} student results`);
+            console.log(`📊 Summary: ${studentsFound} registered students, ${studentsNotFound} not registered yet`);
+            
+            // Verify the results were actually saved in database
+            const savedCount = await StudentResult.countDocuments({ resultSheet: studentResultDocs[0].resultSheet });
+            console.log(`✅ Database verification: ${savedCount} results found in database for this result sheet`);
         }
 
-        console.log(`📊 Created ${studentResultDocs.length} student result entries`);
+        return { 
+            total: studentResultDocs.length, 
+            registered: studentsFound, 
+            unregistered: studentsNotFound 
+        };
+
     } catch (error) {
-        console.error('Error creating student results:', error);
+        console.error('❌ Error creating student results:', error);
+        throw error;
     }
 }
 
@@ -303,6 +368,170 @@ export const getMyResults = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching your results',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get student's results organized by level and semester
+// @route   GET /api/results/my-results-organized
+// @access  Private (Student)
+export const getMyResultsOrganized = async (req, res) => {
+    try {
+        const user = req.user;
+
+        // Get registration number from user
+        const registrationNo = user.enrollmentNumber || user.username;
+
+        if (!registrationNo) {
+            return res.status(400).json({
+                success: false,
+                message: 'No enrollment number associated with your account'
+            });
+        }
+
+        // Find all results for this student with flexible matching
+        let results = [];
+
+        // Try multiple matching strategies
+        const matchingStrategies = [
+            // Strategy 1: Exact match
+            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } } },
+
+            // Strategy 2: Match without slashes (for users like "UWUICT22")
+            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo.replace(/\//g, '')}$`, 'i') } } },
+
+            // Strategy 3: Match core registration number (last part)
+            (() => {
+                const parts = registrationNo.split('/');
+                const lastPart = parts[parts.length - 1];
+                if (lastPart && lastPart.match(/\d{2,4}$/)) {
+                    return { query: { registrationNo: { $regex: new RegExp(`${lastPart}$`, 'i') } } };
+                }
+                return null;
+            })(),
+
+            // Strategy 4: Match with normalized format (convert user format to PDF format)
+            (() => {
+                // If user has format like "UWUICT22", try to convert to "UWU/ICT/22/022"
+                if (registrationNo.match(/^UWU[A-Z]+(\d+)$/)) {
+                    const match = registrationNo.match(/^UWU([A-Z]+)(\d+)$/);
+                    if (match) {
+                        const dept = match[1];
+                        const num = match[2];
+                        // Try different year formats
+                        const possibleFormats = [
+                            `UWU/${dept}/22/${num}`,
+                            `UWU/${dept}/23/${num}`,
+                            `UWU/${dept}/21/${num}`
+                        ];
+                        return {
+                            query: {
+                                registrationNo: { $in: possibleFormats }
+                            }
+                        };
+                    }
+                }
+                return null;
+            })()
+        ].filter(strategy => strategy !== null);
+
+        // Try each strategy until we find results
+        for (const strategy of matchingStrategies) {
+            console.log('Trying matching strategy:', strategy.query);
+            const foundResults = await StudentResult.find(strategy.query)
+                .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+                .sort({ createdAt: -1 });
+
+            if (foundResults.length > 0) {
+                results = foundResults;
+                console.log(`✅ Found ${results.length} results using strategy`);
+                break;
+            }
+        }
+
+        console.log(`Student ${registrationNo}: Found ${results.length} results`);
+
+        // Organize results by level and semester
+        const organizedData = {
+            '100': {
+                title: '100 Level',
+                semesters: {
+                    '1': { title: '1st Semester', subjects: [] },
+                    '2': { title: '2nd Semester', subjects: [] }
+                }
+            },
+            '200': {
+                title: '200 Level',
+                semesters: {
+                    '3': { title: '3rd Semester', subjects: [] },
+                    '4': { title: '4th Semester', subjects: [] }
+                }
+            },
+            '300': {
+                title: '300 Level',
+                semesters: {
+                    '5': { title: '5th Semester', subjects: [] },
+                    '6': { title: '6th Semester', subjects: [] }
+                }
+            },
+            '400': {
+                title: '400 Level',
+                semesters: {
+                    '7': { title: '7th Semester', subjects: [] },
+                    '8': { title: '8th Semester', subjects: [] }
+                }
+            }
+        };
+
+        // Map semester numbers to level-semester combinations
+        const semesterToLevelMap = {
+            '1st Semester': { level: '100', semester: '1' },
+            '2nd Semester': { level: '100', semester: '2' },
+            '3rd Semester': { level: '200', semester: '3' },
+            '4th Semester': { level: '200', semester: '4' },
+            '5th Semester': { level: '300', semester: '5' },
+            '6th Semester': { level: '300', semester: '6' },
+            '7th Semester': { level: '400', semester: '7' },
+            '8th Semester': { level: '400', semester: '8' }
+        };
+
+        // Organize results into the structure
+        results.forEach(result => {
+            const semesterKey = result.semester;
+            const mapping = semesterToLevelMap[semesterKey];
+
+            if (mapping) {
+                const { level, semester } = mapping;
+                organizedData[level].semesters[semester].subjects.push({
+                    code: result.courseCode || '',
+                    title: result.subjectName,
+                    creditCount: result.credits,
+                    grade: result.grade,
+                    status: result.grade ? 'completed' : 'pending',
+                    updateDate: result.createdAt ? new Date(result.createdAt).toISOString().split('T')[0] : null
+                });
+            }
+        });
+
+        // Mark results as viewed
+        const resultIds = results.map(r => r._id);
+        await StudentResult.updateMany(
+            { _id: { $in: resultIds }, isViewed: false },
+            { $set: { isViewed: true, viewedAt: new Date() } }
+        );
+
+        res.status(200).json({
+            success: true,
+            registrationNo,
+            data: organizedData
+        });
+
+    } catch (error) {
+        console.error('Get organized results error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching your organized results',
             error: error.message
         });
     }
@@ -600,6 +829,143 @@ export const linkStudentResults = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error linking results',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get all student results from database (for verification)
+// @route   GET /api/results/student-results
+// @access  Private (Admin/ExamDiv)
+export const getAllStudentResults = async (req, res) => {
+    try {
+        const { limit = 50, page = 1, registrationNo, resultSheet } = req.query;
+        
+        const query = {};
+        if (registrationNo) {
+            query.registrationNo = { $regex: new RegExp(registrationNo, 'i') };
+        }
+        if (resultSheet) {
+            query.resultSheet = resultSheet;
+        }
+
+        const studentResults = await StudentResult.find(query)
+            .populate('student', 'name enrollmentNumber username email')
+            .populate('resultSheet', 'originalFileName uploadedAt')
+            .sort({ createdAt: -1 })
+            .limit(parseInt(limit))
+            .skip((parseInt(page) - 1) * parseInt(limit));
+
+        const total = await StudentResult.countDocuments(query);
+
+        console.log(`📊 Retrieved ${studentResults.length} student results from database (Total: ${total})`);
+
+        res.status(200).json({
+            success: true,
+            count: studentResults.length,
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / parseInt(limit)),
+            data: studentResults.map(sr => ({
+                id: sr._id,
+                registrationNo: sr.registrationNo,
+                studentName: sr.student?.name || 'Not Registered',
+                studentEnrollment: sr.student?.enrollmentNumber || sr.student?.username || 'N/A',
+                grade: sr.grade,
+                remark: sr.remark,
+                subjectName: sr.subjectName,
+                courseCode: sr.courseCode,
+                credits: sr.credits,
+                level: sr.level,
+                semester: sr.semester,
+                academicYear: sr.academicYear,
+                resultSheet: sr.resultSheet?.originalFileName || 'N/A',
+                uploadedAt: sr.resultSheet?.uploadedAt,
+                isViewed: sr.isViewed,
+                createdAt: sr.createdAt
+            }))
+        });
+
+    } catch (error) {
+        console.error('Get student results error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching student results',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Manually add student results to a result sheet
+// @route   POST /api/results/:id/manual-results
+// @access  Private (Admin/ExamDiv)
+export const addManualStudentResults = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { studentResults } = req.body;
+
+        // Validate input
+        if (!Array.isArray(studentResults) || studentResults.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide an array of student results'
+            });
+        }
+
+        // Find the result sheet
+        const resultSheet = await Result.findById(id);
+        if (!resultSheet) {
+            return res.status(404).json({
+                success: false,
+                message: 'Result sheet not found'
+            });
+        }
+
+        // Validate each student result
+        const validatedResults = [];
+        for (const sr of studentResults) {
+            if (!sr.registrationNo || !sr.grade) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid student result: registration number and grade are required`
+                });
+            }
+            validatedResults.push({
+                registrationNo: sr.registrationNo.toUpperCase().trim(),
+                grade: sr.grade.trim(),
+                remark: sr.remark?.trim() || ''
+            });
+        }
+
+        console.log(`📝 Adding ${validatedResults.length} manual student results to result sheet: ${resultSheet.subjectName}`);
+
+        // Create individual StudentResult entries
+        const createResult = await createStudentResults(resultSheet, validatedResults);
+
+        // Update result sheet status
+        resultSheet.parseStatus = 'completed';
+        resultSheet.resultCount = createResult.total;
+        resultSheet.manualEntryCompletedAt = new Date();
+        await resultSheet.save();
+
+        console.log(`✅ Manual results added: ${createResult.total} total, ${createResult.registered} registered, ${createResult.unregistered} not registered yet`);
+
+        res.status(201).json({
+            success: true,
+            message: 'Student results added successfully',
+            data: {
+                resultSheetId: id,
+                totalAdded: createResult.total,
+                registered: createResult.registered,
+                unregistered: createResult.unregistered
+            }
+        });
+
+    } catch (error) {
+        console.error('Add manual results error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error adding manual results',
             error: error.message
         });
     }

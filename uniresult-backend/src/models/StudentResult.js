@@ -63,7 +63,7 @@ const studentResultSchema = new mongoose.Schema({
         trim: true,
         default: ''
     },
-    academicYear: {
+    level: {
         type: String,
         trim: true,
         default: ''
@@ -73,7 +73,7 @@ const studentResultSchema = new mongoose.Schema({
         trim: true,
         default: ''
     },
-    year: {
+    academicYear: {
         type: String,
         trim: true,
         default: ''

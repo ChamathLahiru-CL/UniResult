@@ -16,7 +16,8 @@ const ExamResultUploadPage = () => {
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [facultyFilter, setFacultyFilter] = useState('');
-  const [yearFilter, setYearFilter] = useState('');
+  const [levelFilter, setLevelFilter] = useState('');
+  const [semesterFilter, setSemesterFilter] = useState('');
   const [timeRangeFilter, setTimeRangeFilter] = useState('all');
 
   // Fetch results from API
@@ -38,7 +39,8 @@ const ExamResultUploadPage = () => {
           id: item._id,
           faculty: item.faculty,
           department: item.department,
-          year: item.year,
+          level: item.level,
+          semester: item.semester,
           credits: item.credits,
           subjectName: item.subjectName,
           resultCount: item.resultCount,
@@ -78,7 +80,8 @@ const ExamResultUploadPage = () => {
         result.subjectName.toLowerCase().includes(query) ||
         result.faculty.toLowerCase().includes(query) ||
         result.department.toLowerCase().includes(query) ||
-        result.year.toLowerCase().includes(query) ||
+        result.level.toLowerCase().includes(query) ||
+        result.semester.toLowerCase().includes(query) ||
         result.uploadedBy.toLowerCase().includes(query) ||
         (result.uploadedByUsername && result.uploadedByUsername.toLowerCase().includes(query)) ||
         (result.uploadedByEmail && result.uploadedByEmail.toLowerCase().includes(query))
@@ -90,9 +93,14 @@ const ExamResultUploadPage = () => {
       filtered = filtered.filter(result => result.faculty === facultyFilter);
     }
 
-    // Year filter
-    if (yearFilter) {
-      filtered = filtered.filter(result => result.year === yearFilter);
+    // Level filter
+    if (levelFilter) {
+      filtered = filtered.filter(result => result.level === levelFilter);
+    }
+
+    // Semester filter
+    if (semesterFilter) {
+      filtered = filtered.filter(result => result.semester === semesterFilter);
     }
 
     // Time range filter
@@ -103,7 +111,7 @@ const ExamResultUploadPage = () => {
     filtered.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
 
     setFilteredResults(filtered);
-  }, [results, searchQuery, facultyFilter, yearFilter, timeRangeFilter]);
+  }, [results, searchQuery, facultyFilter, levelFilter, semesterFilter, timeRangeFilter]);
 
   const handleUploadSuccess = () => {
     // Refresh the data from API
@@ -123,11 +131,12 @@ const ExamResultUploadPage = () => {
   const clearFilters = () => {
     setSearchQuery('');
     setFacultyFilter('');
-    setYearFilter('');
+    setLevelFilter('');
+    setSemesterFilter('');
     setTimeRangeFilter('all');
   };
 
-  const hasActiveFilters = searchQuery || facultyFilter || yearFilter || timeRangeFilter !== 'all';
+  const hasActiveFilters = searchQuery || facultyFilter || levelFilter || semesterFilter || timeRangeFilter !== 'all';
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -224,8 +233,10 @@ const ExamResultUploadPage = () => {
               onSearchChange={setSearchQuery}
               facultyFilter={facultyFilter}
               onFacultyFilterChange={setFacultyFilter}
-              yearFilter={yearFilter}
-              onYearFilterChange={setYearFilter}
+              levelFilter={levelFilter}
+              onLevelFilterChange={setLevelFilter}
+              semesterFilter={semesterFilter}
+              onSemesterFilterChange={setSemesterFilter}
               timeRangeFilter={timeRangeFilter}
               onTimeRangeFilterChange={setTimeRangeFilter}
             />
@@ -247,9 +258,14 @@ const ExamResultUploadPage = () => {
                       Faculty: {facultyFilter}
                     </span>
                   )}
-                  {yearFilter && (
+                  {levelFilter && (
                     <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                      Year: {yearFilter}
+                      Level: {levelFilter}
+                    </span>
+                  )}
+                  {semesterFilter && (
+                    <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      Semester: {semesterFilter}
                     </span>
                   )}
                   {timeRangeFilter !== 'all' && (

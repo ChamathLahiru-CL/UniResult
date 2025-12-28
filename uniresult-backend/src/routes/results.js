@@ -9,12 +9,15 @@ import {
     getAllResults,
     getResultById,
     getMyResults,
+    getMyResultsOrganized,
     searchByRegistration,
     reparseResult,
     downloadResult,
     deleteResult,
     getNewResultsCount,
-    linkStudentResults
+    linkStudentResults,
+    getAllStudentResults,
+    addManualStudentResults
 } from '../controllers/results.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -64,12 +67,15 @@ router.use(protect);
 
 // Student routes
 router.get('/my-results', getMyResults);
+router.get('/my-results-organized', getMyResultsOrganized);
 router.get('/my-results/new-count', getNewResultsCount);
 router.post('/link-student', linkStudentResults);
 
 // Admin/ExamDiv routes
 router.post('/upload', authorize('admin', 'examDiv'), upload.single('file'), uploadResult);
+router.post('/:id/manual-results', authorize('admin', 'examDiv'), addManualStudentResults);
 router.get('/', getAllResults);
+router.get('/student-results', authorize('admin', 'examDiv'), getAllStudentResults);
 router.get('/search/:registrationNo', authorize('admin', 'examDiv'), searchByRegistration);
 router.get('/:id', getResultById);
 router.get('/:id/download', downloadResult);

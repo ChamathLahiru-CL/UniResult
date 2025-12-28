@@ -12,6 +12,24 @@ export const departmentOptions = [
   { value: "DOC", label: "Doctor of Medicine (DOC)" }
 ];
 
+export const levelOptions = [
+  { value: "100", label: "100 Level" },
+  { value: "200", label: "200 Level" },
+  { value: "300", label: "300 Level" },
+  { value: "400", label: "400 Level" }
+];
+
+export const semesterOptions = [
+  { value: "1st Semester", label: "1st Semester" },
+  { value: "2nd Semester", label: "2nd Semester" },
+  { value: "3rd Semester", label: "3rd Semester" },
+  { value: "4th Semester", label: "4th Semester" },
+  { value: "5th Semester", label: "5th Semester" },
+  { value: "6th Semester", label: "6th Semester" },
+  { value: "7th Semester", label: "7th Semester" },
+  { value: "8th Semester", label: "8th Semester" }
+];
+
 export const creditOptions = [
   { value: "1", label: "1 Credit" },
   { value: "2", label: "2 Credits" },
