@@ -13,6 +13,7 @@ import examDivisionRoutes from './routes/examDivision.js';
 import timeTableRoutes from './routes/timeTable.js';
 import activityRoutes from './routes/activity.js';
 import newsRoutes from './routes/news.js';
+import resultsRoutes from './routes/results.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -67,10 +68,12 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes); // Alias for /api/users to support frontend calls
 app.use('/api/exam-division', examDivisionRoutes);
 app.use('/api/timetable', timeTableRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/results', resultsRoutes);
 
 // Error handler middleware
 // eslint-disable-next-line no-unused-vars
