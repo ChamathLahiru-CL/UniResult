@@ -547,6 +547,92 @@ export const getMyResultsOrganized = async (req, res) => {
     }
 };
 
+// @desc    Get student's latest results (most recent 5 updates)
+// @route   GET /api/results/my-results/latest
+// @access  Private (Student)
+export const getLatestResults = async (req, res) => {
+    try {
+        const user = req.user;
+        const limit = parseInt(req.query.limit) || 5;
+
+        // Get registration number from user
+        const registrationNo = user.enrollmentNumber || user.username;
+
+        if (!registrationNo) {
+            return res.status(400).json({
+                success: false,
+                message: 'No enrollment number associated with your account'
+            });
+        }
+
+        // Find latest results for this student
+        let results = [];
+
+        // Try multiple matching strategies
+        const matchingStrategies = [
+            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } } },
+            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo.replace(/\//g, '')}$`, 'i') } } }
+        ];
+
+        for (const strategy of matchingStrategies) {
+            const foundResults = await StudentResult.find(strategy.query)
+                .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+                .sort({ createdAt: -1 })
+                .limit(limit);
+
+            if (foundResults.length > 0) {
+                results = foundResults;
+                break;
+            }
+        }
+
+        // Map semester to level
+        const semesterToLevel = {
+            '1st Semester': 100,
+            '2nd Semester': 100,
+            '3rd Semester': 200,
+            '4th Semester': 200,
+            '5th Semester': 300,
+            '6th Semester': 300,
+            '7th Semester': 400,
+            '8th Semester': 400
+        };
+
+        // Extract semester number from semester name
+        const getSemesterNumber = (semesterName) => {
+            const match = semesterName.match(/(\d+)/);
+            return match ? match[1] : '1';
+        };
+
+        // Transform results to match frontend structure
+        const latestResults = results.map(result => ({
+            code: result.courseCode || '',
+            subject: result.subjectName,
+            level: semesterToLevel[result.semester] || 100,
+            semester: parseInt(getSemesterNumber(result.semester)),
+            grade: result.grade || 'N/A',
+            updateDate: result.createdAt ? new Date(result.createdAt).toLocaleDateString() : 'N/A',
+            isNew: result.isViewed ? false : true
+        }));
+
+        console.log(`✅ Found ${latestResults.length} latest results for ${registrationNo}`);
+
+        res.status(200).json({
+            success: true,
+            count: latestResults.length,
+            data: latestResults
+        });
+
+    } catch (error) {
+        console.error('Get latest results error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching latest results',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Search results by registration number
 // @route   GET /api/results/search/:registrationNo
 // @access  Private (Admin/ExamDiv)
