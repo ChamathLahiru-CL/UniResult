@@ -1,14 +1,17 @@
 import React from 'react';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import { facultyOptions, yearOptions } from '../../data/mockTimeTables';
+import { facultyOptions } from '../../data/mockTimeTables';
+import { levelOptions, semesterOptions } from '../../data/mockResults';
 
 const ExamFilterBar = ({
   searchQuery,
   onSearchChange,
   facultyFilter,
   onFacultyFilterChange,
-  yearFilter,
-  onYearFilterChange,
+  levelFilter,
+  onLevelFilterChange,
+  semesterFilter,
+  onSemesterFilterChange,
   timeRangeFilter,
   onTimeRangeFilterChange
 }) => {
@@ -50,16 +53,30 @@ const ExamFilterBar = ({
           ))}
         </select>
 
-        {/* Year Filter */}
+        {/* Level Filter */}
         <select
-          value={yearFilter}
-          onChange={(e) => onYearFilterChange(e.target.value)}
+          value={levelFilter}
+          onChange={(e) => onLevelFilterChange(e.target.value)}
           className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent text-sm bg-white"
         >
-          <option value="">All Years</option>
-          {yearOptions.map((year) => (
-            <option key={year.value} value={year.value}>
-              {year.label}
+          <option value="">All Levels</option>
+          {levelOptions.map((level) => (
+            <option key={level.value} value={level.value}>
+              {level.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Semester Filter */}
+        <select
+          value={semesterFilter}
+          onChange={(e) => onSemesterFilterChange(e.target.value)}
+          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent text-sm bg-white"
+        >
+          <option value="">All Semesters</option>
+          {semesterOptions.map((semester) => (
+            <option key={semester.value} value={semester.value}>
+              {semester.label}
             </option>
           ))}
         </select>

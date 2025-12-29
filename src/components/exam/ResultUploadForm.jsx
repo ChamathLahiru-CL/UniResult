@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, XMarkIcon, DocumentTextIcon, TableCellsIcon } from '@heroicons/react/24/outline';
-import { facultyOptions, yearOptions } from '../../data/mockTimeTables';
-import { departmentOptions, creditOptions } from '../../data/mockResults';
+import { facultyOptions } from '../../data/mockTimeTables';
+import { departmentOptions, creditOptions, levelOptions, semesterOptions } from '../../data/mockResults';
 import { validateFileType, getFileType, formatFileSize } from '../../utils/validateFileType';
 import { notificationDispatcher, showNotificationToast } from '../../utils/notificationDispatcher';
 import UploadProgressBar from './UploadProgressBar';
@@ -9,10 +9,13 @@ import UploadProgressBar from './UploadProgressBar';
 const ResultUploadForm = ({ onUploadSuccess }) => {
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState('');
   const [selectedCredits, setSelectedCredits] = useState('');
   const [subjectName, setSubjectName] = useState('');
-  const [resultCount, setResultCount] = useState('');
+  const [courseCode, setCourseCode] = useState('');
+  const [academicYear, setAcademicYear] = useState('');
+  const [degreeProgram, setDegreeProgram] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -63,13 +66,8 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedFaculty || !selectedDepartment || !selectedYear || !selectedCredits || !subjectName || !resultCount || !selectedFile) {
+    if (!selectedFaculty || !selectedDepartment || !selectedLevel || !selectedSemester || !selectedCredits || !subjectName || !selectedFile) {
       setError('Please fill all required fields and select a file before uploading.');
-      return;
-    }
-
-    if (isNaN(resultCount) || parseInt(resultCount) <= 0) {
-      setError('Result count must be a positive number.');
       return;
     }
 
@@ -77,37 +75,61 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
     setUploadProgress(0);
     setError('');
 
+    console.log('📤 Starting PDF upload...');
+    console.log('Form data:', {
+      faculty: selectedFaculty,
+      department: selectedDepartment,
+      level: selectedLevel,
+      semester: selectedSemester,
+      credits: selectedCredits,
+      subjectName,
+      courseCode,
+      academicYear,
+      degreeProgram,
+      file: selectedFile?.name
+    });
+
     try {
       // Create form data for file upload
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('faculty', selectedFaculty);
       formData.append('department', selectedDepartment);
-      formData.append('year', selectedYear);
+      formData.append('level', selectedLevel);
+      formData.append('semester', selectedSemester);
       formData.append('credits', selectedCredits);
       formData.append('subjectName', subjectName);
-      formData.append('resultCount', resultCount);
+      formData.append('courseCode', courseCode || '');
+      formData.append('academicYear', academicYear || '');
+      formData.append('degreeProgram', degreeProgram || '');
 
-      // Get token from localStorage (assuming auth is implemented)
+      // Get token from localStorage
       const token = localStorage.getItem('token');
+      console.log('Token exists:', !!token);
 
       const headers = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      console.log('🚀 Sending request to backend...');
+      
       const response = await fetch('http://localhost:5000/api/results/upload', {
         method: 'POST',
         headers,
         body: formData
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Upload failed:', errorData);
         throw new Error(errorData.message || 'Upload failed');
       }
 
       const result = await response.json();
+      console.log('✅ Upload successful:', result);
 
       // Dispatch notifications
       await notificationDispatcher(result.data);
@@ -126,7 +148,6 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
         year: result.data.year,
         credits: result.data.credits,
         subjectName: result.data.subjectName,
-        resultCount: result.data.resultCount,
         uploadedBy: result.data.uploadedByName,
         uploadedByUsername: result.data.uploadedByUsername,
         uploadedByEmail: result.data.uploadedByEmail,
@@ -153,10 +174,13 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
   const resetForm = () => {
     setSelectedFaculty('');
     setSelectedDepartment('');
-    setSelectedYear('');
+    setSelectedLevel('');
+    setSelectedSemester('');
     setSelectedCredits('');
     setSubjectName('');
-    setResultCount('');
+    setCourseCode('');
+    setAcademicYear('');
+    setDegreeProgram('');
     setSelectedFile(null);
     setPreviewUrl(null);
     setError('');
@@ -164,7 +188,7 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const isFormValid = selectedFaculty && selectedDepartment && selectedYear && selectedCredits && subjectName && resultCount && selectedFile && !isUploading;
+  const isFormValid = selectedFaculty && selectedDepartment && selectedLevel && selectedSemester && selectedCredits && subjectName && selectedFile && !isUploading;
 
   const getFileIcon = (fileType) => {
     switch (fileType) {
@@ -265,24 +289,45 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
           </div>
         </div>
 
-        {/* Year and Credits Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Year Selection */}
+        {/* Level, Semester and Credits Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Level Selection */}
           <div>
-            <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-              Select Year <span className="text-red-500">*</span>
+            <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Level <span className="text-red-500">*</span>
             </label>
             <select
-              id="year"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
+              id="level"
+              value={selectedLevel}
+              onChange={(e) => setSelectedLevel(e.target.value)}
               disabled={isUploading}
               className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value="">Choose a year...</option>
-              {yearOptions.map((year) => (
-                <option key={year.value} value={year.value}>
-                  {year.label}
+              <option value="">Choose a level...</option>
+              {levelOptions.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Semester Selection */}
+          <div>
+            <label htmlFor="semester" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Semester <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="semester"
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              disabled={isUploading}
+              className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Choose a semester...</option>
+              {semesterOptions.map((semester) => (
+                <option key={semester.value} value={semester.value}>
+                  {semester.label}
                 </option>
               ))}
             </select>
@@ -310,21 +355,55 @@ const ResultUploadForm = ({ onUploadSuccess }) => {
           </div>
         </div>
 
-        {/* Result Count */}
-        <div>
-          <label htmlFor="resultCount" className="block text-sm font-medium text-gray-700 mb-2">
-            Result Count <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="resultCount"
-            type="number"
-            min="1"
-            value={resultCount}
-            onChange={(e) => setResultCount(e.target.value)}
-            disabled={isUploading}
-            placeholder="Enter number of results in the sheet"
-            className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
+        {/* Course Code, Academic Year and Degree Program Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Course Code */}
+          <div>
+            <label htmlFor="courseCode" className="block text-sm font-medium text-gray-700 mb-2">
+              Course Code
+            </label>
+            <input
+              id="courseCode"
+              type="text"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+              disabled={isUploading}
+              placeholder="e.g., ICT 233"
+              className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          {/* Academic Year */}
+          <div>
+            <label htmlFor="academicYear" className="block text-sm font-medium text-gray-700 mb-2">
+              Academic Year
+            </label>
+            <input
+              id="academicYear"
+              type="text"
+              value={academicYear}
+              onChange={(e) => setAcademicYear(e.target.value)}
+              disabled={isUploading}
+              placeholder="e.g., 2024/2025"
+              className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          {/* Degree Program */}
+          <div>
+            <label htmlFor="degreeProgram" className="block text-sm font-medium text-gray-700 mb-2">
+              Degree Program
+            </label>
+            <input
+              id="degreeProgram"
+              type="text"
+              value={degreeProgram}
+              onChange={(e) => setDegreeProgram(e.target.value)}
+              disabled={isUploading}
+              placeholder="e.g., Bachelor of ICT"
+              className="w-full border border-slate-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-[#246BFD] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </div>
         </div>
 
         {/* File Upload */}
