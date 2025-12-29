@@ -11,7 +11,7 @@ export const generateToken = (user) => {
         );
     }
     
-    // Handle regular user object
+    // Handle regular user object (students)
     return jwt.sign(
         {
             id: user._id,
@@ -19,7 +19,10 @@ export const generateToken = (user) => {
             enrollmentNumber: user.enrollmentNumber,
             role: user.role,
             email: user.email,
-            name: user.name
+            name: user.name,
+            faculty: user.faculty,
+            year: user.year,
+            department: user.department
         },
         config.JWT_SECRET,
         { expiresIn: '24h' }

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopBar from '../components/dashboard/TopBar';
 import Footer from '../components/dashboard/Footer';
+import { NotificationProvider } from '../context/NotificationContext';
 
 /**
  * Main Dashboard Layout component
@@ -43,56 +44,58 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/30 to-white">
-      {/* Mobile backdrop */}
-      {isMobile && isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+    <NotificationProvider>
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/30 to-white">
+        {/* Mobile backdrop */}
+        {isMobile && isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
 
-      {/* Sidebar component with transitions */}
-      <div className={`fixed inset-y-0 left-0 transform transition-all duration-300 ease-in-out ${
-        isMobile 
-          ? isMobileMenuOpen 
-            ? 'translate-x-0' 
-            : '-translate-x-full'
-          : isCollapsed 
-            ? 'translate-x-0 w-20' 
-            : 'translate-x-0 w-64'
-      } z-50`}>
-        <Sidebar 
-          isCollapsed={isCollapsed} 
-          isMobile={isMobile}
-          onCloseMobile={() => setIsMobileMenuOpen(false)}
-        />
-      </div>
+        {/* Sidebar component with transitions */}
+        <div className={`fixed inset-y-0 left-0 transform transition-all duration-300 ease-in-out ${
+          isMobile 
+            ? isMobileMenuOpen 
+              ? 'translate-x-0' 
+              : '-translate-x-full'
+            : isCollapsed 
+              ? 'translate-x-0 w-20' 
+              : 'translate-x-0 w-64'
+        } z-50`}>
+          <Sidebar 
+            isCollapsed={isCollapsed} 
+            isMobile={isMobile}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
+          />
+        </div>
 
-      {/* Main content area with dynamic margin */}
-      <div className={`flex flex-col flex-grow transition-all duration-300 ${
-        !isMobile && (isCollapsed ? 'lg:ml-20' : 'lg:ml-64')
-      }`}>
-        {/* Top bar with toggle buttons for sidebar */}
-        <TopBar 
-          toggleMobileMenu={toggleMobileMenu}
-          toggleCollapse={toggleCollapse}
-          isCollapsed={isCollapsed}
-          isMobile={isMobile}
-          isMobileMenuOpen={isMobileMenuOpen}
-        />
-        
-        {/* Page content - rendered via React Router outlet */}
-        <main className="flex-grow p-6 overflow-y-auto bg-gradient-to-br from-gray-50/50 to-white">
-          <div className="max-w-full">
-            <Outlet />
-          </div>
-        </main>
-        
-        {/* Footer component */}
-        <Footer />
+        {/* Main content area with dynamic margin */}
+        <div className={`flex flex-col flex-grow transition-all duration-300 ${
+          !isMobile && (isCollapsed ? 'lg:ml-20' : 'lg:ml-64')
+        }`}>
+          {/* Top bar with toggle buttons for sidebar */}
+          <TopBar 
+            toggleMobileMenu={toggleMobileMenu}
+            toggleCollapse={toggleCollapse}
+            isCollapsed={isCollapsed}
+            isMobile={isMobile}
+            isMobileMenuOpen={isMobileMenuOpen}
+          />
+          
+          {/* Page content - rendered via React Router outlet */}
+          <main className="flex-grow p-6 overflow-y-auto bg-gradient-to-br from-gray-50/50 to-white">
+            <div className="max-w-full">
+              <Outlet />
+            </div>
+          </main>
+          
+          {/* Footer component */}
+          <Footer />
+        </div>
       </div>
-    </div>
+    </NotificationProvider>
   );
 };
 

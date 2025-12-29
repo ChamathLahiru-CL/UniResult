@@ -3,21 +3,29 @@
  * 
  * A dropdown menu that displays user notifications with the following features:
  * - Separates notifications into "NEW" (unread) and "EARLIER" (read) sections
- * - Shows notification type icons with different colors (result, GPA, exam)
+ * - Shows notification type icons with different colors (result, GPA, exam, timetable, news)
  * - Displays relative timestamps (e.g., "2m ago", "1h ago")
  * - Allows marking notifications as read
  * - Links to the full notifications page
  * 
  * @param {Object[]} notifications - Array of notification objects
+ * @param {boolean} loading - Loading state for notifications
  * @param {Function} onClose - Function to close the dropdown
  * @param {Function} onMarkAsRead - Function to mark a notification as read
  */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BellIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { 
+  BellIcon, 
+  CheckCircleIcon, 
+  AcademicCapIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  NewspaperIcon
+} from '@heroicons/react/24/outline';
 
-const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
+const NotificationDropdown = ({ notifications = [], loading = false, onClose, onMarkAsRead }) => {
   // Separate notifications into unread and read groups
   // Unread notifications are shown at the top under "NEW"
   const unreadNotifications = notifications.filter(n => !n.isRead);
@@ -56,12 +64,13 @@ const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
   /**
    * Returns the appropriate icon component for each notification type
    * Each type has its own icon and color scheme:
-   * - result: Green checkmark icon
+   * - result: Green academic cap icon
    * - gpa: Blue chart icon
-   * - exam: Purple calendar icon
+   * - timetable/exam: Purple calendar icon
+   * - news: Orange newspaper icon
    * - default: Gray bell icon
    * 
-   * @param {string} type - The notification type ('result', 'gpa', 'exam')
+   * @param {string} type - The notification type ('result', 'gpa', 'timetable', 'news')
    * @returns {JSX.Element} Icon component with appropriate styling
    */
   const getNotificationIcon = (type) => {
@@ -69,25 +78,26 @@ const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
       case 'result':
         return (
           <div className="bg-green-100 p-2 rounded-lg">
-            <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <AcademicCapIcon className="h-4 w-4 text-green-600" />
           </div>
         );
       case 'gpa':
         return (
           <div className="bg-blue-100 p-2 rounded-lg">
-            <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+            <ChartBarIcon className="h-4 w-4 text-blue-600" />
           </div>
         );
+      case 'timetable':
       case 'exam':
         return (
           <div className="bg-purple-100 p-2 rounded-lg">
-            <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <CalendarIcon className="h-4 w-4 text-purple-600" />
+          </div>
+        );
+      case 'news':
+        return (
+          <div className="bg-orange-100 p-2 rounded-lg">
+            <NewspaperIcon className="h-4 w-4 text-orange-600" />
           </div>
         );
       default:
@@ -113,28 +123,53 @@ const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
           </Link>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          {unreadNotifications.length} unread notifications
+          {unreadNotifications.length} unread notification{unreadNotifications.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       <div className="max-h-[400px] overflow-y-auto">
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && notifications.length === 0 && (
+          <div className="text-center py-8 px-4">
+            <BellIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">No notifications yet</p>
+          </div>
+        )}
+
         {/* Unread Notifications */}
-        {unreadNotifications.length > 0 && (
+        {!loading && unreadNotifications.length > 0 && (
           <div className="px-4 py-2">
             <h4 className="text-xs font-medium text-gray-500 mb-2">NEW</h4>
             <div className="space-y-2">
               {unreadNotifications.map((notification) => (
                 <div 
-                  key={notification.id} 
-                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg group relative"
+                  key={notification._id} 
+                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg group relative cursor-pointer"
+                  onClick={() => {
+                    if (notification.link) {
+                      onClose();
+                      window.location.href = notification.link;
+                    }
+                  }}
                 >
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{notification.message}</p>
-                    <p className="text-xs text-gray-500">{formatTime(notification.timestamp)}</p>
+                    <p className="text-sm font-medium text-gray-900 line-clamp-2">{notification.title}</p>
+                    <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{notification.message}</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatTime(notification.createdAt)}</p>
                   </div>
                   <button
-                    onClick={() => onMarkAsRead(notification.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkAsRead(notification._id);
+                    }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-50 rounded-full"
                     title="Mark as read"
                   >
@@ -147,32 +182,30 @@ const NotificationDropdown = ({ notifications, onClose, onMarkAsRead }) => {
         )}
 
         {/* Read Notifications */}
-        {recentReadNotifications.length > 0 && (
+        {!loading && recentReadNotifications.length > 0 && (
           <div className="px-4 py-2">
             <h4 className="text-xs font-medium text-gray-500 mb-2">EARLIER</h4>
             <div className="space-y-2">
               {recentReadNotifications.map((notification) => (
                 <div 
-                  key={notification.id} 
-                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg opacity-75"
+                  key={notification._id} 
+                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer opacity-60"
+                  onClick={() => {
+                    if (notification.link) {
+                      onClose();
+                      window.location.href = notification.link;
+                    }
+                  }}
                 >
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-600">{notification.message}</p>
-                    <p className="text-xs text-gray-500">{formatTime(notification.timestamp)}</p>
+                    <p className="text-sm font-medium text-gray-900 line-clamp-2">{notification.title}</p>
+                    <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{notification.message}</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatTime(notification.createdAt)}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {notifications.length === 0 && (
-          <div className="px-4 py-8 text-center">
-            <BellIcon className="mx-auto h-8 w-8 text-gray-400" />
-            <p className="mt-2 text-sm font-medium text-gray-900">No notifications</p>
-            <p className="mt-1 text-sm text-gray-500">We'll notify you when something arrives.</p>
           </div>
         )}
       </div>

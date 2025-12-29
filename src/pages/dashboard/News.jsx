@@ -7,6 +7,7 @@ import {
     CheckCircleIcon,
     EyeIcon
 } from '@heroicons/react/24/outline';
+import { checkForNewNews } from '../../utils/newsNotificationDispatcher';
 
 const News = () => {
     const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
@@ -94,6 +95,9 @@ const News = () => {
             }));
 
             setNewsItems(transformedNews);
+            
+            // Check for new news and create notifications
+            checkForNewNews(transformedNews);
         } catch (err) {
             console.error('Error loading news:', err);
             setError(err.message);

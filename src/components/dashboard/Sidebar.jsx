@@ -8,6 +8,7 @@ import {
   QuestionMarkCircleIcon, XMarkIcon,
   ClipboardDocumentIcon, NewspaperIcon
 } from '@heroicons/react/24/outline';
+import { useNotifications } from '../../context/NotificationContext';
 
 /**
  * Sidebar component for dashboard navigation
@@ -17,6 +18,7 @@ import {
 const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
 
   // Function to handle navigation with scroll to top and mobile menu close
   const handleNavigation = (path) => {
@@ -72,7 +74,7 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
       icon: BellIcon,
       path: '/dash/notifications',
       tooltip: 'View Notifications',
-      badge: 2
+      badge: unreadCount
     },
     {
       name: 'News',
@@ -173,7 +175,7 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
               <div className="flex items-center justify-center relative">
                 <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
                   }`} />
-                {item.badge && (
+                {item.badge > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full">
                     {item.badge}
                   </span>

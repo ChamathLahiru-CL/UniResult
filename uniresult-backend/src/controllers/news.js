@@ -2,6 +2,7 @@ import News from '../models/News.js';
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
+import { createNewsNotification } from './notificationController.js';
 import fs from 'fs';
 
 // @desc    Upload/Create news
@@ -72,6 +73,15 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
         status: 'active',
         priority: priority || 'normal'
     });
+
+    // Create notification for news
+    await createNewsNotification({
+        _id: news._id,
+        topic: news.newsTopic,
+        message: news.newsMessage,
+        faculty: news.faculty,
+        priority: news.priority
+    }, req.user);
 
     res.status(201).json({
         success: true,

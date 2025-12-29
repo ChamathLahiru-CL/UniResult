@@ -10,6 +10,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/useAuth';
+import { useNotifications } from '../../context/NotificationContext';
 import NotificationDropdown from './NotificationDropdown';
 
 /**
@@ -31,10 +32,12 @@ import NotificationDropdown from './NotificationDropdown';
 const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMobileMenuOpen }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { unreadCount, decreaseCount } = useNotifications();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [userData, setUserData] = useState({
     name: 'Loading...',
@@ -98,39 +101,41 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
 
   /**
    * Fetch notifications from backend
-   * Currently using dummy data, but in production would:
-   * 1. Connect to real API endpoint
-   * 2. Implement real-time updates (WebSocket/polling)
-   * 3. Handle loading states and errors
-   * 4. Include pagination for large datasets
+   * Loads the latest notifications when dropdown is opened
    */
-  useEffect(() => {
-    // TODO: Replace with actual API call
-    const dummyNotifications = [
-      {
-        id: 1,
-        type: 'result',
-        message: 'Your Programming Fundamentals results are now available',
-        timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-        isRead: false
-      },
-      {
-        id: 2,
-        type: 'gpa',
-        message: 'Your GPA has been updated for Semester 2',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        isRead: false
-      },
-      {
-        id: 3,
-        type: 'exam',
-        message: 'New exam schedule posted for Database Systems',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-        isRead: true
+  const fetchNotifications = async () => {
+    try {
+      setLoadingNotifications(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) return;
+
+      const response = await fetch('http://localhost:5000/api/notifications?limit=10', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setNotifications(result.data);
+        }
       }
-    ];
-    setNotifications(dummyNotifications);
-  }, []);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  // Fetch notifications when dropdown opens
+  useEffect(() => {
+    if (isNotificationOpen) {
+      fetchNotifications();
+    }
+  }, [isNotificationOpen]);
 
   /**
    * Update current date and time every second
@@ -168,18 +173,35 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
 
   /**
    * Marks a notification as read
-   * Updates the notification state and would sync with backend in production
+   * Updates the notification state and syncs with backend
    * 
-   * @param {string|number} notificationId - ID of the notification to mark as read
+   * @param {string} notificationId - ID of the notification to mark as read
    */
-  const handleMarkAsRead = (notificationId) => {
-    // Update local state
-    setNotifications(notifications.map(notification =>
-      notification.id === notificationId
-        ? { ...notification, isRead: true }
-        : notification
-    ));
-    // TODO: Sync with backend API
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(notifications.map(notification =>
+          notification._id === notificationId
+            ? { ...notification, isRead: true }
+            : notification
+        ));
+        // Decrease count in context
+        decreaseCount(1);
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
   /**
@@ -268,9 +290,9 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               >
                 <BellIcon className="h-5 w-5" />
-                {notifications.filter(n => !n.isRead).length > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute top-0 right-0 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full -mt-1 -mr-1">
-                    {notifications.filter(n => !n.isRead).length}
+                    {unreadCount}
                   </span>
                 )}
               </button>
@@ -280,6 +302,7 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                 <div className="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-10">
                   <NotificationDropdown 
                     notifications={notifications}
+                    loading={loadingNotifications}
                     onClose={() => setIsNotificationOpen(false)}
                     onMarkAsRead={handleMarkAsRead}
                   />
