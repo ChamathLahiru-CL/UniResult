@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   DocumentTextIcon, 
@@ -11,9 +11,47 @@ import {
  * LastUpdatedResults Component
  * Displays the most recently updated exam results with navigation
  * Shows subject name, semester, grade, and links to detailed results
+ * Fetches latest 5 results from backend
  */
-const LastUpdatedResults = ({ results = [] }) => {
+const LastUpdatedResults = () => {
   const navigate = useNavigate();
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch latest results from backend
+  useEffect(() => {
+    const fetchLatestResults = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/results/my-results/latest?limit=5', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setResults(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching latest results:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestResults();
+  }, []);
 
   // Handle navigation to specific result in Results page
   const handleSubjectClick = (result) => {
@@ -54,9 +92,16 @@ const LastUpdatedResults = ({ results = [] }) => {
           </button>
         </div>
         
-        {/* Results List */}
-        <div className="space-y-3 flex-grow">
-          {results.map((result, index) => (
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <>
+            {/* Results List */}
+            <div className="space-y-3 flex-grow">
+              {results.map((result, index) => (
             <div 
               key={index} 
               onClick={() => handleSubjectClick(result)}
@@ -146,6 +191,8 @@ const LastUpdatedResults = ({ results = [] }) => {
               </Link>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
     getResultById,
     getMyResults,
     getMyResultsOrganized,
+    getLatestResults,
     searchByRegistration,
     reparseResult,
     downloadResult,
@@ -68,6 +69,7 @@ router.use(protect);
 // Student routes
 router.get('/my-results', getMyResults);
 router.get('/my-results-organized', getMyResultsOrganized);
+router.get('/my-results/latest', getLatestResults);
 router.get('/my-results/new-count', getNewResultsCount);
 router.post('/link-student', linkStudentResults);
 
