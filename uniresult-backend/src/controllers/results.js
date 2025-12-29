@@ -2,6 +2,7 @@ import Result from '../models/Result.js';
 import StudentResult from '../models/StudentResult.js';
 import User from '../models/User.js';
 import pdfParser from '../services/pdfParser.js';
+import { createResultNotification } from './notificationController.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -112,6 +113,15 @@ export const uploadResult = async (req, res) => {
                 console.log('\n📝 Creating individual student result entries...');
                 const createResult = await createStudentResults(result, parseResult.studentResults);
                 console.log(`\n✅ Student results created: ${createResult.total} total, ${createResult.registered} registered, ${createResult.unregistered} not registered yet`);
+
+                // Create notification for result update
+                await createResultNotification({
+                    faculty: result.faculty,
+                    year: result.year,
+                    semester: result.semester,
+                    subjectCode: result.courseCode,
+                    subjectName: result.subjectName
+                }, req.user);
 
             } else if (parseResult.requiresManualEntry) {
                 // PDF is scanned/image-based and requires manual entry

@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  HomeIcon, DocumentTextIcon, 
+import {
+  HomeIcon, DocumentTextIcon,
   CalendarIcon, BellIcon, ChartBarIcon,
   ArrowTrendingUpIcon, UserCircleIcon,
   Cog6ToothIcon as CogIcon,
   QuestionMarkCircleIcon, XMarkIcon,
-  ClipboardDocumentIcon
+  ClipboardDocumentIcon, NewspaperIcon
 } from '@heroicons/react/24/outline';
+import { useNotifications } from '../../context/NotificationContext';
 
 /**
  * Sidebar component for dashboard navigation
@@ -17,7 +18,8 @@ import {
 const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+  const { unreadCount } = useNotifications();
+
   // Function to handle navigation with scroll to top and mobile menu close
   const handleNavigation = (path) => {
     // Close mobile menu when navigating (if in mobile mode)
@@ -37,42 +39,48 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
 
   // Navigation items with their icons and routes
   const navItems = [
-    { 
-      name: 'Dashboard', 
-      icon: HomeIcon, 
+    {
+      name: 'Dashboard',
+      icon: HomeIcon,
       path: '/dash',
       tooltip: 'Overview Dashboard'
     },
-    { 
-      name: 'Results', 
-      icon: DocumentTextIcon, 
+    {
+      name: 'Results',
+      icon: DocumentTextIcon,
       path: '/dash/results',
       tooltip: 'View Examination Results'
     },
-    { 
-      name: 'GPA Analytics', 
-      icon: ChartBarIcon, 
+    {
+      name: 'GPA Analytics',
+      icon: ChartBarIcon,
       path: '/dash/gpa-trend',
       tooltip: 'GPA Performance Analytics'
     },
-    { 
-      name: 'Exam Timetable', 
-      icon: CalendarIcon, 
+    {
+      name: 'Exam Timetable',
+      icon: CalendarIcon,
       path: '/dash/exam-time-table',
       tooltip: 'View Exam Schedule'
     },
-    { 
-      name: 'Academic Progress', 
-      icon: ArrowTrendingUpIcon, 
+    {
+      name: 'Academic Progress',
+      icon: ArrowTrendingUpIcon,
       path: '/dash/progress',
       tooltip: 'Track Academic Progress'
     },
-    { 
-      name: 'Notifications', 
-      icon: BellIcon, 
+    {
+      name: 'Notifications',
+      icon: BellIcon,
       path: '/dash/notifications',
       tooltip: 'View Notifications',
-      badge: 2
+      badge: unreadCount
+    },
+    {
+      name: 'News',
+      icon: NewspaperIcon,
+      path: '/dash/news',
+      tooltip: 'View News & Announcements'
     },
     {
       name: 'Submit Compliance',
@@ -84,15 +92,15 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
 
   // Footer navigation items
   const footerItems = [
-    { 
-      name: 'Profile & Settings', 
-      icon: UserCircleIcon, 
+    {
+      name: 'Profile & Settings',
+      icon: UserCircleIcon,
       path: '/dash/profile-settings',
       tooltip: 'Manage profile and preferences'
     },
-    { 
-      name: 'Help & Support', 
-      icon: QuestionMarkCircleIcon, 
+    {
+      name: 'Help & Support',
+      icon: QuestionMarkCircleIcon,
       path: '/dash/help',
       tooltip: 'Get assistance and documentation'
     },
@@ -108,27 +116,26 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   };
 
   return (
-    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
-      isCollapsed ? 'w-20' : 'w-64'
-    } ${isMobile ? 'shadow-xl' : ''}`}>
-      
+    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+      } ${isMobile ? 'shadow-xl' : ''}`}>
+
       {/* Header with brand logo and mobile close button */}
       <div className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4">
         {!isCollapsed && (
-          <Link 
+          <Link
             to="/dash"
             className="flex items-center focus:outline-none"
             onClick={() => isMobile && onCloseMobile && onCloseMobile()}
           >
             <h1 className="text-3xl font-bold">
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
-                <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
+              <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
+              <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
             </h1>
           </Link>
         )}
 
         {isCollapsed && !isMobile && (
-          <Link 
+          <Link
             to="/dash"
             className="flex items-center justify-center w-full focus:outline-none"
           >
@@ -153,30 +160,28 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
           </button>
         )}
       </div>
-      
+
       {/* Main navigation section */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <div key={item.name} className="relative group">
             <button
               onClick={() => handleNavigation(item.path)}
-              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${
-                isActive(item.path)
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${isActive(item.path)
                   ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-center relative">
-                <item.icon className={`h-5 w-5 ${
-                  isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
-                }`} />
-                {item.badge && (
+                <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
+                  }`} />
+                {item.badge > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full">
                     {item.badge}
                   </span>
                 )}
               </div>
-              
+
               {!isCollapsed && (
                 <span className={`ml-3 text-sm ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
                   {item.name}
@@ -199,7 +204,7 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
           </div>
         ))}
       </nav>
-      
+
       {/* Footer navigation section */}
       <div className="mt-auto border-t border-gray-200 bg-gray-50">
         <div className="px-3 py-4">
@@ -207,18 +212,16 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
             <div key={item.name} className="relative group">
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${
-                  isActive(item.path)
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${isActive(item.path)
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
-                } mb-1 last:mb-0`}
+                  } mb-1 last:mb-0`}
               >
                 <div className="flex items-center justify-center">
-                  <item.icon className={`h-5 w-5 ${
-                    isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
-                  }`} />
+                  <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
+                    }`} />
                 </div>
-                
+
                 {!isCollapsed && (
                   <span className={`ml-3 text-sm ${isActive(item.path) ? 'font-semibold' : ''} whitespace-nowrap`}>
                     {item.name}

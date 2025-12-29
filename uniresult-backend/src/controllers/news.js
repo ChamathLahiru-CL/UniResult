@@ -2,6 +2,7 @@ import News from '../models/News.js';
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
+import { createNewsNotification } from './notificationController.js';
 import fs from 'fs';
 
 // @desc    Upload/Create news
@@ -73,6 +74,15 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
         priority: priority || 'normal'
     });
 
+    // Create notification for news
+    await createNewsNotification({
+        _id: news._id,
+        topic: news.newsTopic,
+        message: news.newsMessage,
+        faculty: news.faculty,
+        priority: news.priority
+    }, req.user);
+
     res.status(201).json({
         success: true,
         data: news,
@@ -116,6 +126,7 @@ export const getNews = asyncHandler(async (req, res) => {
 
     const news = await News.find(query)
         .populate('uploadedBy', 'firstName lastName employeeNumber')
+        .populate('readBy.userId', 'username email name')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit));
@@ -232,6 +243,10 @@ export const deleteNews = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/news/:id/read
 // @access  Private
 export const markNewsAsRead = asyncHandler(async (req, res, next) => {
+    if (!req.user || !req.user.id) {
+        return next(new ErrorResponse('User not authenticated', 401));
+    }
+
     const news = await News.findById(req.params.id);
 
     if (!news) {

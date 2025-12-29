@@ -12,6 +12,7 @@ import GPATrend from './pages/dashboard/GPATrend'; // GPA Trend Analysis page
 import AcademicProgress from './pages/dashboard/AcademicProgress'; // Academic Progress page
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable page
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
+import News from './pages/dashboard/News'; // News and Announcements page
 import ProfileAndSettings from './pages/dashboard/ProfileAndSettings'; // Combined Profile and Settings page
 import Help from './pages/dashboard/Help'; // Help and support page
 import AdminDashboard from './pages/admin/AdminDashboard'; // Admin dashboard page
@@ -63,80 +64,81 @@ function App() {
     <AuthProvider>
       <Routes>
         {/* Authentication Routes */}
-      <Route path="/" element={<Login />} /> {/* Login page */}
-      <Route path="/signup" element={<SignUp />} /> {/* Sign-up page */}
-      <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot password page */}
+        <Route path="/" element={<Login />} /> {/* Login page */}
+        <Route path="/signup" element={<SignUp />} /> {/* Sign-up page */}
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot password page */}
 
-      {/* Student Dashboard Routes */}
-      <Route 
-        path="/dash" 
-        element={
-          <ProtectedRoute requiredRole="student">
-            <DashboardLayout />
-          </ProtectedRoute>
-        }>
-        <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
-        <Route path="results" element={<Results />} /> {/* Results page */}
-        <Route path="gpa-analytics" element={<GPAAnalytics />} /> {/* GPA Analytics page */}
-        <Route path="gpa-trend" element={<GPATrend />} /> {/* GPA trend analysis page */}
-        <Route path="progress" element={<AcademicProgress />} /> {/* Academic Progress page */}
-        <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
-        <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
-        <Route path="profile-settings" element={<ProfileAndSettings />} /> {/* Combined Profile and Settings page */}
-        <Route path="profile" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old profile route */}
-        <Route path="settings" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old settings route */}
-        <Route path="help" element={<Help />} /> {/* Help and support page */}
-        <Route path="compliance/new" element={<CompliancePage />} /> {/* New Compliance Form */}
-      </Route>
+        {/* Student Dashboard Routes */}
+        <Route
+          path="/dash"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <DashboardLayout />
+            </ProtectedRoute>
+          }>
+          <Route index element={<StudentDashboard />} /> {/* Default student dashboard */}
+          <Route path="results" element={<Results />} /> {/* Results page */}
+          <Route path="gpa-analytics" element={<GPAAnalytics />} /> {/* GPA Analytics page */}
+          <Route path="gpa-trend" element={<GPATrend />} /> {/* GPA trend analysis page */}
+          <Route path="progress" element={<AcademicProgress />} /> {/* Academic Progress page */}
+          <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
+          <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
+          <Route path="news" element={<News />} /> {/* News and Announcements page */}
+          <Route path="profile-settings" element={<ProfileAndSettings />} /> {/* Combined Profile and Settings page */}
+          <Route path="profile" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old profile route */}
+          <Route path="settings" element={<Navigate to="/dash/profile-settings" replace />} /> {/* Redirect old settings route */}
+          <Route path="help" element={<Help />} /> {/* Help and support page */}
+          <Route path="compliance/new" element={<CompliancePage />} /> {/* New Compliance Form */}
+        </Route>
 
-      {/* Exam Division Dashboard Routes */}
-      <Route
-        path="/exam"
-        element={
-          <ProtectedRoute requiredRole="examDiv">
-            <ExamDivisionLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<ExamDivision />} />
-        <Route path="new-result" element={<ExamResultUploadPage />} />
-        <Route path="time-table" element={<ExamTimeTableUploadPage />} />
-        <Route path="news" element={<ExamNewsPage />} />
-        <Route path="compliance" element={<ExamCompliance />} />
-        <Route path="activities" element={<ExamActivities />} />
-        <Route path="members" element={<ExamDivisionMembers />} />
-        <Route path="results" element={<ResultManagement />} />
-        <Route path="profile" element={<ExamProfileSettings />} />
-        <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
-        <Route path="help" element={<ExamDivisionHelp />} />
-      </Route>
-      
-      {/* Admin Dashboard Routes */}
-      <Route 
-        path="/admin" 
-        element={
-          <ProtectedRoute requiredRole="admin">
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
-        <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
-        <Route path="activities" element={<AdminRecentActivitiesPage />} />
-        <Route path="exam-division" element={<AdminExamDivisionPage />} />
-        <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
-        <Route path="compliance" element={<AdminCompliancePage />} />
-        <Route path="compliance/:id" element={<ComplianceDetailPage />} />
-        <Route path="students" element={<AdminStudentManagementPage />} />
-        <Route path="results" element={<AdminStudentResultPage />} />
-        <Route path="results/:id" element={<ResultDetailsPage />} />
-        <Route path="profile" element={<AdminProfileSettings />} />
-        <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
-        <Route path="announcement" element={<AdminAnnouncementPage />} />
-        <Route path="help" element={<AdminHelpPage />} />
-      </Route>
+        {/* Exam Division Dashboard Routes */}
+        <Route
+          path="/exam"
+          element={
+            <ProtectedRoute requiredRole="examDiv">
+              <ExamDivisionLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ExamDivision />} />
+          <Route path="new-result" element={<ExamResultUploadPage />} />
+          <Route path="time-table" element={<ExamTimeTableUploadPage />} />
+          <Route path="news" element={<ExamNewsPage />} />
+          <Route path="compliance" element={<ExamCompliance />} />
+          <Route path="activities" element={<ExamActivities />} />
+          <Route path="members" element={<ExamDivisionMembers />} />
+          <Route path="results" element={<ResultManagement />} />
+          <Route path="profile" element={<ExamProfileSettings />} />
+          <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
+          <Route path="help" element={<ExamDivisionHelp />} />
+        </Route>
 
-      {/* Fallback Route */}
-      <Route path="*" element={<Navigate to="/" replace />} /> {/* Redirect unknown routes to login page */}
-    </Routes>
+        {/* Admin Dashboard Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }>
+          <Route index element={<AdminDashboard />} /> {/* Default admin dashboard */}
+          <Route path="activities" element={<AdminRecentActivitiesPage />} />
+          <Route path="exam-division" element={<AdminExamDivisionPage />} />
+          <Route path="exam-division/:memberId" element={<AdminExamDivisionPage />} />
+          <Route path="compliance" element={<AdminCompliancePage />} />
+          <Route path="compliance/:id" element={<ComplianceDetailPage />} />
+          <Route path="students" element={<AdminStudentManagementPage />} />
+          <Route path="results" element={<AdminStudentResultPage />} />
+          <Route path="results/:id" element={<ResultDetailsPage />} />
+          <Route path="profile" element={<AdminProfileSettings />} />
+          <Route path="settings" element={<Navigate to="/admin/profile" replace />} />
+          <Route path="announcement" element={<AdminAnnouncementPage />} />
+          <Route path="help" element={<AdminHelpPage />} />
+        </Route>
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" replace />} /> {/* Redirect unknown routes to login page */}
+      </Routes>
     </AuthProvider>
   );
 }

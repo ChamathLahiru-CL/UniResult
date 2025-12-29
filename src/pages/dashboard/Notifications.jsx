@@ -1,65 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BellIcon,
   AcademicCapIcon,
   CalendarIcon,
   ChartBarIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  NewspaperIcon
 } from '@heroicons/react/24/outline';
+import { useNotifications } from '../../context/NotificationContext';
 
 const Notifications = () => {
   const navigate = useNavigate();
+  const { decreaseCount, resetCount } = useNotifications();
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load notifications from localStorage on component mount
-  const loadNotifications = () => {
+  // Load notifications from backend
+  const loadNotifications = async () => {
     try {
-      const savedNotifications = localStorage.getItem('notifications');
-      if (savedNotifications) {
-        return JSON.parse(savedNotifications);
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('Please log in to view notifications');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error loading notifications:', error);
+
+      const response = await fetch('http://localhost:5000/api/notifications', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNotifications(result.data);
+        setError(null);
+      } else {
+        throw new Error(result.message || 'Failed to load notifications');
+      }
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    return [];
   };
 
-  // Sample notifications data with persistent storage
-  const [notifications, setNotifications] = useState(() => {
-    const saved = loadNotifications();
-    if (saved.length === 0) {
-      // Initial sample data only if no saved notifications exist
-      return [{
-        id: 1,
-        title: 'Semester 5 Results Released',
-        message: 'Your semester 5 examination results are now available. Click to view your results.',
-        type: 'result',
-        time: '2025-09-29T10:20:00',
-        isRead: false,
-        link: '/dash/results'
-      },
-      {
-        id: 2,
-        title: 'GPA Update',
-        message: 'Your overall GPA has been updated based on your latest results.',
-        type: 'gpa',
-        time: '2025-09-29T10:20:00',
-        isRead: false,
-        link: '/dash/gpa-trend'
-      },
-      {
-        id: 3,
-        title: 'New Exam Schedule',
-        message: 'The examination timetable for Semester II 2024/2025 has been published.',
-        type: 'exam',
-        time: '2025-09-29T10:20:00',
-        isRead: true,
-        link: '/dash/exam-time-table'
-      }];
-    }
-    return saved;
-  });
+  // Load notifications on component mount
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
   // Get icon based on notification type
   const getIcon = (type) => {
@@ -69,7 +70,10 @@ const Notifications = () => {
       case 'gpa':
         return ChartBarIcon;
       case 'exam':
+      case 'timetable':
         return CalendarIcon;
+      case 'news':
+        return NewspaperIcon;
       default:
         return BellIcon;
     }
@@ -84,40 +88,72 @@ const Notifications = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 60) {
-      return `${minutes} minutes ago`;
+    if (minutes < 1) {
+      return 'Just now';
+    } else if (minutes < 60) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     } else if (hours < 24) {
-      return `${hours} hours ago`;
-    } else {
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (days === 1) {
+      return 'Yesterday';
+    } else if (days < 7) {
       return `${days} days ago`;
+    } else {
+      return date.toLocaleDateString();
     }
   };
 
   // Mark notification as read
-  const markAsRead = (id) => {
-    const updatedNotifications = notifications.map(notif =>
-      notif.id === id ? { ...notif, isRead: true } : notif
-    );
-    setNotifications(updatedNotifications);
-    saveNotifications(updatedNotifications);
+  const markAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(prevNotifications =>
+          prevNotifications.map(notif =>
+            notif._id === id ? { ...notif, isRead: true } : notif
+          )
+        );
+        // Decrease count in context
+        decreaseCount(1);
+      }
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
   };
 
   // Mark all notifications as read
-  const markAllAsRead = () => {
-    const updatedNotifications = notifications.map(notif => ({
-      ...notif,
-      isRead: true
-    }));
-    setNotifications(updatedNotifications);
-    saveNotifications(updatedNotifications);
-  };
-
-  // Save notifications to localStorage
-  const saveNotifications = (notifs) => {
+  const markAllAsRead = async () => {
     try {
-      localStorage.setItem('notifications', JSON.stringify(notifs));
-    } catch (error) {
-      console.error('Error saving notifications:', error);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('http://localhost:5000/api/notifications/read-all', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(prevNotifications =>
+          prevNotifications.map(notif => ({ ...notif, isRead: true }))
+        );
+        // Reset count in context
+        resetCount();
+      }
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
     }
   };
 
@@ -133,11 +169,58 @@ const Notifications = () => {
 
   // Handle notification click
   const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
+    if (!notification.isRead) {
+      markAsRead(notification._id);
+    }
     if (notification.link) {
       navigate(notification.link);
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+        <div className="relative mb-6 sm:mb-8">
+          <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+          <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+          <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+            Notifications
+          </h1>
+          <p className="text-gray-600 text-xs sm:text-sm font-medium">
+            Stay updated with your latest academic activities
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading notifications...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+        <div className="relative mb-6 sm:mb-8">
+          <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+            Notifications
+          </h1>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={loadNotifications}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -204,7 +287,7 @@ const Notifications = () => {
           const Icon = getIcon(notification.type);
           return (
             <div
-              key={notification.id}
+              key={notification._id}
               className={`
                 group bg-white rounded-xl shadow-md p-4 sm:p-5 transition-all duration-300
                 ${notification.isRead 
@@ -236,7 +319,7 @@ const Notifications = () => {
                       {notification.title}
                     </p>
                     <span className="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600 w-fit">
-                      {formatTime(notification.time)}
+                      {formatTime(notification.createdAt)}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">
@@ -256,7 +339,7 @@ const Notifications = () => {
                     </button>
                     {!notification.isRead && (
                       <button
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => markAsRead(notification._id)}
                         className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 
                           bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none"
                       >

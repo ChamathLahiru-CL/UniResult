@@ -5,6 +5,7 @@ import Activity from '../models/Activity.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 import { parseEnrollmentNumber } from '../utils/enrollmentParser.js';
+import { createTimetableNotification } from './notificationController.js';
 import fs from 'fs';
 
 // @desc    Upload time table
@@ -98,6 +99,13 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
             fileType: req.file.mimetype.split('/')[1]
         }
     });
+
+    // Create notification for timetable upload
+    await createTimetableNotification({
+        _id: timeTable._id,
+        faculty: timeTable.faculty,
+        year: timeTable.year
+    }, req.user);
 
     res.status(201).json({
         success: true,

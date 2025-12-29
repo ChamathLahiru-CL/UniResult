@@ -123,11 +123,24 @@ newsSchema.virtual('formattedTime').get(function() {
 
 // Method to mark as read by a user
 newsSchema.methods.markAsReadBy = function(userId) {
-    const existingRead = this.readBy.find(read => read.userId.toString() === userId.toString());
+    // Ensure userId is a string for comparison
+    const userIdStr = userId.toString();
+
+    const existingRead = this.readBy.find(read => {
+        const readUserIdStr = read.userId.toString();
+        return readUserIdStr === userIdStr;
+    });
+
     if (!existingRead) {
-        this.readBy.push({ userId, readAt: new Date() });
+        // Use direct MongoDB update to avoid validation
+        return this.constructor.updateOne(
+            { _id: this._id },
+            { $push: { readBy: { userId: userIdStr, readAt: new Date() } } },
+            { runValidators: false } // Disable validation for this update
+        );
+    } else {
+        return Promise.resolve({ acknowledged: true });
     }
-    return this.save();
 };
 
 // Static method to get news for a specific faculty
