@@ -123,30 +123,6 @@ const StudentDashboard = () => {
     { month: 'DEC', value: 630 }
   ];
   
-  // Sample notification data
-  const notifications = [
-    { 
-      type: 'result', 
-      message: 'Semester 5 results are now available', 
-      time: 'Today, 10:20 AM' 
-    },
-    { 
-      type: 'gpa', 
-      message: 'Your GPA has updated', 
-      time: 'Today, 10:20 AM' 
-    },
-    { 
-      type: 'exam', 
-      message: 'Upcoming exam timetable', 
-      time: 'Today, 10:20 AM' 
-    },
-    { 
-      type: 'result', 
-      message: 'Stat 200 Level result updated', 
-      time: 'Today, 10:20 AM' 
-    }
-  ];
-  
   return (
     <div className="animate-fadeIn">
       {/* Page Header with decorative elements */}
@@ -191,7 +167,7 @@ const StudentDashboard = () => {
         
         {/* Recent Notifications - Full Width */}
         <div className="col-span-1 md:col-span-2 mt-2 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-          <RecentNotifications notifications={notifications} />
+          <RecentNotifications />
         </div>
       </div>
     </div>
