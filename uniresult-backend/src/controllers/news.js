@@ -116,6 +116,7 @@ export const getNews = asyncHandler(async (req, res) => {
 
     const news = await News.find(query)
         .populate('uploadedBy', 'firstName lastName employeeNumber')
+        .populate('readBy.userId', 'username email name')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit));
@@ -232,6 +233,10 @@ export const deleteNews = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/news/:id/read
 // @access  Private
 export const markNewsAsRead = asyncHandler(async (req, res, next) => {
+    if (!req.user || !req.user.id) {
+        return next(new ErrorResponse('User not authenticated', 401));
+    }
+
     const news = await News.findById(req.params.id);
 
     if (!news) {
