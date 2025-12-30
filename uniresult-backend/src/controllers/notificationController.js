@@ -197,21 +197,38 @@ export const createResultNotification = async (resultData, uploadedBy) => {
 /**
  * Helper function to create news notification
  */
-export const createNewsNotification = async (news, uploadedBy) => {
+export const createNewsNotification = async (newsData, uploadedBy) => {
     try {
+        // Handle both news object and newsData object
+        const newsTopic = newsData.newsTopic || newsData.topic;
+        const newsMessage = newsData.newsMessage || newsData.message;
+        const faculty = newsData.faculty;
+        const newsPriority = newsData.priority || 'medium';
+        
+        // Map news priority to notification priority
+        // News uses: 'low', 'medium', 'high', 'urgent'
+        // Notification uses: 'low', 'normal', 'high', 'urgent'
+        const priorityMap = {
+            'low': 'low',
+            'medium': 'normal',
+            'high': 'high',
+            'urgent': 'urgent'
+        };
+        const notificationPriority = priorityMap[newsPriority] || 'normal';
+        
         const notification = await Notification.create({
             type: 'news',
-            title: `New Announcement: ${news.topic}`,
-            message: `A new announcement has been posted: ${news.message.substring(0, 100)}...`,
+            title: `New Announcement: ${newsTopic}`,
+            message: newsMessage.length > 100 ? `${newsMessage.substring(0, 100)}...` : newsMessage,
             link: '/dash/news',
-            priority: news.priority || 'normal',
+            priority: notificationPriority,
             recipients: {
-                faculty: news.faculty === 'All Faculties' ? null : news.faculty,
+                faculty: faculty === 'All Faculties' ? null : faculty,
                 year: null // News visible to all years in faculty
             },
             metadata: {
-                newsId: news._id,
-                newsTopic: news.topic
+                newsId: newsData._id,
+                newsTopic: newsTopic
             },
             createdBy: {
                 userId: uploadedBy.id || uploadedBy._id,
@@ -220,7 +237,7 @@ export const createNewsNotification = async (news, uploadedBy) => {
             }
         });
         
-        console.log('✅ News notification created:', notification._id);
+        console.log('✅ News notification created:', notification._id, 'for faculty:', faculty, 'with priority:', notificationPriority);
         return notification;
     } catch (error) {
         console.error('❌ Error creating news notification:', error);
