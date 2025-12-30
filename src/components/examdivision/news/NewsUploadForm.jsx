@@ -70,7 +70,7 @@ const NewsUploadForm = ({ onNewsUploaded }) => {
       formData.append('faculty', data.faculty);
       formData.append('newsType', data.newsType);
       formData.append('newsMessage', data.newsMessage);
-      formData.append('priority', data.priority || 'normal');
+      formData.append('priority', data.priority || 'medium');
 
       if (selectedFile) {
         formData.append('attachment', selectedFile);
@@ -220,7 +220,9 @@ const NewsUploadForm = ({ onNewsUploaded }) => {
             {...register('priority')}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
             <option value="urgent">Urgent</option>
           </select>
         </div>

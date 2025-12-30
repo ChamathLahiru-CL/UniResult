@@ -5,7 +5,10 @@ import {
     UserGroupIcon,
     AcademicCapIcon,
     CheckCircleIcon,
-    EyeIcon
+    EyeIcon,
+    ArrowDownTrayIcon,
+    PhotoIcon,
+    DocumentIcon
 } from '@heroicons/react/24/outline';
 import { checkForNewNews } from '../../utils/newsNotificationDispatcher';
 
@@ -14,6 +17,7 @@ const News = () => {
     const [newsItems, setNewsItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userFaculty, setUserFaculty] = useState(null);
 
     // Get current user ID from auth context/localStorage
     const getCurrentUserId = () => {
@@ -29,6 +33,58 @@ const News = () => {
         return null;
     };
 
+    // Get current user's faculty from localStorage
+    const getCurrentUserFaculty = () => {
+        try {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                console.log('📋 Current user data:', user);
+                console.log('📍 All user properties:', Object.keys(user));
+                console.log('📍 User faculty:', user.faculty);
+                
+                // Try different possible faculty property names
+                const faculty = user.faculty || user.Faculty || user.facultyName || user.department;
+                console.log('🎓 Detected faculty:', faculty);
+                
+                return faculty;
+            }
+        } catch (error) {
+            console.error('Error getting user faculty:', error);
+        }
+        return null;
+    };
+
+    // Fetch user faculty from backend API
+    const fetchUserFaculty = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            const response = await fetch('http://localhost:5000/api/user/profile', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('👤 User profile from API:', data);
+                
+                // Extract faculty from the response
+                const faculty = data.data?.faculty || data.faculty || data.data?.department || data.department;
+                console.log('🎓 Faculty from API:', faculty);
+                
+                setUserFaculty(faculty);
+                return faculty;
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
+        return null;
+    };
+
     // Load news from backend
     const loadNews = async () => {
         try {
@@ -40,7 +96,25 @@ const News = () => {
                 throw new Error('No authentication token found');
             }
 
-            const response = await fetch('http://localhost:5000/api/news', {
+            // Get user's faculty to filter news
+            const currentUserFaculty = userFaculty || getCurrentUserFaculty();
+            console.log('🎓 Filtering news for faculty:', currentUserFaculty);
+            
+            // Don't load news if faculty is not available yet
+            if (!currentUserFaculty) {
+                console.log('⏳ Waiting for user faculty to be loaded...');
+                setLoading(false);
+                return;
+            }
+            
+            // Build API URL with faculty filter
+            const apiUrl = currentUserFaculty 
+                ? `http://localhost:5000/api/news?faculty=${encodeURIComponent(currentUserFaculty)}`
+                : 'http://localhost:5000/api/news';
+            
+            console.log('🔗 API URL:', apiUrl);
+
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,53 +123,87 @@ const News = () => {
             });
 
             const data = await response.json();
+            
+            console.log('📰 Received news items:', data.data?.length || 0);
+            console.log('📰 News data:', data.data);
 
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to fetch news');
             }
 
-            // Get current user ID once before mapping
+            // Get current user ID
             const currentUserId = getCurrentUserId();
+            
+            console.log('🎓 Current user faculty for filtering:', currentUserFaculty);
 
             // Transform backend data to match frontend structure
-            const transformedNews = data.data.map(news => ({
-                id: news._id,
-                title: news.newsTopic,
-                content: news.newsMessage,
-                uploader: news.uploadedByRole === 'examDiv' ? 'Exam Division' : 'Admin',
-                uploaderName: news.uploadedByName,
-                date: news.createdAt,
-                priority: news.priority || 'medium',
-                type: news.newsType,
-                faculty: news.faculty,
-                fileUrl: news.fileUrl,
-                fileName: news.originalFileName,
-                isRead: (() => {
-                    if (!currentUserId || !news.readBy || news.readBy.length === 0) {
-                        return false;
+            const transformedNews = data.data
+                .filter(news => {
+                    // Client-side filtering as fallback
+                    // Show news if:
+                    // 1. It's for "All Faculties" - visible to everyone
+                    // 2. It exactly matches the user's faculty
+                    
+                    if (!currentUserFaculty) {
+                        console.log('⚠️ No user faculty found, showing all news');
+                        return true; // If no faculty, show all
                     }
-
-                    return news.readBy.some(read => {
-                        // read.userId is populated with: { _id, username, email, name }
-                        // localStorage stores user.id which is actually the username/enrollment number
-                        // So we need to compare with the username field, not _id
-                        
-                        let readUserId = read.userId;
-                        
-                        // If it's an object (populated), use the username field
-                        if (readUserId && typeof readUserId === 'object') {
-                            // Compare using username since that's what's in localStorage as user.id
-                            return readUserId.username === currentUserId;
+                    
+                    const newsFaculty = news.faculty;
+                    
+                    // Check if news is for all faculties
+                    if (newsFaculty === 'All Faculties') {
+                        console.log(`✅ "${news.newsTopic}" - All Faculties (visible to everyone)`);
+                        return true;
+                    }
+                    
+                    // Exact faculty match (case-insensitive)
+                    const isMatch = newsFaculty?.toLowerCase() === currentUserFaculty.toLowerCase();
+                    
+                    console.log(`${isMatch ? '✅' : '❌'} "${news.newsTopic}": faculty="${newsFaculty}", userFaculty="${currentUserFaculty}", match=${isMatch}`);
+                    
+                    return isMatch;
+                })
+                .map(news => ({
+                    id: news._id,
+                    title: news.newsTopic,
+                    content: news.newsMessage,
+                    uploader: news.uploadedByRole === 'examDiv' ? 'Exam Division' : 'Admin',
+                    uploaderName: news.uploadedByName,
+                    date: news.createdAt,
+                    priority: news.priority || 'medium',
+                    type: news.newsType,
+                    faculty: news.faculty,
+                    fileUrl: news.fileUrl,
+                    fileName: news.originalFileName,
+                    isRead: (() => {
+                        if (!currentUserId || !news.readBy || news.readBy.length === 0) {
+                            return false;
                         }
-                        
-                        // Fallback: if it's just a string _id, this won't match but keep the logic
-                        return String(readUserId) === String(currentUserId);
-                    });
-                })()
-            }));
+
+                        return news.readBy.some(read => {
+                            // read.userId is populated with: { _id, username, email, name }
+                            // localStorage stores user.id which is actually the username/enrollment number
+                            // So we need to compare with the username field, not _id
+
+                            let readUserId = read.userId;
+
+                            // If it's an object (populated), use the username field
+                            if (readUserId && typeof readUserId === 'object') {
+                                // Compare using username since that's what's in localStorage as user.id
+                                return readUserId.username === currentUserId;
+                            }
+
+                            // Fallback: if it's just a string _id, this won't match but keep the logic
+                            return String(readUserId) === String(currentUserId);
+                        });
+                    })()
+                }));
+            
+            console.log(`✅ Filtered news items: ${transformedNews.length} out of ${data.data.length}`);
 
             setNewsItems(transformedNews);
-            
+
             // Check for new news and create notifications
             checkForNewNews(transformedNews);
         } catch (err) {
@@ -106,12 +214,22 @@ const News = () => {
         }
     };
 
-    // Load news on component mount
+    // Load user faculty and news on component mount
     useEffect(() => {
-        loadNews();
+        const loadFacultyAndNews = async () => {
+            await fetchUserFaculty();
+            loadNews();
+        };
+        loadFacultyAndNews();
     }, []);
+    
+    // Reload news when userFaculty changes
+    useEffect(() => {
+        if (userFaculty) {
+            loadNews();
+        }
+    }, [userFaculty]);
 
-    // Mark news as read
     const markAsRead = async (newsId) => {
         // Validate news ID
         if (!newsId || typeof newsId !== 'string' || newsId.length !== 24) {
@@ -424,6 +542,56 @@ const News = () => {
                                     <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">
                                         {news.content}
                                     </p>
+
+                                    {/* File Attachment Section */}
+                                    {news.fileUrl && (
+                                        <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                            {/* Image Preview */}
+                                            {news.fileName && /\.(jpg|jpeg|png|gif|webp)$/i.test(news.fileName) && (
+                                                <div className="mb-3">
+                                                    <img
+                                                        src={`http://localhost:5000${news.fileUrl}`}
+                                                        alt={news.fileName}
+                                                        className="max-w-full h-auto rounded-lg shadow-sm max-h-96 object-contain"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextElementSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <div className="hidden items-center justify-center p-4 bg-gray-100 rounded-lg text-gray-500">
+                                                        <PhotoIcon className="w-8 h-8 mr-2" />
+                                                        <span className="text-sm">Image preview not available</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* File Info and Download Button */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    {news.fileName && /\.(jpg|jpeg|png|gif|webp)$/i.test(news.fileName) ? (
+                                                        <PhotoIcon className="w-5 h-5 text-blue-600" />
+                                                    ) : (
+                                                        <DocumentIcon className="w-5 h-5 text-blue-600" />
+                                                    )}
+                                                    <span className="text-sm text-gray-700 font-medium">
+                                                        {news.fileName || 'Attachment'}
+                                                    </span>
+                                                </div>
+                                                <a
+                                                    href={`http://localhost:5000${news.fileUrl}`}
+                                                    download={news.fileName}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r
+                                                        from-green-500 to-green-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200
+                                                        hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
+                                                >
+                                                    <ArrowDownTrayIcon className="w-4 h-4 mr-1.5" />
+                                                    Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                                         <button
                                             onClick={() => handleNewsClick(news)}

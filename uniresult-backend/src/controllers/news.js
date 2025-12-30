@@ -71,17 +71,11 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
         uploadedByEmail: uploaderEmail,
         uploadedByRole: uploaderRole,
         status: 'active',
-        priority: priority || 'normal'
+        priority: priority || 'medium'
     });
 
     // Create notification for news
-    await createNewsNotification({
-        _id: news._id,
-        topic: news.newsTopic,
-        message: news.newsMessage,
-        faculty: news.faculty,
-        priority: news.priority
-    }, req.user);
+    await createNewsNotification(news, req.user);
 
     res.status(201).json({
         success: true,
@@ -95,6 +89,9 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
 // @access  Private
 export const getNews = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, faculty, type, status } = req.query;
+
+    console.log('📰 Get News Request - Faculty filter:', faculty);
+    console.log('📰 Query params:', req.query);
 
     // Build query
     let query = {};
@@ -110,6 +107,8 @@ export const getNews = asyncHandler(async (req, res) => {
             ];
         }
     }
+
+    console.log('📰 MongoDB Query:', JSON.stringify(query, null, 2));
 
     // Type filter
     if (type && type !== 'all') {
@@ -132,6 +131,11 @@ export const getNews = asyncHandler(async (req, res) => {
         .limit(parseInt(limit));
 
     const total = await News.countDocuments(query);
+    
+    console.log(`📰 Found ${news.length} news items for faculty: ${faculty || 'all'}`);
+    if (news.length > 0) {
+        console.log('📰 Sample news faculties:', news.map(n => ({ topic: n.newsTopic, faculty: n.faculty })));
+    }
 
     res.status(200).json({
         success: true,
