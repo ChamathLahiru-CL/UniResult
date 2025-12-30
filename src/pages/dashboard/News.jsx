@@ -5,7 +5,10 @@ import {
     UserGroupIcon,
     AcademicCapIcon,
     CheckCircleIcon,
-    EyeIcon
+    EyeIcon,
+    ArrowDownTrayIcon,
+    PhotoIcon,
+    DocumentIcon
 } from '@heroicons/react/24/outline';
 import { checkForNewNews } from '../../utils/newsNotificationDispatcher';
 
@@ -79,15 +82,15 @@ const News = () => {
                         // read.userId is populated with: { _id, username, email, name }
                         // localStorage stores user.id which is actually the username/enrollment number
                         // So we need to compare with the username field, not _id
-                        
+
                         let readUserId = read.userId;
-                        
+
                         // If it's an object (populated), use the username field
                         if (readUserId && typeof readUserId === 'object') {
                             // Compare using username since that's what's in localStorage as user.id
                             return readUserId.username === currentUserId;
                         }
-                        
+
                         // Fallback: if it's just a string _id, this won't match but keep the logic
                         return String(readUserId) === String(currentUserId);
                     });
@@ -95,7 +98,7 @@ const News = () => {
             }));
 
             setNewsItems(transformedNews);
-            
+
             // Check for new news and create notifications
             checkForNewNews(transformedNews);
         } catch (err) {
@@ -424,6 +427,56 @@ const News = () => {
                                     <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">
                                         {news.content}
                                     </p>
+
+                                    {/* File Attachment Section */}
+                                    {news.fileUrl && (
+                                        <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                            {/* Image Preview */}
+                                            {news.fileName && /\.(jpg|jpeg|png|gif|webp)$/i.test(news.fileName) && (
+                                                <div className="mb-3">
+                                                    <img
+                                                        src={`http://localhost:5000${news.fileUrl}`}
+                                                        alt={news.fileName}
+                                                        className="max-w-full h-auto rounded-lg shadow-sm max-h-96 object-contain"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextElementSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <div className="hidden items-center justify-center p-4 bg-gray-100 rounded-lg text-gray-500">
+                                                        <PhotoIcon className="w-8 h-8 mr-2" />
+                                                        <span className="text-sm">Image preview not available</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* File Info and Download Button */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    {news.fileName && /\.(jpg|jpeg|png|gif|webp)$/i.test(news.fileName) ? (
+                                                        <PhotoIcon className="w-5 h-5 text-blue-600" />
+                                                    ) : (
+                                                        <DocumentIcon className="w-5 h-5 text-blue-600" />
+                                                    )}
+                                                    <span className="text-sm text-gray-700 font-medium">
+                                                        {news.fileName || 'Attachment'}
+                                                    </span>
+                                                </div>
+                                                <a
+                                                    href={`http://localhost:5000${news.fileUrl}`}
+                                                    download={news.fileName}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r
+                                                        from-green-500 to-green-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200
+                                                        hover:translate-y-[-1px] active:translate-y-[1px] focus:outline-none"
+                                                >
+                                                    <ArrowDownTrayIcon className="w-4 h-4 mr-1.5" />
+                                                    Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                                         <button
                                             onClick={() => handleNewsClick(news)}
