@@ -87,6 +87,17 @@ export const uploadResult = async (req, res) => {
                 uploaderRole = 'examDiv';
                 uploaderId = examMember._id;
             }
+        } else {
+            // Check if user is an exam division member even if their role is not 'examDiv'
+            const ExamDivisionMember = (await import('../models/ExamDivisionMember.js')).default;
+            const examMember = await ExamDivisionMember.findOne({ email: req.user.email });
+            if (examMember) {
+                uploaderName = `${examMember.firstName} ${examMember.lastName}`;
+                uploaderUsername = examMember.username;
+                uploaderEmail = examMember.email;
+                uploaderRole = 'examDiv';
+                uploaderId = examMember._id;
+            }
         }
 
         // Create activity record for admin dashboard

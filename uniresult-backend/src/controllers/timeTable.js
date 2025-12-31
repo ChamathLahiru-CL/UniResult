@@ -35,6 +35,7 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
     }
 
     // Get uploader details
+    let uploaderId = req.user.id;
     let uploaderName = 'Unknown User';
     let uploaderUsername = req.user.username || 'Unknown';
     let uploaderEmail = req.user.email || 'unknown@example.com';
@@ -49,12 +50,22 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
             uploaderRole = 'examDiv';
         }
     } else {
-        const user = await User.findById(req.user.id);
-        if (user) {
-            uploaderName = user.name;
-            uploaderUsername = user.username;
-            uploaderEmail = user.email;
-            uploaderRole = user.role;
+        // Check if user is an exam division member even if their role is not 'examDiv'
+        const examMember = await ExamDivisionMember.findOne({ email: req.user.email });
+        if (examMember) {
+            uploaderId = examMember._id;
+            uploaderName = `${examMember.firstName} ${examMember.lastName}`;
+            uploaderUsername = examMember.username;
+            uploaderEmail = examMember.email;
+            uploaderRole = 'examDiv';
+        } else {
+            const user = await User.findById(req.user.id);
+            if (user) {
+                uploaderName = user.name;
+                uploaderUsername = user.username;
+                uploaderEmail = user.email;
+                uploaderRole = user.role;
+            }
         }
     }
 
@@ -83,7 +94,7 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
         activityType: 'TIMETABLE_UPLOAD',
         activityName: 'Exam Time Table Updated',
         description: `Updated exam time table for ${faculty} - ${year} (${req.file.originalname})`,
-        performedBy: req.user.role === 'examDiv' ? req.user.id : null,
+        performedBy: uploaderId,
         performedByName: uploaderName,
         performedByUsername: uploaderUsername,
         performedByEmail: uploaderEmail,

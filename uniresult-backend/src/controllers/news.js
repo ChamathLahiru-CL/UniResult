@@ -43,6 +43,15 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
             uploaderEmail = examMember.email;
             uploaderRole = 'examDiv';
         }
+    } else {
+        // Check if user is an exam division member even if their role is not 'examDiv'
+        const examMember = await ExamDivisionMember.findOne({ email: req.user.email });
+        if (examMember) {
+            uploaderName = `${examMember.firstName} ${examMember.lastName}`;
+            uploaderEmpNo = examMember.employeeNumber || examMember.username;
+            uploaderEmail = examMember.email;
+            uploaderRole = 'examDiv';
+        }
     }
 
     // Handle file upload if present

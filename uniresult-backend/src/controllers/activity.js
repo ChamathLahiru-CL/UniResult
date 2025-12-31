@@ -2,6 +2,7 @@ import Activity from '../models/Activity.js';
 import TimeTable from '../models/TimeTable.js';
 import News from '../models/News.js';
 import Result from '../models/Result.js';
+import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 
@@ -320,8 +321,18 @@ export const getMyActivities = asyncHandler(async (req, res) => {
 export const getAllExamDivisionActivities = asyncHandler(async (req, res) => {
     const { page = 1, limit = 20, type } = req.query;
 
+    // Get all exam division member IDs to build a more comprehensive query
+    const examMembers = await ExamDivisionMember.find({ status: 'Active' });
+    const examMemberIds = examMembers.map(member => member._id);
+
     // Build query - activities performed by any exam division member
-    let query = { performedByRole: 'examDiv' };
+    // Include activities where performedByRole is 'examDiv' OR performedBy is an exam division member
+    let query = {
+        $or: [
+            { performedByRole: 'examDiv' },
+            { performedBy: { $in: examMemberIds } }
+        ]
+    };
 
     // Type filter
     if (type && type !== 'all') {
