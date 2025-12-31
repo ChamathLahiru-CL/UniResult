@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 
-const RecentActivities = ({ activeFilter = 'all' }) => {
+const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const [error, setError] = useState(null);
@@ -40,7 +40,8 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
 
       if (response.ok) {
         const result = await response.json();
-        setActivities(result.data);
+        const data = limit ? result.data.slice(0, limit) : result.data;
+        setActivities(data);
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Failed to fetch activities');
@@ -53,11 +54,11 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeFilter, limit]);
 
   useEffect(() => {
     fetchActivities();
-  }, [activeFilter]);
+  }, [fetchActivities]);
 
   const getActivityIcon = (type) => {
     switch (type) {

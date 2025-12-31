@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { MemberCard } from '../../components/examdivision/members/MemberCard';
 import { SearchMembers } from '../../components/examdivision/members/SearchMembers';
-import { MemberDetailsModal } from '../../components/examdivision/members/MemberDetailsModal';
 import { isActiveMember } from '../../utils/memberUtils';
 
 const ExamDivisionMembers = () => {
-  const [selectedMember, setSelectedMember] = useState(null);
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -87,11 +87,7 @@ const ExamDivisionMembers = () => {
   };
 
   const handleViewMember = (member) => {
-    setSelectedMember(member);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedMember(null);
+    navigate(`/exam/members/${member.id}`);
   };
 
   const filteredMembers = memberList.filter(member => {
@@ -147,13 +143,6 @@ const ExamDivisionMembers = () => {
           ))
         )}
       </div>
-
-      {selectedMember && (
-        <MemberDetailsModal
-          member={selectedMember}
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 };

@@ -10,10 +10,10 @@ export const SearchMembers = ({
 }) => {
   const roles = [
     'All',
+    'Exam Officer',
+    'Senior Coordinator',
     'Coordinator',
-    'Reviewer',
-    'Assistant',
-    'Data Entry'
+    'Assistant Coordinator'
   ];
 
   return (

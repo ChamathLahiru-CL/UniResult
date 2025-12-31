@@ -74,9 +74,12 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+          <Link 
+            to="/exam"
+            className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          >
             UniResult
-          </span>
+          </Link>
         </div>
 
         {/* Navigation */}

@@ -1,4 +1,5 @@
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
+import Activity from '../models/Activity.js';
 
 // @desc    Create new exam division member
 // @route   POST /api/exam-division/members
@@ -92,10 +93,41 @@ export const getAllExamMembers = async (req, res) => {
             .select('-password')
             .sort({ createdAt: -1 });
 
+        // Calculate upload counts for each member
+        const membersWithUploads = await Promise.all(
+            members.map(async (member) => {
+                const memberObj = member.toObject();
+                
+                // Count activities by type
+                const resultUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'RESULT_UPLOAD'
+                });
+                
+                const timetableUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'TIMETABLE_UPLOAD'
+                });
+                
+                const newsUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'NEWS_POST'
+                });
+                
+                memberObj.uploads = {
+                    results: resultUploads,
+                    timetables: timetableUploads,
+                    news: newsUploads
+                };
+                
+                return memberObj;
+            })
+        );
+
         res.status(200).json({
             success: true,
-            count: members.length,
-            data: members
+            count: membersWithUploads.length,
+            data: membersWithUploads
         });
 
     } catch (error) {
@@ -111,6 +143,9 @@ export const getAllExamMembers = async (req, res) => {
 // @desc    Get single exam division member
 // @route   GET /api/exam-division/members/:id
 // @access  Private/Admin
+// @desc    Get single exam division member
+// @route   GET /api/exam-division/members/:id
+// @access  Private/Admin/ExamDiv
 export const getExamMemberById = async (req, res) => {
     try {
         const member = await ExamDivisionMember.findById(req.params.id).select('-password');
@@ -122,9 +157,32 @@ export const getExamMemberById = async (req, res) => {
             });
         }
 
+        // Calculate upload counts for this member
+        const resultUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'RESULT_UPLOAD'
+        });
+        
+        const timetableUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'TIMETABLE_UPLOAD'
+        });
+        
+        const newsUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'NEWS_POST'
+        });
+
+        const memberObj = member.toObject();
+        memberObj.uploads = {
+            results: resultUploads,
+            timetables: timetableUploads,
+            news: newsUploads
+        };
+
         res.status(200).json({
             success: true,
-            data: member
+            data: memberObj
         });
 
     } catch (error) {
@@ -400,6 +458,43 @@ export const updatePassword = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating password',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get activities by member ID
+// @route   GET /api/exam-division/members/:id/activities
+// @access  Private/Admin/ExamDiv
+export const getMemberActivities = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Verify member exists
+        const member = await ExamDivisionMember.findById(id);
+        if (!member) {
+            return res.status(404).json({
+                success: false,
+                message: 'Exam division member not found'
+            });
+        }
+
+        // Fetch all activities performed by this member
+        const activities = await Activity.find({ performedBy: id })
+            .sort({ createdAt: -1 })
+            .limit(100); // Limit to last 100 activities
+
+        res.status(200).json({
+            success: true,
+            count: activities.length,
+            data: activities
+        });
+
+    } catch (error) {
+        console.error('Get member activities error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching member activities',
             error: error.message
         });
     }

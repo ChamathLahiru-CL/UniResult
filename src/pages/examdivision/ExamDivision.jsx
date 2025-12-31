@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import QuickActions from '../../components/examdivision/QuickActions';
 import LastUpdatedResults from '../../components/examdivision/LastUpdatedResults';
@@ -9,7 +10,7 @@ import RecentActivities from '../../components/examdivision/RecentActivities';
 const ExamDivision = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('myActivities'); // 'myActivities' or 'otherActivities'
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate loading delay for smooth entrance animation
@@ -62,56 +63,32 @@ const ExamDivision = () => {
             </div>
           </motion.div>
 
-          {/* Recent Activities Section with Tabs */}
+          {/* Recent Activities Section */}
           <motion.div
             className="mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-              {/* Tabs Header */}
-              <div className="border-b border-gray-200">
-                <div className="px-6 flex space-x-8">
-                  <button
-                    onClick={() => setActiveTab('myActivities')}
-                    className={`py-4 text-sm font-medium border-b-2 transition-colors duration-200 ${
-                      activeTab === 'myActivities'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    My Activities
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('otherActivities')}
-                    className={`py-4 text-sm font-medium border-b-2 transition-colors duration-200 ${
-                      activeTab === 'otherActivities'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Other Activities
-                  </button>
-                </div>
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">Recent Activities</h2>
+                <button
+                  onClick={() => navigate('/exam/activities')}
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                >
+                  View All Activities
+                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
-
-              {/* Activities Content */}
-              <div className="p-6">
-                {activeTab === 'myActivities' ? (
-                  <RecentActivities 
-                    isLoading={isLoading} 
-                    filter="myActivities"
-                    userId={user?.id} 
-                  />
-                ) : (
-                  <RecentActivities 
-                    isLoading={isLoading} 
-                    filter="otherActivities"
-                    userId={user?.id}
-                  />
-                )}
-              </div>
+              <RecentActivities 
+                isLoading={isLoading} 
+                filter="myActivities"
+                userId={user?.id}
+                limit={5}
+              />
             </div>
           </motion.div>
         </motion.div>
