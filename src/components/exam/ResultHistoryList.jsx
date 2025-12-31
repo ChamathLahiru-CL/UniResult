@@ -50,10 +50,10 @@ const ResultHistoryList = ({ results = [], onPreview }) => {
 
   if (results.length === 0) {
     return (
-      <div className="bg-white rounded-lg p-8 shadow-md text-center">
-        <DocumentIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Result Sheets Found</h3>
-        <p className="text-gray-500">
+      <div className="bg-white rounded-lg p-6 sm:p-8 shadow-md text-center">
+        <DocumentIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No Result Sheets Found</h3>
+        <p className="text-sm sm:text-base text-gray-500">
           No result sheets match your current filters. Try adjusting your search criteria.
         </p>
       </div>
@@ -63,15 +63,15 @@ const ResultHistoryList = ({ results = [], onPreview }) => {
   const getFileIcon = (type) => {
     switch (type) {
       case 'pdf':
-        return <DocumentIcon className="h-8 w-8 text-red-500" />;
+        return <DocumentIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-red-500" />;
       case 'docx':
-        return <DocumentTextIcon className="h-8 w-8 text-blue-500" />;
+        return <DocumentTextIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-500" />;
       case 'excel':
-        return <TableCellsIcon className="h-8 w-8 text-green-500" />;
+        return <TableCellsIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-green-500" />;
       case 'image':
-        return <PhotoIcon className="h-8 w-8 text-purple-500" />;
+        return <PhotoIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-500" />;
       default:
-        return <DocumentIcon className="h-8 w-8 text-gray-500" />;
+        return <DocumentIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-gray-500" />;
     }
   };
 
@@ -88,94 +88,100 @@ const ResultHistoryList = ({ results = [], onPreview }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-900">Past Result Uploads</h3>
-        <p className="text-sm text-gray-600 mt-1">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">Past Result Uploads</h3>
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           {results.length} result sheet{results.length !== 1 ? 's' : ''} found
         </p>
       </div>
 
       <div className="divide-y divide-gray-100">
         {results.map((result) => (
-          <div key={result.id} className="p-6 hover:bg-gray-50 transition-colors">
-            <div className="flex items-center justify-between">
+          <div key={result.id} className="p-4 sm:p-5 md:p-6 hover:bg-gray-50 transition-colors">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
               {/* File Info */}
-              <div className="flex items-center gap-4 flex-1">
-                <div className="flex-shrink-0">
+              <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="shrink-0 mt-0.5">
                   {getFileIcon(result.type)}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h4 className="text-lg font-medium text-gray-900 truncate">
-                      {result.subjectName}
-                    </h4>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getFacultyBadgeColor(result.faculty)}`}>
-                      {result.faculty}
+                  {/* Title */}
+                  <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2 break-words">
+                    {result.subjectName}
+                  </h4>
+                  
+                  {/* Badges - Stacked on mobile */}
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3">
+                    <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium border ${getFacultyBadgeColor(result.faculty)}`}>
+                      <span className="truncate max-w-[150px] sm:max-w-none">{result.faculty}</span>
                     </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
+                    <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
                       {result.year}
                     </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+                    <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
                       {result.credits} Credit{result.credits !== '1' ? 's' : ''}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-2">
+                  {/* Metadata - Stacked on mobile */}
+                  <div className="space-y-1.5 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-4 text-xs sm:text-sm text-gray-500 mb-2">
                     <div className="flex items-center gap-1">
-                      <UserIcon className="h-4 w-4" />
-                      <span>
-                        Uploaded by {result.uploadedByName}
+                      <UserIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="truncate">
+                        {result.uploadedByName}
                         {result.uploadedByUsername && ` (${result.uploadedByUsername})`}
                         {result.uploadedByRole && ` - ${result.uploadedByRole}`}
                       </span>
                     </div>
+                    <span className="hidden sm:inline">•</span>
                     <div className="flex items-center gap-1">
-                      <ClockIcon className="h-4 w-4" />
-                      <span>{formatDate(result.uploadedAt)}</span>
+                      <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="truncate">{formatDate(result.uploadedAt)}</span>
                     </div>
+                    <span className="hidden sm:inline">•</span>
                     <div className="flex items-center gap-1">
-                      <AcademicCapIcon className="h-4 w-4" />
+                      <AcademicCapIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                       <span>{result.resultCount} result{result.resultCount !== 1 ? 's' : ''}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span className="font-medium text-gray-700">{result.department}</span>
-                    <span>•</span>
-                    <span>{result.fileName}</span>
-                    <span>•</span>
+                  {/* File details - Stacked on mobile */}
+                  <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500">
+                    <span className="font-medium text-gray-700 truncate max-w-[200px] sm:max-w-none">{result.department}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="truncate max-w-[150px] sm:max-w-xs">{result.fileName}</span>
+                    <span className="hidden sm:inline">•</span>
                     <span>{result.fileSize}</span>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <span className="capitalize">{result.type} file</span>
                   </div>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Actions - Full width buttons on mobile */}
+              <div className="flex gap-2 sm:gap-3 sm:shrink-0 sm:ml-auto">
                 <button
                   onClick={() => onPreview(result)}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 hover:border-blue-300"
                   title="Preview file"
                 >
-                  <EyeIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Preview</span>
+                  <EyeIcon className="h-4 w-4 shrink-0" />
+                  <span>Preview</span>
                 </button>
 
-                {/* Download button for all file types */}
                 <button
                   onClick={() => handleDownload(result)}
-                  className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                    result.type === 'pdf' ? 'text-red-600 hover:text-red-800 hover:bg-red-50' :
-                    result.type === 'docx' ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-50' :
-                    result.type === 'excel' ? 'text-green-600 hover:text-green-800 hover:bg-green-50' :
-                    'text-purple-600 hover:text-purple-800 hover:bg-purple-50'
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 text-xs sm:text-sm rounded-lg transition-colors border ${
+                    result.type === 'pdf' ? 'text-red-600 hover:text-red-800 hover:bg-red-50 border-red-200 hover:border-red-300' :
+                    result.type === 'docx' ? 'text-blue-600 hover:text-blue-800 hover:bg-blue-50 border-blue-200 hover:border-blue-300' :
+                    result.type === 'excel' ? 'text-green-600 hover:text-green-800 hover:bg-green-50 border-green-200 hover:border-green-300' :
+                    'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200 hover:border-purple-300'
                   }`}
                   title={`Download ${result.type.toUpperCase()} file`}
                 >
-                  <ArrowDownTrayIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Download</span>
+                  <ArrowDownTrayIcon className="h-4 w-4 shrink-0" />
+                  <span>Download</span>
                 </button>
               </div>
             </div>

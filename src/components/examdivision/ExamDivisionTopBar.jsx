@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import {
@@ -16,9 +16,17 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Refs for click outside detection
+  const notificationRef = useRef(null);
+  const mobileNotificationRef = useRef(null);
+  const profileMenuRef = useRef(null);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [profile, setProfile] = useState({ name: 'Loading...', role: 'Exam Officer' });
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,6 +34,35 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close notifications dropdown if clicked outside
+      if (showNotifications && 
+          notificationRef.current && 
+          !notificationRef.current.contains(event.target) &&
+          mobileNotificationRef.current && 
+          !mobileNotificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      
+      // Close profile menu if clicked outside
+      if (showProfileMenu && 
+          profileMenuRef.current && 
+          !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showNotifications, showProfileMenu]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -64,6 +101,42 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
     fetchProfile();
   }, [user]);
 
+  // Fetch recent activities for notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!user?.token) return;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/activities/my-activities', {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const latestActivities = result.data.slice(0, 6);
+          setNotifications(latestActivities);
+          // Count unread (activities from last 24 hours)
+          const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          const unread = latestActivities.filter(
+            activity => new Date(activity.timestamp) > oneDayAgo
+          ).length;
+          setUnreadCount(unread);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+    
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   const currentDate = currentDateTime.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -97,7 +170,41 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
     setShowProfileMenu(false);
   };
 
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const handleViewAllActivities = () => {
+    navigate('/exam/activities');
+    setShowNotifications(false);
+  };
+
+  const getActivityTypeColor = (type) => {
+    switch (type) {
+      case 'timetable_upload':
+        return 'text-blue-600 bg-blue-50';
+      case 'result_upload':
+        return 'text-green-600 bg-green-50';
+      case 'news_post':
+        return 'text-purple-600 bg-purple-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const activityTime = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - activityTime) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
   return (
+    <>
     <header className="bg-white shadow-sm z-40 sticky top-0">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
@@ -130,20 +237,96 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
                 <span className="text-sm">{currentTime}</span>
               </div>
               <div className="h-6 w-px bg-gray-200"></div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-full hover:bg-gray-100 relative"
-              >
-                <BellIcon className="h-5 w-5 text-gray-400" />
-                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-              </motion.button>
+              <div className="relative" ref={notificationRef}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleNotificationClick}
+                  className="p-2 rounded-full hover:bg-gray-100 relative focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <BellIcon className="h-5 w-5 text-gray-400" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex items-center justify-center h-4 w-4 text-xs font-bold text-white bg-red-500 rounded-full ring-2 ring-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </motion.button>
+
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[500px] overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                          {unreadCount} new
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="overflow-y-auto max-h-[380px]">
+                      {notifications.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-gray-500">
+                          <BellIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No recent activities</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-100">
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                              onClick={() => {
+                                navigate('/exam/activities');
+                                setShowNotifications(false);
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`mt-1 p-1.5 rounded-full ${getActivityTypeColor(notification.type)}`}>
+                                  <div className="w-2 h-2 rounded-full bg-current"></div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                    {notification.description}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatTimeAgo(notification.timestamp)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {notifications.length > 0 && (
+                      <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                        <button
+                          onClick={handleViewAllActivities}
+                          className="w-full text-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          View All Activities
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Right section - User Profile */}
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative" ref={profileMenuRef}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -199,6 +382,101 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
           </div>
         </div>
       </div>
+      
+      {/* Mobile date display */}
+      <div className="sm:hidden border-t border-gray-200 px-4 py-2">
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            <CalendarIcon className="h-4 w-4 shrink-0" />
+            <span className="truncate text-xs">{currentDate}</span>
+          </div>
+          <div className="relative" ref={mobileNotificationRef}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNotificationClick}
+              className="p-1 rounded-full hover:bg-gray-100 relative focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <BellIcon className="h-5 w-5 text-gray-400" />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 flex items-center justify-center h-3.5 w-3.5 text-[10px] font-bold text-white bg-red-500 rounded-full ring-2 ring-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </motion.button>
+
+            {/* Mobile Notifications Dropdown */}
+            {showNotifications && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[400px] overflow-hidden"
+              >
+                <div className="px-3 py-2.5 border-b border-gray-200 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+                      {unreadCount} new
+                    </span>
+                  )}
+                </div>
+                
+                <div className="overflow-y-auto max-h-[300px]">
+                  {notifications.length === 0 ? (
+                    <div className="px-3 py-6 text-center text-gray-500">
+                      <BellIcon className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+                      <p className="text-xs">No recent activities</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="px-3 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            navigate('/exam/activities');
+                            setShowNotifications(false);
+                          }}
+                        >
+                          <div className="flex items-start gap-2">
+                            <div className={`mt-1 p-1 rounded-full ${getActivityTypeColor(notification.type)} shrink-0`}>
+                              <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-900 line-clamp-2">
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                                {notification.description}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {formatTimeAgo(notification.timestamp)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {notifications.length > 0 && (
+                  <div className="px-3 py-2.5 border-t border-gray-200 bg-gray-50">
+                    <button
+                      onClick={handleViewAllActivities}
+                      className="w-full text-center text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                    >
+                      View All Activities
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
 
       {/* Sign Out Confirmation Modal */}
       {showSignOutConfirm && (
@@ -246,25 +524,7 @@ const ExamDivisionTopBar = ({ onMenuClick }) => {
           </motion.div>
         </div>
       )}
-
-      {/* Mobile date display */}
-      <div className="lg:hidden border-t border-gray-200 px-4 py-2">
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-2">
-            <CalendarIcon className="h-4 w-4" />
-            <span>{currentDate}</span>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-1 rounded-full hover:bg-gray-100 relative"
-          >
-            <BellIcon className="h-5 w-5 text-gray-400" />
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-          </motion.button>
-        </div>
-      </div>
-    </header>
+    </>
   );
 };
 
