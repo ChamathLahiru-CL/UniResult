@@ -254,12 +254,12 @@ const Notifications = () => {
                       ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md shadow-blue-200'
                       : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                     }
-                  ${tab === 'unread' && unreadCount > 0 ? 'pr-8 sm:pr-10' : ''}
+                  ${tab === 'unread' && unreadCount > 0 ? 'pr-10 sm:pr-12' : ''}
                 `}
                 >
                   {tab}
                   {tab === 'unread' && unreadCount > 0 && (
-                    <span className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-3 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs bg-red-500 text-white rounded-full min-w-[18px] sm:min-w-[20px] flex items-center justify-center font-bold">
+                    <span className="absolute top-1/2 -translate-y-1/2 right-2.5 sm:right-3.5 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs bg-red-500 text-white rounded-full min-w-[20px] sm:min-w-[24px] flex items-center justify-center font-bold shadow-sm">
                       {unreadCount}
                     </span>
                   )}
