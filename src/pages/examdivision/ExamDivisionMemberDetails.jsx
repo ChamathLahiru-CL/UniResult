@@ -356,25 +356,25 @@ const ExamDivisionMemberDetails = () => {
                   {activities.map((activity, index) => (
                     <div key={activity._id || index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <div className="flex-shrink-0">
-                        <span className="text-3xl">{getActivityIcon(activity.type)}</span>
+                        <span className="text-3xl">{getActivityIcon(activity.activityType || activity.activityName)}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{activity.description}</p>
                         <p className="text-xs text-gray-500 mt-1">
                           {format(new Date(activity.createdAt || activity.date), 'MMMM d, yyyy h:mm a')}
                         </p>
-                        {activity.details && (
-                          <p className="text-xs text-gray-600 mt-1">{activity.details}</p>
+                        {activity.fileName && (
+                          <p className="text-xs text-gray-600 mt-1">File: {activity.fileName}</p>
                         )}
                       </div>
                       <div className="flex-shrink-0">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          activity.type === 'upload' ? 'bg-blue-100 text-blue-800' :
-                          activity.type === 'update' ? 'bg-green-100 text-green-800' :
-                          activity.type === 'delete' ? 'bg-red-100 text-red-800' :
+                          activity.activityType?.toLowerCase().includes('upload') ? 'bg-blue-100 text-blue-800' :
+                          activity.activityType?.toLowerCase().includes('update') ? 'bg-green-100 text-green-800' :
+                          activity.activityType?.toLowerCase().includes('login') ? 'bg-purple-100 text-purple-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
-                          {activity.type || 'action'}
+                          {activity.activityName || activity.activityType || 'Activity'}
                         </span>
                       </div>
                     </div>
