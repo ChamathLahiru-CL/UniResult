@@ -87,6 +87,13 @@ const ExamDivisionMemberDetails = () => {
 
     if (memberId) {
       fetchMemberDetails();
+
+      // Auto-refresh every 30 seconds
+      const interval = setInterval(() => {
+        fetchMemberDetails();
+      }, 30000);
+
+      return () => clearInterval(interval);
     }
   }, [memberId, user]);
 

@@ -93,10 +93,41 @@ export const getAllExamMembers = async (req, res) => {
             .select('-password')
             .sort({ createdAt: -1 });
 
+        // Calculate upload counts for each member
+        const membersWithUploads = await Promise.all(
+            members.map(async (member) => {
+                const memberObj = member.toObject();
+                
+                // Count activities by type
+                const resultUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'RESULT_UPLOAD'
+                });
+                
+                const timetableUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'TIMETABLE_UPLOAD'
+                });
+                
+                const newsUploads = await Activity.countDocuments({
+                    performedBy: member._id,
+                    activityType: 'NEWS_POST'
+                });
+                
+                memberObj.uploads = {
+                    results: resultUploads,
+                    timetables: timetableUploads,
+                    news: newsUploads
+                };
+                
+                return memberObj;
+            })
+        );
+
         res.status(200).json({
             success: true,
-            count: members.length,
-            data: members
+            count: membersWithUploads.length,
+            data: membersWithUploads
         });
 
     } catch (error) {
@@ -112,6 +143,9 @@ export const getAllExamMembers = async (req, res) => {
 // @desc    Get single exam division member
 // @route   GET /api/exam-division/members/:id
 // @access  Private/Admin
+// @desc    Get single exam division member
+// @route   GET /api/exam-division/members/:id
+// @access  Private/Admin/ExamDiv
 export const getExamMemberById = async (req, res) => {
     try {
         const member = await ExamDivisionMember.findById(req.params.id).select('-password');
@@ -123,9 +157,32 @@ export const getExamMemberById = async (req, res) => {
             });
         }
 
+        // Calculate upload counts for this member
+        const resultUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'RESULT_UPLOAD'
+        });
+        
+        const timetableUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'TIMETABLE_UPLOAD'
+        });
+        
+        const newsUploads = await Activity.countDocuments({
+            performedBy: member._id,
+            activityType: 'NEWS_POST'
+        });
+
+        const memberObj = member.toObject();
+        memberObj.uploads = {
+            results: resultUploads,
+            timetables: timetableUploads,
+            news: newsUploads
+        };
+
         res.status(200).json({
             success: true,
-            data: member
+            data: memberObj
         });
 
     } catch (error) {
