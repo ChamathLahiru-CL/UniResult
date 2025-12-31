@@ -141,39 +141,39 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
 
   return (
     <div className="bg-white rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+        <div className="flex-1">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
             {activeFilter === 'my' ? 'My Activities' : 'All Exam Division Activities'}
           </h2>
           {activeFilter === 'all' && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
               See what other exam division members are doing
             </p>
           )}
         </div>
         <button
           onClick={fetchActivities}
-          className="inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          className="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
         >
-          <ArrowPathIcon className="w-4 h-4 mr-1" />
+          <ArrowPathIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
           Refresh
         </button>
       </div>
 
       <div className="divide-y divide-gray-200">
         {activities.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-4 sm:p-6 text-center text-gray-500">
             <div className="flex justify-center mb-4">
-              <DocumentTextIcon className="w-12 h-12 text-gray-400" />
+              <DocumentTextIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
             </div>
-            <p className="text-sm">
+            <p className="text-xs sm:text-sm">
               {activeFilter === 'my'
                 ? 'No recent activities found for you'
                 : 'No activities found from exam division members'}
             </p>
             {activeFilter === 'all' && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 px-2">
                 Activities will appear here when exam division members upload time tables, results, or post news updates
               </p>
             )}
@@ -184,43 +184,51 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
             return (
               <div
                 key={activity.id}
-                className="p-4 transition-colors duration-200 hover:bg-gray-50"
+                className="p-3 sm:p-4 transition-colors duration-200 hover:bg-gray-50"
               >
-                <div className="flex items-start space-x-4">
-                  <div className={`p-2 rounded-lg ${getIconColor(activity.type)}`}>
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                  {/* Icon - Hidden on mobile, shown on tablet+ */}
+                  <div className={`hidden sm:block p-2 rounded-lg ${getIconColor(activity.type)} shrink-0`}>
                     <IconComponent className="w-5 h-5" />
                   </div>
 
+                  {/* Main content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <p className="text-sm font-medium text-gray-900">
+                    {/* Title and badge */}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 break-words">
                         {activity.title}
                       </p>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        activity.type === 'timetable_upload' ? 'bg-blue-100 text-blue-800' :
-                        activity.type === 'result_upload' ? 'bg-green-100 text-green-800' :
-                        activity.type === 'news_post' ? 'bg-purple-100 text-purple-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${activity.type === 'timetable_upload' ? 'bg-blue-100 text-blue-800' :
+                          activity.type === 'result_upload' ? 'bg-green-100 text-green-800' :
+                            activity.type === 'news_post' ? 'bg-purple-100 text-purple-800' :
+                              'bg-gray-100 text-gray-800'
+                        }`}>
                         {activity.type === 'timetable_upload' ? 'Time Table' :
-                         activity.type === 'result_upload' ? 'Result' :
-                         activity.type === 'news_post' ? 'News' :
-                         'Activity'}
+                          activity.type === 'result_upload' ? 'Result' :
+                            activity.type === 'news_post' ? 'News' :
+                              'Activity'}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">
+
+                    {/* Description */}
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2 break-words">
                       {activity.description}
                     </p>
+
+                    {/* Faculty info */}
                     {activity.faculty && (
-                      <p className="text-xs text-blue-600 mt-1">
+                      <p className="text-xs text-blue-600 mb-2 break-words">
                         Faculty: {activity.faculty}
                         {activity.year && ` • Year: ${activity.year}`}
                       </p>
                     )}
+
+                    {/* Performer info */}
                     {activeFilter === 'all' && activity.performedByName && (
-                      <div className="flex items-center mt-2">
-                        <UserCircleIcon className="w-4 h-4 text-purple-500 mr-1" />
-                        <p className="text-sm font-medium text-purple-700">
+                      <div className="flex items-center mb-2">
+                        <UserCircleIcon className="w-4 h-4 text-purple-500 mr-1 shrink-0" />
+                        <p className="text-xs sm:text-sm font-medium text-purple-700 truncate">
                           {activity.performedByName}
                           {activity.performedByUsername && (
                             <span className="text-xs text-purple-500 ml-1">
@@ -230,70 +238,71 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
                         </p>
                       </div>
                     )}
-                    <div className="flex items-center mt-2 text-xs text-gray-500 space-x-4">
+
+                    {/* Timestamp */}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500 mb-3">
                       <div className="flex items-center">
-                        <ClockIcon className="w-4 h-4 mr-1" />
-                        {formatActivityTime(activity.timestamp)}
+                        <ClockIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" />
+                        <span className="whitespace-nowrap">{formatActivityTime(activity.timestamp)}</span>
                       </div>
                       <div className="flex items-center">
                         <span className="text-gray-400">•</span>
                         <span className="ml-1">{getRelativeTime(activity.timestamp)}</span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center space-x-2">
-                    {/* Action buttons for uploads with files */}
-                    {activity.fileUrl && (
-                      <div className="flex space-x-1 mr-2">
-                        <button
-                          onClick={() => window.open(activity.fileUrl, '_blank')}
-                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors"
-                          title="Preview document"
-                        >
-                          Preview
-                        </button>
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch(activity.fileUrl);
-                              const blob = await response.blob();
-                              const url = window.URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = url;
-                              link.download = activity.fileName || 'document';
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              window.URL.revokeObjectURL(url);
-                            } catch (error) {
-                              console.error('Download failed:', error);
-                              window.open(activity.fileUrl, '_blank');
-                            }
-                          }}
-                          className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-green-600 hover:bg-green-50 border border-green-200 hover:border-green-300 transition-colors"
-                          title="Download document"
-                        >
-                          Download
-                        </button>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        if (activity.type === 'timetable_upload') {
-                          navigate('/exam/time-table');
-                        } else if (activity.type === 'result_upload') {
-                          navigate('/exam/results');
-                        } else if (activity.type === 'news_post') {
-                          navigate('/exam/news');
-                        }
-                      }}
-                      className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-150"
-                    >
-                      View Details
-                      <ChevronRightIcon className="w-4 h-4 ml-1" />
-                    </button>
+                    {/* Action buttons - Mobile friendly layout */}
+                    <div className="flex flex-wrap gap-2">
+                      {activity.fileUrl && (
+                        <>
+                          <button
+                            onClick={() => window.open(activity.fileUrl, '_blank')}
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors flex-1 sm:flex-initial min-w-[80px]"
+                            title="Preview document"
+                          >
+                            Preview
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(activity.fileUrl);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = activity.fileName || 'document';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(url);
+                              } catch (error) {
+                                console.error('Download failed:', error);
+                                window.open(activity.fileUrl, '_blank');
+                              }
+                            }}
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded text-green-600 hover:bg-green-50 border border-green-200 hover:border-green-300 transition-colors flex-1 sm:flex-initial min-w-[80px]"
+                            title="Download document"
+                          >
+                            Download
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (activity.type === 'timetable_upload') {
+                            navigate('/exam/time-table');
+                          } else if (activity.type === 'result_upload') {
+                            navigate('/exam/results');
+                          } else if (activity.type === 'news_post') {
+                            navigate('/exam/news');
+                          }
+                        }}
+                        className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-200 hover:border-blue-300 transition-colors flex-1 sm:flex-initial min-w-[100px]"
+                      >
+                        View Details
+                        <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
