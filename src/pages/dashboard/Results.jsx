@@ -232,232 +232,201 @@ const Results = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 animate-fadeIn">
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl shadow-inner">
-              <AcademicCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Academic Results</h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1">Review your academic performance</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                  <AcademicCapIcon className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white">Academic Results</h1>
+                  <p className="text-blue-100 text-sm sm:text-base mt-1">Review your academic performance</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading your results...</span>
+        <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading your results...</p>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-red-800 mb-2">Error Loading Results</h3>
-          <p className="text-red-600">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Try Again
-          </button>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 sm:p-12 text-center">
+            <div className="p-4 bg-red-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <ExclamationTriangleIcon className="h-10 w-10 text-red-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-red-800 mb-2">Error Loading Results</h3>
+            <p className="text-red-600 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200 font-medium shadow-lg"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       )}
 
       {/* Results Content */}
       {!loading && !error && (
-        <div className="space-y-4">
-          {Object.entries(resultData).map(([level, levelData], index) => (
+        <div className="space-y-6">
+          {Object.entries(resultData).map(([level, levelData]) => (
             <div key={level} 
-              className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200 transform hover:scale-[1.02] hover:-translate-y-1 group cursor-pointer"
-              style={{ 
-                animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
-                opacity: 0,
-              }}>
+              className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-blue-300 hover:scale-[1.01]">
               {/* Level Header */}
-              <div className="w-full px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50/30 to-white transition-all duration-300 group-hover:from-blue-50 group-hover:to-indigo-50 group-hover:shadow-inner">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 w-full">
-                  <div className="flex items-center space-x-3 sm:space-x-4">
-                    <div className={`p-2 sm:p-3 rounded-full shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-200/30 transform group-hover:scale-110 group-hover:-translate-y-1 ${
-                      level === '100' ? 'bg-gradient-to-br from-green-100 to-green-200 text-green-600 group-hover:from-green-200 group-hover:to-green-300' :
-                      level === '200' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 group-hover:from-blue-200 group-hover:to-blue-300' :
-                      level === '300' ? 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 group-hover:from-purple-200 group-hover:to-purple-300' :
-                      'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 group-hover:from-orange-200 group-hover:to-orange-300'
-                    }`}>
-                      <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <AcademicCapIcon className="h-6 w-6 text-white" />
                     </div>
-                    <h2 className="text-lg sm:text-2xl font-bold text-blue-600 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-105 transform">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white">
                       {levelData.title}
                     </h2>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                    <button 
-                      className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5 text-center"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleLevel(level);
-                      }}
-                    >
-                      Click to view results
-                    </button>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <button
-                      className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-300 transform hover:-translate-y-0.5 text-center"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleLevel(level);
                       }}
+                      className="px-5 py-2.5 bg-white/20 backdrop-blur-sm border-2 border-white/30 text-white rounded-xl hover:bg-white/30 hover:shadow-lg transition-all duration-200 font-medium active:scale-95 text-center"
                     >
-                      {expandedLevels.has(level) ? 'Collapse' : 'Click to expand'}
-                    </button>
-                    <div className="flex justify-center sm:justify-start">
                       {expandedLevels.has(level) ? (
-                        <ChevronUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110" />
+                        <span className="flex items-center justify-center space-x-2">
+                          <span>Collapse</span>
+                          <ChevronUpIcon className="h-5 w-5" />
+                        </span>
                       ) : (
-                        <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition-all duration-300 transform group-hover:translate-y-1 group-hover:scale-110 animate-bounce" />
+                        <span className="flex items-center justify-center space-x-2">
+                          <span>Expand</span>
+                          <ChevronDownIcon className="h-5 w-5" />
+                        </span>
                       )}
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Semesters */}
               {expandedLevels.has(level) && (
-                <div className="px-3 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
+                <div className="p-4 sm:p-6 space-y-4 bg-gray-50">
                   {Object.entries(levelData.semesters).map(([semesterNum, semesterData]) => {
                     const semesterId = `semester-${semesterNum}`;
                     const completion = getCompletionPercentage(semesterData.subjects);
                     
                     return (
                       <div key={semesterId} 
-                        className="border border-gray-200 rounded-lg overflow-hidden transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-blue-300 bg-white"
-                        style={{ animation: `fadeInUp 0.5s ease-out ${semesterNum * 0.1}s both` }}>
+                        className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg">
                         {/* Semester Header */}
                         <button
                           onClick={() => toggleSemester(semesterId)}
-                          className="w-full px-3 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 bg-gradient-to-r from-gray-50 to-white hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group"
+                          className="w-full px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full">
-                            <h3 className="text-base sm:text-lg font-medium text-gray-900 text-left">{semesterData.title}</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
-                              completion >= 80 ? 'bg-green-100 text-green-800' :
-                              completion >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {completion}% Complete
-                            </span>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
+                            <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 text-left">{semesterData.title}</h3>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${
+                                completion >= 80 ? 'bg-green-100 text-green-700 border border-green-300' :
+                                completion >= 50 ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' :
+                                'bg-red-100 text-red-700 border border-red-300'
+                              }`}>
+                                {completion}% Complete
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex justify-center sm:justify-end">
+                          <div className="flex items-center justify-end">
                             {expandedSemesters.has(semesterId) ? (
-                              <ChevronUpIcon className="h-4 w-4 text-gray-500" />
+                              <ChevronUpIcon className="h-5 w-5 text-blue-600" />
                             ) : (
-                              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+                              <ChevronDownIcon className="h-5 w-5 text-blue-600" />
                             )}
                           </div>
                         </button>
 
                         {/* Semester Content */}
                         {expandedSemesters.has(semesterId) && (
-                          <div className="p-3 sm:p-4">
+                          <div className="p-4 sm:p-6 bg-white">
                             {/* Results Table */}
-                            <div className="overflow-x-auto mb-4 -mx-3 sm:mx-0">
-                              <div className="min-w-full inline-block align-middle">
-                                <table className="w-full table-auto min-w-[600px]">
-                                  <thead>
-                                    <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
-                                      <th className="text-left py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Subject Code
-                                        </span>
-                                      </th>
-                                      <th className="text-left py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Subject Title
-                                        </span>
-                                      </th>
-                                      <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Credit Count
-                                        </span>
-                                      </th>
-                                      <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Grade
-                                        </span>
-                                      </th>
-                                      <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Status
-                                        </span>
-                                      </th>
-                                      <th className="text-center py-3 sm:py-4 px-2 sm:px-4">
-                                        <span className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 transition-all duration-300 text-xs sm:text-sm">
-                                          Update Date
-                                        </span>
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {semesterData.subjects.map((subject, index) => (
-                                      <tr key={subject.code || index} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.01] ${
-                                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                                      } ${
-                                        highlightedSubject === subject.code ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-yellow-300 shadow-lg ring-2 ring-yellow-300/50 animate-pulse' : ''
-                                      }`}>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">{subject.code || 'N/A'}</td>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">{subject.title}</td>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
-                                          <span className="font-semibold text-gray-900 bg-blue-50 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
-                                            {subject.creditCount || 3}
-                                          </span>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
-                                          {subject.grade ? (
-                                            <span className={`font-semibold px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
-                                              subject.grade.startsWith('A') ? 'bg-green-50 text-green-600' :
-                                              subject.grade.startsWith('B') ? 'bg-blue-50 text-blue-600' :
-                                              subject.grade.startsWith('C') ? 'bg-yellow-50 text-yellow-600' :
-                                              'bg-red-50 text-red-600'
-                                            }`}>
-                                              {subject.grade}
-                                            </span>
-                                          ) : (
-                                            <span className="text-gray-400 text-xs sm:text-sm">-</span>
-                                          )}
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
-                                          <StatusBadge status={subject.status} />
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
-                                          <span className="text-xs sm:text-sm text-gray-500">
-                                            {subject.updateDate || (subject.status === 'completed' ? '2025-10-28' : '-')}
-                                          </span>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                            <div className="space-y-3 mb-6">
+                              {/* Table Header */}
+                              <div className="hidden lg:grid lg:grid-cols-6 gap-4 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                                <div className="font-semibold text-blue-700 text-sm">Subject Code</div>
+                                <div className="col-span-2 font-semibold text-blue-700 text-sm">Subject Title</div>
+                                <div className="text-center font-semibold text-blue-700 text-sm">Credits</div>
+                                <div className="text-center font-semibold text-blue-700 text-sm">Grade</div>
+                                <div className="text-center font-semibold text-blue-700 text-sm">Status</div>
                               </div>
+                              
+                              {/* Table Rows - Card Style */}
+                              {semesterData.subjects.map((subject, index) => (
+                                <div key={subject.code || index} 
+                                  className={`grid grid-cols-1 lg:grid-cols-6 gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
+                                    highlightedSubject === subject.code 
+                                      ? 'bg-yellow-50 border-yellow-300 shadow-lg' 
+                                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                                  }`}>
+                                  {/* Mobile Labels */}
+                                  <div className="lg:col-span-1 flex items-center gap-2">
+                                    <span className="text-xs text-blue-600 font-medium lg:hidden">Code:</span>
+                                    <span className="font-semibold text-gray-900 text-sm sm:text-base">{subject.code || 'N/A'}</span>
+                                  </div>
+                                  <div className="lg:col-span-2 flex items-center gap-2">
+                                    <span className="text-xs text-blue-600 font-medium lg:hidden">Subject:</span>
+                                    <span className="text-gray-700 text-sm sm:text-base">{subject.title}</span>
+                                  </div>
+                                  <div className="lg:text-center flex items-center gap-2 lg:block">
+                                    <span className="text-xs text-blue-600 font-medium lg:hidden">Credits:</span>
+                                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
+                                      {subject.creditCount || 3}
+                                    </span>
+                                  </div>
+                                  <div className="lg:text-center flex items-center gap-2 lg:block">
+                                    <span className="text-xs text-blue-600 font-medium lg:hidden">Grade:</span>
+                                    {subject.grade ? (
+                                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                                        subject.grade.startsWith('A') ? 'bg-green-100 text-green-700 border border-green-300' :
+                                        subject.grade.startsWith('B') ? 'bg-purple-100 text-purple-700 border border-purple-300' :
+                                        subject.grade.startsWith('C') ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' :
+                                        'bg-red-100 text-red-700 border border-red-300'
+                                      }`}>
+                                        {subject.grade}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">-</span>
+                                    )}
+                                  </div>
+                                  <div className="lg:text-center flex items-center gap-2 lg:block">
+                                    <span className="text-xs text-blue-600 font-medium lg:hidden">Status:</span>
+                                    <StatusBadge status={subject.status} />
+                                  </div>
+                                </div>
+                              ))}
                             </div>
 
                             {/* Export Buttons */}
                             {canDownload(semesterData.subjects) && (
-                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-200">
+                              <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t-2 border-gray-200">
                                 <button
                                   onClick={() => exportToExcel(semesterData, semesterData.title)}
                                   disabled={isExporting === `${semesterData.title}-excel`}
-                                  className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+                                  className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-xl active:scale-95"
                                 >
                                   {isExporting === `${semesterData.title}-excel` ? (
-                                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
                                   ) : (
-                                    <DocumentArrowDownIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                                    <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
                                   )}
                                   Download Excel
                                 </button>
@@ -465,12 +434,12 @@ const Results = () => {
                                 <button
                                   onClick={() => exportToPDF(semesterData, semesterData.title)}
                                   disabled={isExporting === `${semesterData.title}-pdf`}
-                                  className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium hover:shadow-lg transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+                                  className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 rounded-xl hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 font-medium shadow-md hover:shadow-lg active:scale-95"
                                 >
                                   {isExporting === `${semesterData.title}-pdf` ? (
-                                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent mr-2"></div>
                                   ) : (
-                                    <DocumentArrowDownIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                                    <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
                                   )}
                                   Download PDF
                                 </button>
@@ -478,9 +447,9 @@ const Results = () => {
                             )}
 
                             {!canDownload(semesterData.subjects) && (
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 pt-4 border-t border-gray-200 text-xs sm:text-sm text-gray-500">
-                                <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
-                                <span>Download will be available when at least 50% of results are published</span>
+                              <div className="flex items-center space-x-2 pt-6 border-t-2 border-gray-200 text-sm text-amber-700 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                                <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
+                                <span className="font-medium">Download will be available when at least 50% of results are published</span>
                               </div>
                             )}
                           </div>
@@ -494,6 +463,7 @@ const Results = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
