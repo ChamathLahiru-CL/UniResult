@@ -171,7 +171,7 @@ const GPATrend = () => {
     <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
       {/* Header with Stats */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+        <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
@@ -492,7 +492,7 @@ const GPATrend = () => {
       </div>
 
       {/* Performance Insights */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 text-white">
+      <div className="bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 text-white">
         <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
           <SparklesIcon className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
           <h3 className="text-base sm:text-xl font-bold">Performance Insights</h3>

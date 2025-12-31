@@ -236,7 +236,7 @@ const Results = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Page Header */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 sm:p-8">
+          <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
@@ -285,7 +285,7 @@ const Results = () => {
             <div key={level} 
               className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-blue-300 hover:scale-[1.01]">
               {/* Level Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+              <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
@@ -332,7 +332,7 @@ const Results = () => {
                         {/* Semester Header */}
                         <button
                           onClick={() => toggleSemester(semesterId)}
-                          className="w-full px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
+                          className="w-full px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-150 hover:to-indigo-150 transition-all duration-300"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
                             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 text-left">{semesterData.title}</h3>
@@ -361,7 +361,7 @@ const Results = () => {
                             {/* Results Table */}
                             <div className="space-y-3 mb-6">
                               {/* Table Header */}
-                              <div className="hidden lg:grid lg:grid-cols-6 gap-4 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                              <div className="hidden lg:grid lg:grid-cols-6 gap-4 px-4 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border border-blue-200">
                                 <div className="font-semibold text-blue-700 text-sm">Subject Code</div>
                                 <div className="col-span-2 font-semibold text-blue-700 text-sm">Subject Title</div>
                                 <div className="text-center font-semibold text-blue-700 text-sm">Credits</div>

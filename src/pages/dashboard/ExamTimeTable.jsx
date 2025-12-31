@@ -107,7 +107,7 @@ const ExamTimeTable = () => {
 
   const getYearColor = () => {
     return { 
-      gradient: 'from-blue-500 to-indigo-600', 
+      gradient: 'from-blue-400 to-indigo-500', 
       bg: 'from-blue-50 to-indigo-50', 
       border: 'border-blue-200', 
       icon: 'text-blue-600' 
@@ -172,7 +172,7 @@ const ExamTimeTable = () => {
       {/* Page Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 sm:p-8">
+          <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
