@@ -13,6 +13,17 @@ import RecentNotifications from '../../components/dashboard/RecentNotifications'
 const StudentDashboard = () => {
   const [userName, setUserName] = useState('User');
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [gpaData, setGpaData] = useState({
+    overallGPA: 0,
+    semester: 0,
+    levelGPAs: {
+      100: null,
+      200: null,
+      300: null,
+      400: null
+    },
+    loading: true
+  });
 
   // Fetch user data from backend
   useEffect(() => {
@@ -55,17 +66,74 @@ const StudentDashboard = () => {
     fetchUserData();
   }, []);
 
-  // Sample data for GPA Summary with level-wise breakdown
-  const gpaData = {
-    overallGPA: 3.75,
-    semester: 5,
-    levelGPAs: {
-      100: 3.65,
-      200: 3.80,
-      300: 3.70,
-      400: null
-    }
-  };
+  // Fetch GPA analytics from backend
+  useEffect(() => {
+    const fetchGPAData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          setGpaData(prev => ({ ...prev, loading: false }));
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/gpa/analytics', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success && result.data.hasResults) {
+          // Transform backend data to component format
+          const levelGPAs = {};
+          let currentSemester = 0;
+          
+          // Extract level GPAs
+          Object.entries(result.data.levels).forEach(([levelKey, levelData]) => {
+            levelGPAs[levelKey] = levelData.gpa || null;
+            
+            // Calculate current semester from semesters with data
+            if (levelData.semesters && levelData.semesters.length > 0) {
+              const completedSemesters = levelData.semesters.filter(s => s.gpa > 0).length;
+              const levelNum = parseInt(levelKey);
+              const semestersBeforeLevel = ((levelNum / 100) - 1) * 2;
+              currentSemester = Math.max(currentSemester, semestersBeforeLevel + completedSemesters);
+            }
+          });
+
+          setGpaData({
+            overallGPA: result.data.overall.currentGPA || 0,
+            semester: currentSemester,
+            levelGPAs: levelGPAs,
+            loading: false
+          });
+        } else {
+          // No results yet - show empty state
+          setGpaData({
+            overallGPA: 0,
+            semester: 0,
+            levelGPAs: {
+              100: null,
+              200: null,
+              300: null,
+              400: null
+            },
+            loading: false
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching GPA data:', error);
+        setGpaData(prev => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchGPAData();
+  }, []);
   
   // Sample data for GPA trend
   const gpaChartData = [
@@ -107,6 +175,7 @@ const StudentDashboard = () => {
             overallGPA={gpaData.overallGPA} 
             semester={gpaData.semester}
             levelGPAs={gpaData.levelGPAs}
+            loading={gpaData.loading}
           />
         </div>
         

@@ -15,14 +15,15 @@ import './GPAComponents.css';
  * Features: Level-wise display, navigation, hover animations, responsive design
  */
 const GPASummary = ({ 
-  overallGPA = 3.75, 
-  semester = 5,
+  overallGPA = 0, 
+  semester = 0,
   levelGPAs = {
-    100: 3.65,
-    200: 3.80,
-    300: 3.70,
+    100: null,
+    200: null,
+    300: null,
     400: null
-  }
+  },
+  loading = false
 }) => {
   const navigate = useNavigate();
 
@@ -48,6 +49,28 @@ const GPASummary = ({
     if (gpa >= 2.5) return { text: 'text-yellow-600', bg: 'from-yellow-50 to-yellow-100', border: 'border-yellow-200' };
     return { text: 'text-red-600', bg: 'from-red-50 to-red-100', border: 'border-red-200' };
   };
+
+  // Determine current level based on semester
+  const getCurrentLevel = () => {
+    if (semester <= 2) return '100';
+    if (semester <= 4) return '200';
+    if (semester <= 6) return '300';
+    return '400';
+  };
+
+  const currentLevel = getCurrentLevel();
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="gpa-card bg-white p-4 rounded-xl shadow-md border border-gray-200 h-full relative overflow-hidden">
+        <div className="relative z-10 h-full flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-2"></div>
+          <p className="text-sm text-gray-500">Loading GPA data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="gpa-card bg-white p-4 rounded-xl shadow-md border border-gray-200 h-full relative overflow-hidden group hover:shadow-lg transition-all duration-300">
@@ -97,7 +120,7 @@ const GPASummary = ({
           <div className="gpa-level-grid grid grid-cols-2 gap-3">
             {Object.entries(levelGPAs).map(([level, gpa]) => {
               const colors = getGPAColor(gpa);
-              const isCurrentLevel = level === '300'; // 5th semester = 300 level
+              const isCurrentLevel = level === currentLevel;
               
               return (
                 <div
@@ -159,7 +182,7 @@ const GPASummary = ({
               View GPA Trend Analysis
             </button>
             <span className="text-gray-500">
-              Updated: Oct 29, 2025
+              Updated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
         </div>
