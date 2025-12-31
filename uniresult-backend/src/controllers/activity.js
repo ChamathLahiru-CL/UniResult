@@ -1,5 +1,8 @@
 import Activity from '../models/Activity.js';
 import TimeTable from '../models/TimeTable.js';
+import News from '../models/News.js';
+import Result from '../models/Result.js';
+import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 
@@ -75,6 +78,30 @@ export const getActivities = asyncHandler(async (req, res) => {
                 }
             } catch (error) {
                 console.error('Error fetching timetable for activity:', error);
+            }
+        }
+
+        // For news posts, get the file URL from the related News
+        if (activity.activityType === 'NEWS_POST' && activity.metadata?.newsId) {
+            try {
+                const news = await News.findById(activity.metadata.newsId);
+                if (news && news.fileUrl) {
+                    fileUrl = `http://localhost:5000${news.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching news for activity:', error);
+            }
+        }
+
+        // For result uploads, get the file URL from the related Result
+        if (activity.activityType === 'RESULT_UPLOAD' && activity.metadata?.resultId) {
+            try {
+                const result = await Result.findById(activity.metadata.resultId);
+                if (result && result.fileUrl) {
+                    fileUrl = `http://localhost:5000${result.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching result for activity:', error);
             }
         }
 
@@ -219,19 +246,60 @@ export const getMyActivities = asyncHandler(async (req, res) => {
     const total = await Activity.countDocuments(query);
 
     // Transform activities for frontend
-    const transformedActivities = activities.map(activity => ({
-        id: activity._id,
-        title: activity.activityName,
-        description: activity.description,
-        time: activity.createdAt,
-        type: activity.activityType.toLowerCase(),
-        faculty: activity.faculty,
-        year: activity.year,
-        fileName: activity.fileName,
-        fileSize: activity.fileSize,
-        status: activity.status,
-        priority: activity.priority,
-        timestamp: activity.createdAt
+    const transformedActivities = await Promise.all(activities.map(async (activity) => {
+        let fileUrl = null;
+
+        // For timetable uploads, get the file URL from the related TimeTable
+        if (activity.activityType === 'TIMETABLE_UPLOAD' && activity.metadata?.timeTableId) {
+            try {
+                const timeTable = await TimeTable.findById(activity.metadata.timeTableId);
+                if (timeTable) {
+                    fileUrl = `http://localhost:5000${timeTable.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching timetable for activity:', error);
+            }
+        }
+
+        // For news posts, get the file URL from the related News
+        if (activity.activityType === 'NEWS_POST' && activity.metadata?.newsId) {
+            try {
+                const news = await News.findById(activity.metadata.newsId);
+                if (news && news.fileUrl) {
+                    fileUrl = `http://localhost:5000${news.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching news for activity:', error);
+            }
+        }
+
+        // For result uploads, get the file URL from the related Result
+        if (activity.activityType === 'RESULT_UPLOAD' && activity.metadata?.resultId) {
+            try {
+                const result = await Result.findById(activity.metadata.resultId);
+                if (result && result.fileUrl) {
+                    fileUrl = `http://localhost:5000${result.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching result for activity:', error);
+            }
+        }
+
+        return {
+            id: activity._id,
+            title: activity.activityName,
+            description: activity.description,
+            time: activity.createdAt,
+            type: activity.activityType.toLowerCase(),
+            faculty: activity.faculty,
+            year: activity.year,
+            fileName: activity.fileName,
+            fileSize: activity.fileSize,
+            fileUrl: fileUrl,
+            status: activity.status,
+            priority: activity.priority,
+            timestamp: activity.createdAt
+        };
     }));
 
     res.status(200).json({
@@ -253,8 +321,18 @@ export const getMyActivities = asyncHandler(async (req, res) => {
 export const getAllExamDivisionActivities = asyncHandler(async (req, res) => {
     const { page = 1, limit = 20, type } = req.query;
 
+    // Get all exam division member IDs to build a more comprehensive query
+    const examMembers = await ExamDivisionMember.find({ status: 'Active' });
+    const examMemberIds = examMembers.map(member => member._id);
+
     // Build query - activities performed by any exam division member
-    let query = { performedByRole: 'examDiv' };
+    // Include activities where performedByRole is 'examDiv' OR performedBy is an exam division member
+    let query = {
+        $or: [
+            { performedByRole: 'examDiv' },
+            { performedBy: { $in: examMemberIds } }
+        ]
+    };
 
     // Type filter
     if (type && type !== 'all') {
@@ -285,6 +363,30 @@ export const getAllExamDivisionActivities = asyncHandler(async (req, res) => {
                 }
             } catch (error) {
                 console.error('Error fetching timetable for activity:', error);
+            }
+        }
+
+        // For news posts, get the file URL from the related News
+        if (activity.activityType === 'NEWS_POST' && activity.metadata?.newsId) {
+            try {
+                const news = await News.findById(activity.metadata.newsId);
+                if (news && news.fileUrl) {
+                    fileUrl = `http://localhost:5000${news.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching news for activity:', error);
+            }
+        }
+
+        // For result uploads, get the file URL from the related Result
+        if (activity.activityType === 'RESULT_UPLOAD' && activity.metadata?.resultId) {
+            try {
+                const result = await Result.findById(activity.metadata.resultId);
+                if (result && result.fileUrl) {
+                    fileUrl = `http://localhost:5000${result.fileUrl}`;
+                }
+            } catch (error) {
+                console.error('Error fetching result for activity:', error);
             }
         }
 

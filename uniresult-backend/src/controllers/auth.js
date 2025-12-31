@@ -202,7 +202,7 @@ export const login = async (req, res) => {
         let user = null;
         let isExamDivMember = false;
 
-        // Check if logging in as exam division member
+        // First, try to find if this is an exam division member login
         if (role === 'examDiv') {
             // Find exam division member by username
             user = await ExamDivisionMember.findOne({ username }).select('+password');
@@ -247,6 +247,13 @@ export const login = async (req, res) => {
                 });
             }
 
+            // Check if this user is also an exam division member
+            const examMember = await ExamDivisionMember.findOne({ email: user.email });
+            if (examMember && examMember.status === 'Active') {
+                isExamDivMember = true;
+                console.log('✅ User is also an exam division member');
+            }
+
             console.log('✅ User found:', { 
                 username: user.username, 
                 role: user.role,
@@ -279,34 +286,94 @@ export const login = async (req, res) => {
         await user.save();
 
         // Generate token with appropriate data
-        const tokenPayload = isExamDivMember ? {
-            id: user._id,
-            username: user.username,
-            role: 'examDiv',
-            position: user.position,
-            email: user.email,
-            name: user.nameWithInitial
-        } : user;
+        let tokenPayload;
+        if (isExamDivMember && role === 'examDiv') {
+            // Exam division member logging in as examDiv
+            tokenPayload = {
+                id: user._id,
+                username: user.username,
+                role: 'examDiv',
+                position: user.position,
+                email: user.email,
+                name: user.nameWithInitial
+            };
+        } else if (isExamDivMember && role !== 'examDiv') {
+            // Regular user who is also an exam division member
+            const examMember = await ExamDivisionMember.findOne({ email: user.email });
+            tokenPayload = {
+                id: examMember._id,
+                username: examMember.username,
+                role: 'examDiv',
+                position: examMember.position,
+                email: examMember.email,
+                name: examMember.nameWithInitial
+            };
+        } else {
+            // Regular user
+            tokenPayload = {
+                id: user._id,
+                username: user.username,
+                role: user.role,
+                email: user.email,
+                name: user.name,
+                faculty: user.faculty,
+                year: user.year,
+                department: user.department,
+                enrollmentNumber: user.enrollmentNumber
+            };
+        }
 
         const token = generateToken(tokenPayload);
 
         // Create response matching frontend expectations
+        let responseUser;
+        if (isExamDivMember && role === 'examDiv') {
+            // Exam division member logging in as examDiv
+            responseUser = {
+                id: user.username,
+                userId: String(user._id),
+                name: user.nameWithInitial,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: 'examDiv',
+                position: user.position,
+                token: token,
+                loginTime: new Date().toISOString()
+            };
+        } else if (isExamDivMember && role !== 'examDiv') {
+            // Regular user who is also an exam division member
+            const examMember = await ExamDivisionMember.findOne({ email: user.email });
+            responseUser = {
+                id: examMember.username,
+                userId: String(examMember._id),
+                name: examMember.nameWithInitial,
+                firstName: examMember.firstName,
+                lastName: examMember.lastName,
+                email: examMember.email,
+                role: 'examDiv',
+                position: examMember.position,
+                token: token,
+                loginTime: new Date().toISOString()
+            };
+        } else {
+            // Regular user
+            responseUser = {
+                id: user.username,
+                userId: String(user._id),
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                token: token,
+                loginTime: new Date().toISOString()
+            };
+        }
+
         const response = {
             success: true,
             message: 'Login successful',
             data: {
-                user: {
-                    id: isExamDivMember ? user.username : user.username,
-                    userId: String(user._id),
-                    name: isExamDivMember ? user.nameWithInitial : user.name,
-                    firstName: isExamDivMember ? user.firstName : undefined,
-                    lastName: isExamDivMember ? user.lastName : undefined,
-                    email: user.email,
-                    role: isExamDivMember ? 'examDiv' : user.role,
-                    position: isExamDivMember ? user.position : undefined,
-                    token: token,
-                    loginTime: new Date().toISOString()
-                },
+                user: responseUser,
                 token
             }
         };
