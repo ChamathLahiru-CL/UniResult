@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   DocumentArrowUpIcon,
   CalendarIcon,
@@ -9,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const QuickActions = ({ isLoading }) => {
+  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState(null);
 
   const actions = [
@@ -18,7 +20,7 @@ const QuickActions = ({ isLoading }) => {
       description: 'Support Document: PDF, Docs, Excel',
       icon: DocumentArrowUpIcon,
       buttonText: 'Upload',
-      acceptedFiles: '.pdf,.doc,.docx,.xls,.xlsx'
+      path: '/exam/new-result'
     },
     {
       id: 'timetable',
@@ -26,7 +28,7 @@ const QuickActions = ({ isLoading }) => {
       description: 'Support Document: PDF, JPG, PNG',
       icon: CalendarIcon,
       buttonText: 'Upload',
-      acceptedFiles: '.pdf,.jpg,.jpeg,.png'
+      path: '/exam/time-table'
     },
     {
       id: 'news',
@@ -34,7 +36,7 @@ const QuickActions = ({ isLoading }) => {
       description: 'Support Document: PDF, JPG, PNG, Text',
       icon: NewspaperIcon,
       buttonText: 'Upload',
-      acceptedFiles: '.pdf,.jpg,.jpeg,.png,.txt'
+      path: '/exam/news'
     },
     {
       id: 'compliance',
@@ -42,7 +44,7 @@ const QuickActions = ({ isLoading }) => {
       description: 'Student Exam result compliance',
       icon: ClipboardDocumentCheckIcon,
       buttonText: 'Check',
-      action: 'check'
+      path: '/exam/compliance'
     }
   ];
 
@@ -58,28 +60,8 @@ const QuickActions = ({ isLoading }) => {
     }
   };
 
-  const handleUpload = (actionId) => {
-    // Create a hidden file input and trigger it
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = actions.find(a => a.id === actionId).acceptedFiles;
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        // Handle file upload
-        console.log(`Uploading ${file.name} for ${actionId}`);
-      }
-    };
-    input.click();
-  };
-
   const handleAction = (action) => {
-    if (action.action === 'check') {
-      // Handle compliance check
-      console.log('Checking student compliance');
-    } else {
-      handleUpload(action.id);
-    }
+    navigate(action.path);
   };
 
   return (
