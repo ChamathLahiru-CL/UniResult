@@ -8,7 +8,8 @@ import {
     deleteExamMember,
     getProfile,
     updateProfile,
-    updatePassword
+    updatePassword,
+    getMemberActivities
 } from '../controllers/examDivision.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -25,6 +26,9 @@ router.get('/members', authorize('admin', 'examDiv'), getAllExamMembers);
 
 // Get single exam division member - admin or examDiv
 router.get('/members/:id', authorize('admin', 'examDiv'), getExamMemberById);
+
+// Get activities by member ID - admin or examDiv
+router.get('/members/:id/activities', authorize('admin', 'examDiv'), getMemberActivities);
 
 // Update exam division member - admin only
 router.put('/members/:id', authorize('admin'), updateExamMember);

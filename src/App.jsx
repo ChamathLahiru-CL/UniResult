@@ -29,6 +29,7 @@ import AdminExamDivisionPage from './pages/admin/AdminExamDivisionPage';
 import AdminLayout from './layouts/AdminLayout';
 import ExamActivities from './pages/examdivision/ExamActivities';
 import ExamDivisionMembers from './pages/examdivision/ExamDivisionMembers';
+import ExamDivisionMemberDetails from './pages/examdivision/ExamDivisionMemberDetails';
 import ResultManagement from './pages/examdivision/ResultManagement';
 import ExamNewsPage from './pages/examdivision/ExamNewsPage';
 import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPage';
@@ -107,6 +108,7 @@ function App() {
           <Route path="compliance" element={<ExamCompliance />} />
           <Route path="activities" element={<ExamActivities />} />
           <Route path="members" element={<ExamDivisionMembers />} />
+          <Route path="members/:memberId" element={<ExamDivisionMemberDetails />} />
           <Route path="results" element={<ResultManagement />} />
           <Route path="profile" element={<ExamProfileSettings />} />
           <Route path="settings" element={<Navigate to="/exam/profile" replace />} />
