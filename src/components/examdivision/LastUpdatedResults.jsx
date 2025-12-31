@@ -60,78 +60,76 @@ const LastUpdatedResults = ({ isLoading }) => {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl bg-white">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-800">Last Updated Results</h2>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {['date', 'degree', 'subject', 'level', 'semester', 'action'].map((column) => (
-                <th
-                  key={column}
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-                  onClick={() => column !== 'action' && handleSort(column)}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>{column.charAt(0).toUpperCase() + column.slice(1)}</span>
-                    {column !== 'action' && <SortIcon column={column} />}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <AnimatePresence>
-              {sortedResults.map((result, index) => (
-                <motion.tr
-                  key={result.id}
-                  custom={index}
-                  variants={tableRowVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  whileHover="hover"
-                  onHoverStart={() => setHoveredRow(result.id)}
-                  onHoverEnd={() => setHoveredRow(null)}
-                  className="group"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.degree}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.subject}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.level}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.semester}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`
-                        inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium
-                        ${hoveredRow === result.id
-                          ? 'bg-blue-600 text-white'
-                          : 'text-blue-600 bg-blue-50 group-hover:bg-blue-100'
-                        }
-                        transition-colors duration-200
-                      `}
-                    >
-                      <EyeIcon className="w-4 h-4 mr-1" />
-                      View Details
-                    </motion.button>
-                  </td>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </tbody>
-        </table>
+    <div className="overflow-hidden rounded-lg sm:rounded-xl bg-white">      
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {['date', 'degree', 'subject', 'level', 'semester', 'action'].map((column) => (
+                  <th
+                    key={column}
+                    scope="col"
+                    className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                    onClick={() => column !== 'action' && handleSort(column)}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span className="truncate">{column.charAt(0).toUpperCase() + column.slice(1)}</span>
+                      {column !== 'action' && <SortIcon column={column} />}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <AnimatePresence>
+                {sortedResults.map((result, index) => (
+                  <motion.tr
+                    key={result.id}
+                    custom={index}
+                    variants={tableRowVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    whileHover="hover"
+                    onHoverStart={() => setHoveredRow(result.id)}
+                    onHoverEnd={() => setHoveredRow(null)}
+                    className="group"
+                  >
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{result.date}</td>
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{result.degree}</td>
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 truncate max-w-[120px] sm:max-w-none">{result.subject}</td>
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{result.level}</td>
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">{result.semester}</td>
+                    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`
+                          inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm font-medium
+                          ${hoveredRow === result.id
+                            ? 'bg-blue-600 text-white'
+                            : 'text-blue-600 bg-blue-50 group-hover:bg-blue-100'
+                          }
+                          transition-colors duration-200
+                        `}
+                      >
+                        <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">View Details</span>
+                      </motion.button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Loading State */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-lg sm:rounded-xl">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
         </div>
       )}
     </div>

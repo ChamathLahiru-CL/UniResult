@@ -87,20 +87,20 @@ const QuickActions = ({ isLoading }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl shadow-lg p-6 relative"
+      className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5 md:p-6 relative"
     >
       {isLoading ? (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-lg sm:rounded-xl z-10">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
         </div>
       ) : null}
-      <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-5 md:mb-6">Quick Actions</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {actions.map((action) => (
           <motion.div
             key={action.id}
-            className={`relative p-6 rounded-lg border ${
+            className={`relative p-4 sm:p-5 md:p-6 rounded-lg border ${
               hoveredCard === action.id
                 ? 'border-blue-500 bg-blue-50/50'
                 : 'border-gray-200 bg-white'
@@ -110,18 +110,18 @@ const QuickActions = ({ isLoading }) => {
             onHoverStart={() => setHoveredCard(action.id)}
             onHoverEnd={() => setHoveredCard(null)}
           >
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className={`
-                inline-flex p-3 rounded-lg
+                inline-flex p-2 sm:p-2.5 md:p-3 rounded-lg
                 ${hoveredCard === action.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
                 transition-colors duration-200
               `}>
-                <action.icon className="h-6 w-6" />
+                <action.icon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{action.title}</h3>
-                <p className="mt-1 text-sm text-gray-500">{action.description}</p>
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">{action.title}</h3>
+                <p className="mt-1 text-xs sm:text-sm text-gray-500 line-clamp-2">{action.description}</p>
               </div>
 
               <motion.button
@@ -129,7 +129,7 @@ const QuickActions = ({ isLoading }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleAction(action)}
                 className={`
-                  w-full px-4 py-2 rounded-lg text-sm font-medium
+                  w-full px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium
                   ${hoveredCard === action.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
