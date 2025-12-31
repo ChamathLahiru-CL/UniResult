@@ -17,7 +17,26 @@ export const getNotifications = asyncHandler(async (req, res) => {
         role: user.role
     });
     
-    const notifications = await Notification.getForUser(user, {
+    // If user doesn't have faculty in token (old token), fetch from database
+    let userWithFaculty = user;
+    if (!user.faculty && user.role === 'student') {
+        const User = (await import('../models/User.js')).default;
+        const dbUser = await User.findById(user.id || user._id);
+        if (dbUser) {
+            userWithFaculty = {
+                ...user,
+                faculty: dbUser.faculty,
+                year: dbUser.year,
+                department: dbUser.department
+            };
+            console.log('📝 Fetched faculty from database:', {
+                faculty: dbUser.faculty,
+                year: dbUser.year
+            });
+        }
+    }
+    
+    const notifications = await Notification.getForUser(userWithFaculty, {
         limit: parseInt(req.query.limit) || 50
     });
     
@@ -59,17 +78,31 @@ export const markAsRead = asyncHandler(async (req, res) => {
 export const markAllAsRead = asyncHandler(async (req, res) => {
     const user = req.user;
     
+    // If user doesn't have faculty in token (old token), fetch from database
+    let userWithFaculty = user;
+    if (!user.faculty && user.role === 'student') {
+        const User = (await import('../models/User.js')).default;
+        const dbUser = await User.findById(user.id || user._id);
+        if (dbUser) {
+            userWithFaculty = {
+                ...user,
+                faculty: dbUser.faculty,
+                year: dbUser.year
+            };
+        }
+    }
+    
     const query = {
         isActive: true,
         $or: [
-            { 'recipients.faculty': user.faculty },
+            { 'recipients.faculty': userWithFaculty.faculty },
             { 'recipients.faculty': null } // Notifications for all faculties
         ]
     };
     
-    if (user.year) {
+    if (userWithFaculty.year) {
         const yearCondition = [
-            { 'recipients.year': user.year },
+            { 'recipients.year': userWithFaculty.year },
             { 'recipients.year': null }
         ];
         // Combine with existing $or condition
@@ -103,7 +136,21 @@ export const markAllAsRead = asyncHandler(async (req, res) => {
 export const getUnreadCount = asyncHandler(async (req, res) => {
     const user = req.user;
     
-    const notifications = await Notification.getForUser(user);
+    // If user doesn't have faculty in token (old token), fetch from database
+    let userWithFaculty = user;
+    if (!user.faculty && user.role === 'student') {
+        const User = (await import('../models/User.js')).default;
+        const dbUser = await User.findById(user.id || user._id);
+        if (dbUser) {
+            userWithFaculty = {
+                ...user,
+                faculty: dbUser.faculty,
+                year: dbUser.year
+            };
+        }
+    }
+    
+    const notifications = await Notification.getForUser(userWithFaculty);
     const unreadCount = notifications.filter(n => !n.isRead).length;
     
     res.json({

@@ -315,7 +315,11 @@ export const login = async (req, res) => {
                 username: user.username,
                 role: user.role,
                 email: user.email,
-                name: user.name
+                name: user.name,
+                faculty: user.faculty,
+                year: user.year,
+                department: user.department,
+                enrollmentNumber: user.enrollmentNumber
             };
         }
 
