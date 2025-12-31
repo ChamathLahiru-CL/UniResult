@@ -81,8 +81,8 @@ export const uploadTimeTable = asyncHandler(async (req, res, next) => {
     // Create activity record for admin dashboard
     await Activity.create({
         activityType: 'TIMETABLE_UPLOAD',
-        activityName: 'Exam Time Table Update',
-        description: `Uploaded time table for ${faculty} - ${year}`,
+        activityName: 'Exam Time Table Updated',
+        description: `Updated exam time table for ${faculty} - ${year} (${req.file.originalname})`,
         performedBy: req.user.role === 'examDiv' ? req.user.id : null,
         performedByName: uploaderName,
         performedByUsername: uploaderUsername,

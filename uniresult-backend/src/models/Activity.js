@@ -37,12 +37,10 @@ const activitySchema = new mongoose.Schema({
         enum: ['examDiv', 'admin', 'student']
     },
     faculty: {
-        type: String,
-        enum: ['Faculty of Technological Studies', 'Faculty of Applied Science', 'Faculty of Management', 'Faculty of Agriculture', 'Faculty of Medicine']
+        type: String
     },
     year: {
-        type: String,
-        enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+        type: String
     },
     fileName: {
         type: String

@@ -1,5 +1,6 @@
 import News from '../models/News.js';
 import ExamDivisionMember from '../models/ExamDivisionMember.js';
+import Activity from '../models/Activity.js';
 import asyncHandler from '../middleware/async.js';
 import ErrorResponse from '../utils/errorResponse.js';
 import { createNewsNotification } from './notificationController.js';
@@ -72,6 +73,28 @@ export const uploadNews = asyncHandler(async (req, res, next) => {
         uploadedByRole: uploaderRole,
         status: 'active',
         priority: priority || 'medium'
+    });
+
+    // Create activity record for admin dashboard
+    await Activity.create({
+        activityType: 'NEWS_POST',
+        activityName: 'News Update Posted',
+        description: `Posted news update: "${newsTopic}" for ${faculty} - ${fileData.originalFileName}`,
+        performedBy: req.user.id,
+        performedByName: uploaderName,
+        performedByUsername: uploaderEmpNo,
+        performedByEmail: uploaderEmail,
+        performedByRole: uploaderRole,
+        faculty: faculty,
+        fileName: fileData.originalFileName,
+        fileSize: fileData.fileSize,
+        status: 'NEW',
+        priority: priority === 'urgent' ? 'HIGH' : 'MEDIUM',
+        metadata: {
+            newsId: news._id,
+            newsType: newsType,
+            fileType: fileData.fileType
+        }
     });
 
     // Create notification for news

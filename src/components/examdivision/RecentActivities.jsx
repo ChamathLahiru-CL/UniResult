@@ -22,6 +22,7 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
   const fetchActivities = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setActivities([]); // Clear activities when fetching new data
 
     try {
       const token = localStorage.getItem('token');
@@ -29,16 +30,6 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
 
       if (activeFilter === 'all') {
         url = 'http://localhost:5000/api/activities/exam-division';
-      }
-
-      // Add type filter based on activeFilter
-      const typeMap = {
-        my: 'TIMETABLE_UPLOAD',
-        all: '' // Show all activity types
-      };
-
-      if (activeFilter !== 'all' && typeMap[activeFilter]) {
-        url += `?type=${typeMap[activeFilter]}`;
       }
 
       const response = await fetch(url, {
@@ -66,14 +57,16 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
 
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities]);
+  }, [activeFilter]);
 
   const getActivityIcon = (type) => {
     switch (type) {
-      case 'timetable':
+      case 'timetable_upload':
         return DocumentTextIcon;
-      case 'result':
+      case 'result_upload':
         return DocumentIcon;
+      case 'news_post':
+        return PhotoIcon;
       case 'activity':
         return CalendarDaysIcon;
       default:
@@ -98,12 +91,14 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
 
   const getIconColor = (type) => {
     switch (type) {
-      case 'timetable':
+      case 'timetable_upload':
         return 'text-blue-500 bg-blue-100';
-      case 'result':
+      case 'result_upload':
         return 'text-green-500 bg-green-100';
-      case 'activity':
+      case 'news_post':
         return 'text-purple-500 bg-purple-100';
+      case 'activity':
+        return 'text-orange-500 bg-orange-100';
       default:
         return 'text-gray-500 bg-gray-100';
     }
@@ -146,7 +141,16 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
   return (
     <div className="bg-white rounded-xl overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Recent Activities</h2>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {activeFilter === 'my' ? 'My Activities' : 'All Exam Division Activities'}
+          </h2>
+          {activeFilter === 'all' && (
+            <p className="text-sm text-gray-600 mt-1">
+              See what other exam division members are doing
+            </p>
+          )}
+        </div>
         <button
           onClick={fetchActivities}
           className="inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
@@ -165,8 +169,13 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
             <p className="text-sm">
               {activeFilter === 'my'
                 ? 'No recent activities found for you'
-                : 'No activities found'}
+                : 'No activities found from exam division members'}
             </p>
+            {activeFilter === 'all' && (
+              <p className="text-xs text-gray-500 mt-1">
+                Activities will appear here when exam division members upload time tables, results, or post news updates
+              </p>
+            )}
           </div>
         ) : (
           activities.map((activity) => {
@@ -182,9 +191,22 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      {activity.title}
-                    </p>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {activity.title}
+                      </p>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        activity.type === 'timetable_upload' ? 'bg-blue-100 text-blue-800' :
+                        activity.type === 'result_upload' ? 'bg-green-100 text-green-800' :
+                        activity.type === 'news_post' ? 'bg-purple-100 text-purple-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {activity.type === 'timetable_upload' ? 'Time Table' :
+                         activity.type === 'result_upload' ? 'Result' :
+                         activity.type === 'news_post' ? 'News' :
+                         'Activity'}
+                      </span>
+                    </div>
                     <p className="text-xs text-gray-600 mt-1">
                       {activity.description}
                     </p>
@@ -195,10 +217,17 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                       </p>
                     )}
                     {activeFilter === 'all' && activity.performedByName && (
-                      <p className="text-xs text-purple-600 mt-1">
-                        By: {activity.performedByName}
-                        {activity.performedByUsername && ` (${activity.performedByUsername})`}
-                      </p>
+                      <div className="flex items-center mt-2">
+                        <UserCircleIcon className="w-4 h-4 text-purple-500 mr-1" />
+                        <p className="text-sm font-medium text-purple-700">
+                          {activity.performedByName}
+                          {activity.performedByUsername && (
+                            <span className="text-xs text-purple-500 ml-1">
+                              ({activity.performedByUsername})
+                            </span>
+                          )}
+                        </p>
+                      </div>
                     )}
                     <div className="flex items-center mt-2 text-xs text-gray-500 space-x-4">
                       <div className="flex items-center">
@@ -213,8 +242,8 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    {/* Action buttons for timetable uploads */}
-                    {activity.type === 'timetable_upload' && activity.fileUrl && (
+                    {/* Action buttons for uploads with files */}
+                    {activity.fileUrl && (
                       <div className="flex space-x-1 mr-2">
                         <button
                           onClick={() => window.open(activity.fileUrl, '_blank')}
@@ -231,7 +260,7 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                               const url = window.URL.createObjectURL(blob);
                               const link = document.createElement('a');
                               link.href = url;
-                              link.download = activity.fileName || 'timetable';
+                              link.download = activity.fileName || 'document';
                               document.body.appendChild(link);
                               link.click();
                               document.body.removeChild(link);
@@ -253,6 +282,10 @@ const RecentActivities = ({ activeFilter = 'all' }) => {
                       onClick={() => {
                         if (activity.type === 'timetable_upload') {
                           navigate('/exam/time-table');
+                        } else if (activity.type === 'result_upload') {
+                          navigate('/exam/results');
+                        } else if (activity.type === 'news_post') {
+                          navigate('/exam/news');
                         }
                       }}
                       className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-150"

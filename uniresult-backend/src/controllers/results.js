@@ -1,6 +1,7 @@
 import Result from '../models/Result.js';
 import StudentResult from '../models/StudentResult.js';
 import User from '../models/User.js';
+import Activity from '../models/Activity.js';
 import pdfParser from '../services/pdfParser.js';
 import { createResultNotification } from './notificationController.js';
 import fs from 'fs';
@@ -67,6 +68,50 @@ export const uploadResult = async (req, res) => {
             uploadedByEmail: req.user.email,
             uploadedByRole: req.user.role,
             parseStatus: 'processing'
+        });
+
+        // Get uploader details for activity
+        let uploaderName = req.user.name || 'Unknown User';
+        let uploaderUsername = req.user.username || 'Unknown';
+        let uploaderEmail = req.user.email || 'unknown@example.com';
+        let uploaderRole = req.user.role || 'unknown';
+        let uploaderId = req.user.id || req.user._id;
+
+        if (req.user.role === 'examDiv') {
+            const ExamDivisionMember = (await import('../models/ExamDivisionMember.js')).default;
+            const examMember = await ExamDivisionMember.findById(req.user.id);
+            if (examMember) {
+                uploaderName = `${examMember.firstName} ${examMember.lastName}`;
+                uploaderUsername = examMember.username;
+                uploaderEmail = examMember.email;
+                uploaderRole = 'examDiv';
+                uploaderId = examMember._id;
+            }
+        }
+
+        // Create activity record for admin dashboard
+        await Activity.create({
+            activityType: 'RESULT_UPLOAD',
+            activityName: 'Exam Result Uploaded',
+            description: `Uploaded exam result for ${subjectName} (${faculty} - ${level} ${semester}) - ${req.file.originalname}`,
+            performedBy: uploaderId,
+            performedByName: uploaderName,
+            performedByUsername: uploaderUsername,
+            performedByEmail: uploaderEmail,
+            performedByRole: uploaderRole,
+            faculty: faculty,
+            year: level,
+            fileName: req.file.originalname,
+            fileSize: req.file.size,
+            status: 'NEW',
+            priority: 'MEDIUM',
+            metadata: {
+                resultId: result._id,
+                subjectName: subjectName,
+                courseCode: courseCode,
+                semester: semester,
+                department: department
+            }
         });
 
         // Parse the PDF asynchronously
