@@ -78,17 +78,17 @@ const LastUpdatedResults = () => {
       
       <div className="relative z-10 h-full flex flex-col">
         {/* Header with navigation */}
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-            <DocumentTextIcon className="w-5 h-5 mr-2 text-blue-500" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-5 gap-2">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center">
+            <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500 flex-shrink-0" />
             Latest Results
           </h2>
           <button
             onClick={handleViewAllResults}
-            className="flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn"
+            className="flex items-center justify-center text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn px-3 py-2 rounded-lg hover:bg-blue-50 w-full sm:w-auto"
           >
             View All
-            <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-1 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+            <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
           </button>
         </div>
         
@@ -100,40 +100,40 @@ const LastUpdatedResults = () => {
         ) : (
           <>
             {/* Results List */}
-            <div className="space-y-3 flex-grow">
+            <div className="space-y-2 sm:space-y-3 flex-grow">
               {results.map((result, index) => (
             <div 
               key={index} 
               onClick={() => handleSubjectClick(result)}
-              className="group/item cursor-pointer flex items-start p-3 border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-white rounded-lg hover:shadow-md hover:from-blue-100 hover:to-blue-50 transition-all duration-200 transform hover:-translate-y-1 hover:scale-[1.02]"
+              className="group/item cursor-pointer flex items-start p-2.5 sm:p-3 border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-white rounded-lg hover:shadow-md hover:from-blue-100 hover:to-blue-50 transition-all duration-200 transform md:hover:-translate-y-1 active:scale-95 md:hover:scale-[1.02]"
             >
               {/* Subject Icon */}
-              <div className="flex-shrink-0 mr-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center group-hover/item:bg-blue-200 transition-colors duration-200">
-                  <AcademicCapIcon className="w-4 h-4 text-blue-600" />
+              <div className="flex-shrink-0 mr-2 sm:mr-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center group-hover/item:bg-blue-200 transition-colors duration-200">
+                  <AcademicCapIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
                 </div>
               </div>
 
               {/* Result Details */}
               <div className="flex-grow min-w-0">
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-800 group-hover/item:text-blue-700 transition-colors duration-200">
+                <div className="flex justify-between items-start mb-1 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xs sm:text-base font-semibold text-gray-800 group-hover/item:text-blue-700 transition-colors duration-200 truncate">
                       {result.subject}
                     </h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-sm text-gray-600">
+                    <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
+                      <span className="text-[10px] sm:text-sm text-gray-600 truncate">
                         {result.level} Level
                       </span>
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                        Semester {result.semester}
+                      <span className="text-[9px] sm:text-xs bg-blue-100 text-blue-800 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                        Sem {result.semester}
                       </span>
                     </div>
                   </div>
                   
                   {/* Grade Display */}
-                  <div className="flex flex-col items-end">
-                    <span className={`font-bold px-3 py-1 rounded-full text-white shadow-sm text-sm ${
+                  <div className="flex flex-col items-end flex-shrink-0">
+                    <span className={`font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-white shadow-sm text-xs sm:text-sm ${
                       result.grade === 'A+' || result.grade === 'A' ? 'bg-gradient-to-r from-green-500 to-green-600' : 
                       result.grade === 'B+' || result.grade === 'B' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
                       result.grade === 'C+' || result.grade === 'C' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
@@ -142,9 +142,9 @@ const LastUpdatedResults = () => {
                       {result.grade}
                     </span>
                     {result.updateDate && (
-                      <div className="flex items-center mt-1 text-xs text-gray-500">
-                        <CalendarIcon className="w-3 h-3 mr-1" />
-                        {result.updateDate}
+                      <div className="flex items-center mt-0.5 sm:mt-1 text-[9px] sm:text-xs text-gray-500">
+                        <CalendarIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                        <span className="truncate">{result.updateDate}</span>
                       </div>
                     )}
                   </div>

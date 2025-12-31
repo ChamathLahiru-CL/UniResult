@@ -106,14 +106,14 @@ const GPAChart = ({ data = [], labels = [], targetGPA, showTarget = false, compa
             bodyColor: '#1F2937',
             borderColor: '#E5E7EB',
             borderWidth: 2,
-            padding: 16,
+            padding: window.innerWidth < 640 ? 12 : 16,
             displayColors: true,
             titleFont: {
-              size: 14,
+              size: window.innerWidth < 640 ? 12 : 14,
               weight: '600'
             },
             bodyFont: {
-              size: 13
+              size: window.innerWidth < 640 ? 11 : 13
             },
             callbacks: {
               title: (items) => `📊 ${items[0].label}`,
@@ -148,11 +148,13 @@ const GPAChart = ({ data = [], labels = [], targetGPA, showTarget = false, compa
             ticks: {
               display: true,
               font: {
-                size: compact ? 10 : 11,
+                size: compact ? 10 : window.innerWidth < 640 ? 9 : 11,
                 weight: '500'
               },
               color: '#6B7280',
-              padding: 8
+              padding: window.innerWidth < 640 ? 4 : 8,
+              maxRotation: window.innerWidth < 640 ? 45 : 0,
+              minRotation: window.innerWidth < 640 ? 45 : 0
             },
             border: {
               display: false
@@ -163,11 +165,11 @@ const GPAChart = ({ data = [], labels = [], targetGPA, showTarget = false, compa
               display: !compact,
               text: 'GPA (0.0 - 4.0)',
               font: {
-                size: 12,
+                size: window.innerWidth < 640 ? 10 : 12,
                 weight: '600'
               },
               color: '#374151',
-              padding: { bottom: 10 }
+              padding: { bottom: window.innerWidth < 640 ? 5 : 10 }
             },
             grid: {
               display: true,
@@ -177,11 +179,11 @@ const GPAChart = ({ data = [], labels = [], targetGPA, showTarget = false, compa
             ticks: {
               display: true,
               font: {
-                size: compact ? 10 : 11,
+                size: compact ? 10 : window.innerWidth < 640 ? 9 : 11,
                 weight: '500'
               },
               color: '#6B7280',
-              padding: 8,
+              padding: window.innerWidth < 640 ? 4 : 8,
               stepSize: 0.5,
               callback: function(value) {
                 return value.toFixed(1);

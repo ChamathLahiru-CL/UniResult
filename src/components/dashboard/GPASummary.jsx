@@ -80,44 +80,44 @@ const GPASummary = ({
       
       <div className="relative z-10 h-full flex flex-col">
         {/* Header with navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-            <ChartBarIcon className="w-5 h-5 mr-2 text-blue-500" />
-            GPA Summary
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center">
+            <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500 flex-shrink-0" />
+            <span>GPA Summary</span>
           </h2>
           <button
             onClick={handleViewAllAnalytics}
-            className="analytics-button flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn"
+            className="analytics-button flex items-center justify-center text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 group/btn px-3 py-2 rounded-lg hover:bg-blue-50 w-full sm:w-auto"
           >
             <span>View GPA Trend</span>
-            <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-1 transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+            <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1 transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
           </button>
         </div>
 
         {/* Overall GPA Highlight */}
-        <div className="gpa-hover-lift mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100 hover:shadow-md transition-all duration-300 cursor-pointer"
+        <div className="gpa-hover-lift mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-lg border border-blue-100 hover:shadow-md transition-all duration-300 cursor-pointer"
              onClick={handleViewAllAnalytics}>
           <div className="flex items-center justify-between">
             <div>
-              <span className="gpa-number text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="gpa-number text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {overallGPA}
               </span>
               <div className="mt-1 flex items-center">
-                <span className="inline-block h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
-                <p className="text-sm font-medium text-gray-600">Overall GPA</p>
+                <span className="inline-block h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-blue-500 mr-1.5 sm:mr-2"></span>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Overall GPA</p>
               </div>
             </div>
-            <div className="p-2 bg-blue-100 rounded-full">
-              <AcademicCapIcon className="h-5 w-5 text-blue-600" />
+            <div className="p-1.5 sm:p-2 bg-blue-100 rounded-full flex-shrink-0">
+              <AcademicCapIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             </div>
           </div>
         </div>
 
         {/* Level-wise GPA Grid */}
-        <div className="flex-1 space-y-3">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Level-wise Performance</h3>
+        <div className="flex-1 space-y-2 sm:space-y-3">
+          <h3 className="text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">Level-wise Performance</h3>
           
-          <div className="gpa-level-grid grid grid-cols-2 gap-3">
+          <div className="gpa-level-grid grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(levelGPAs).map(([level, gpa]) => {
               const colors = getGPAColor(gpa);
               const isCurrentLevel = level === currentLevel;
@@ -126,28 +126,28 @@ const GPASummary = ({
                 <div
                   key={level}
                   onClick={() => handleLevelClick(level)}
-                  className={`gpa-level-card gpa-click-effect p-3 rounded-lg border-2 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-md bg-gradient-to-br ${colors.bg} ${colors.border} hover:border-opacity-80 group/card`}
+                  className={`gpa-level-card gpa-click-effect p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 cursor-pointer transform md:hover:scale-105 active:scale-95 hover:shadow-md bg-gradient-to-br ${colors.bg} ${colors.border} hover:border-opacity-80 group/card`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-600">
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600">
                       {level} Level
                     </span>
                     {isCurrentLevel && (
                       <div className="current-level-indicator flex items-center">
-                        <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse"></span>
-                        <span className="text-xs text-blue-600 ml-1">Current</span>
+                        <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                        <span className="text-[9px] sm:text-xs text-blue-600 ml-0.5 sm:ml-1">Current</span>
                       </div>
                     )}
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className={`text-lg font-bold ${colors.text} group-hover/card:scale-110 transition-transform duration-200`}>
+                    <span className={`text-base sm:text-lg font-bold ${colors.text} group-hover/card:scale-110 transition-transform duration-200`}>
                       {gpa || '--'}
                     </span>
                     {gpa && (
-                      <div className={`trend-icon p-1 rounded ${colors.bg} opacity-70 group-hover/card:opacity-100 transition-opacity duration-200`}>
+                      <div className={`trend-icon p-0.5 sm:p-1 rounded ${colors.bg} opacity-70 group-hover/card:opacity-100 transition-opacity duration-200`}>
                         {gpa >= 3.5 ? (
-                          <ArrowTrendingUpIcon className="h-3 w-3 text-green-500" />
+                          <ArrowTrendingUpIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500" />
                         ) : gpa >= 3.0 ? (
                           <ArrowTrendingUpIcon className="h-3 w-3 text-blue-500" />
                         ) : (

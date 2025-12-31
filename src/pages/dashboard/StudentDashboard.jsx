@@ -167,10 +167,10 @@ const StudentDashboard = () => {
         </div>
       </div>
       
-      {/* Main Grid Layout with enhanced styling */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Main Grid Layout with enhanced mobile responsiveness */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* GPA Summary Card */}
-        <div className="col-span-1 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+        <div className="col-span-1 transform transition-all duration-300 md:hover:scale-[1.02] hover:shadow-lg">
           <GPASummary 
             overallGPA={gpaData.overallGPA} 
             semester={gpaData.semester}
@@ -180,22 +180,22 @@ const StudentDashboard = () => {
         </div>
         
         {/* Last Updated Results Panel */}
-        <div className="col-span-1 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+        <div className="col-span-1 transform transition-all duration-300 md:hover:scale-[1.02] hover:shadow-lg">
           <LastUpdatedResults />
         </div>
         
         {/* Quick Actions Panel */}
-        <div className="col-span-1 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+        <div className="col-span-1 transform transition-all duration-300 md:hover:scale-[1.02] hover:shadow-lg">
           <QuickActions />
         </div>
         
         {/* GPA Trend Chart */}
-        <div className="col-span-1 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+        <div className="col-span-1 transform transition-all duration-300 md:hover:scale-[1.02] hover:shadow-lg">
           <GPATrend data={gpaChartData} />
         </div>
         
         {/* Recent Notifications - Full Width */}
-        <div className="col-span-1 md:col-span-2 mt-2 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+        <div className="col-span-1 lg:col-span-2 transform transition-all duration-300 md:hover:scale-[1.01] hover:shadow-lg">
           <RecentNotifications />
         </div>
       </div>
