@@ -1,5 +1,6 @@
 import Compliance from '../models/Compliance.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import fs from 'fs/promises';
 import PDFDocument from 'pdfkit';
 
@@ -28,14 +29,20 @@ export const submitCompliance = async (req, res) => {
       });
     }
 
-    // Get student details
-    const student = await User.findById(userId);
-    if (!student) {
+    // Get user details
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Student not found'
+        message: 'User not found'
       });
     }
+
+    // Define submitter name for notifications
+    const submitterName = user.name;
+
+    // Determine submitter type
+    const submitterType = user.role === 'examDiv' ? 'exam-division' : 'student';
 
     // Process attachments
     const attachments = [];
@@ -54,10 +61,16 @@ export const submitCompliance = async (req, res) => {
 
     // Create compliance
     const compliance = new Compliance({
-      student: userId,
-      studentName: student.name,
-      studentEmail: student.email,
-      studentIndexNumber: student.indexNumber || student.email,
+      submitter: userId,
+      submitterType,
+      submitterName: user.name,
+      submitterEmail: user.email,
+      submitterIndexNumber: submitterType === 'student' ? (user.indexNumber || user.email) : undefined,
+      // Legacy fields for backward compatibility
+      student: submitterType === 'student' ? userId : undefined,
+      studentName: submitterType === 'student' ? user.name : undefined,
+      studentEmail: submitterType === 'student' ? user.email : undefined,
+      studentIndexNumber: submitterType === 'student' ? (user.indexNumber || user.email) : undefined,
       topic,
       recipient,
       importance,
@@ -69,8 +82,98 @@ export const submitCompliance = async (req, res) => {
 
     await compliance.save();
 
-    // TODO: Send notification to recipients
-    // This can be implemented using the notification system
+    // Send notifications to recipients
+    try {
+      // For exam division complaints, always send to admin only
+      if (submitterType === 'exam-division') {
+        await Notification.create({
+          type: 'compliance',
+          title: `New Exam Division Complaint - ${topic}`,
+          message: `${submitterName} submitted a complaint in ${selectedGroups[0] || 'General'} category: ${topic}`,
+          priority: importance === 'High' ? 'high' : importance === 'Medium' ? 'medium' : 'low',
+          recipients: {
+            role: 'admin'
+          },
+          metadata: {
+            complianceId: compliance._id,
+            submitterType,
+            importance,
+            category: selectedGroups[0] || 'General'
+          },
+          createdBy: {
+            userId: userId,
+            name: submitterName,
+            role: 'examDiv'
+          }
+        });
+      } else {
+        // For student complaints, use the original logic
+        if (compliance.recipient === 'admin') {
+          await Notification.create({
+            type: 'compliance',
+            title: `New Student Complaint`,
+            message: `${submitterName} submitted a complaint: ${topic}`,
+            priority: importance === 'High' ? 'high' : importance === 'Medium' ? 'medium' : 'low',
+            recipients: {
+              role: 'admin'
+            },
+            metadata: {
+              complianceId: compliance._id,
+              submitterType,
+              importance
+            },
+            createdBy: {
+              userId: userId,
+              name: submitterName,
+              role: 'student'
+            }
+          });
+        } else if (compliance.recipient === 'students') {
+          await Notification.create({
+            type: 'compliance',
+            title: `New Student Complaint`,
+            message: `${submitterName} submitted a complaint: ${topic}`,
+            priority: importance === 'High' ? 'high' : importance === 'Medium' ? 'medium' : 'low',
+            recipients: {
+              role: 'student'
+            },
+            metadata: {
+              complianceId: compliance._id,
+              submitterType,
+              importance
+            },
+            createdBy: {
+              userId: userId,
+              name: submitterName,
+              role: 'student'
+            }
+          });
+        } else if (compliance.recipient === 'exam-division') {
+          await Notification.create({
+            type: 'compliance',
+            title: `New Student Complaint`,
+            message: `${submitterName} submitted a complaint: ${topic}`,
+            priority: importance === 'High' ? 'high' : importance === 'Medium' ? 'medium' : 'low',
+            recipients: {
+              role: 'examDiv'
+            },
+            metadata: {
+              complianceId: compliance._id,
+              submitterType,
+              importance
+            },
+            createdBy: {
+              userId: userId,
+              name: submitterName,
+              role: 'student'
+            }
+          });
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error creating notifications:', notificationError);
+      // Don't fail the compliance submission if notifications fail
+    }
 
     res.status(201).json({
       success: true,
@@ -89,7 +192,7 @@ export const submitCompliance = async (req, res) => {
 };
 
 /**
- * Get all compliances for the logged-in student
+ * Get all compliances for the logged-in user (student or exam division)
  */
 export const getMyCompliances = async (req, res) => {
   try {
@@ -97,7 +200,7 @@ export const getMyCompliances = async (req, res) => {
     const { status, importance, page = 1, limit = 10 } = req.query;
 
     // Build query
-    const query = { student: userId };
+    const query = { submitter: userId };
     if (status) query.status = status;
     if (importance) query.importance = importance;
 
@@ -188,7 +291,8 @@ export const getAllCompliances = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const compliances = await Compliance.find(query)
-      .populate('student', 'name email indexNumber')
+      .populate('submitter', 'name email indexNumber role')
+      .populate('student', 'name email indexNumber') // For backward compatibility
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -407,7 +511,8 @@ export const getExamDivisionCompliances = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const compliances = await Compliance.find(query)
-      .populate('student', 'name email indexNumber')
+      .populate('submitter', 'name email indexNumber role')
+      .populate('student', 'name email indexNumber') // For backward compatibility
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -510,7 +615,8 @@ export const downloadCompliancePDF = async (req, res) => {
     const { id } = req.params;
 
     const compliance = await Compliance.findById(id)
-      .populate('student', 'name email indexNumber');
+      .populate('submitter', 'name email indexNumber role')
+      .populate('student', 'name email indexNumber'); // For backward compatibility
 
     if (!compliance) {
       return res.status(404).json({

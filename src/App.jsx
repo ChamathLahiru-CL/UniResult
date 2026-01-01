@@ -37,6 +37,7 @@ import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPag
 import ExamProfileSettings from './pages/examdivision/ExamProfileSettings';
 import ExamDivisionHelp from './pages/examdivision/ExamDivisionHelp';
 import ExamResultUploadPage from './pages/examdivision/ExamResultUploadPage';
+import ExamDivisionComplaints from './pages/examdivision/ExamDivisionComplaints';
 
 // Import Admin Compliance components
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
@@ -108,6 +109,7 @@ function App() {
           <Route path="time-table" element={<ExamTimeTableUploadPage />} />
           <Route path="news" element={<ExamNewsPage />} />
           <Route path="compliance" element={<ExamCompliance />} />
+          <Route path="complaints" element={<ExamDivisionComplaints />} />
           <Route path="activities" element={<ExamActivities />} />
           <Route path="members" element={<ExamDivisionMembers />} />
           <Route path="members/:memberId" element={<ExamDivisionMemberDetails />} />

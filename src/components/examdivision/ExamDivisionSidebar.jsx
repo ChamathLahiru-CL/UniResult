@@ -12,6 +12,7 @@ import {
   UserCircleIcon,
   Cog6ToothIcon,
   QuestionMarkCircleIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
@@ -24,6 +25,7 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
     { name: 'New Time Table Update', href: '/exam/time-table', icon: CalendarIcon },
     { name: 'News Upload', href: '/exam/news', icon: NewspaperIcon },
     { name: 'Student Compliance', href: '/exam/compliance', icon: ClipboardDocumentCheckIcon },
+    { name: 'Submit Complaint', href: '/exam/complaints', icon: ExclamationTriangleIcon },
     { name: 'Recent Activities', href: '/exam/activities', icon: ClockIcon },
     { name: 'Exam Members', href: '/exam/members', icon: UserGroupIcon },
   ];
@@ -68,13 +70,12 @@ const ExamDivisionSidebar = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 lg:fixed`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 lg:fixed`}
       >
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <Link 
+          <Link
             to="/exam"
             className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity duration-200"
           >

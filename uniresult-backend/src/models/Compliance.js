@@ -1,24 +1,40 @@
 import mongoose from 'mongoose';
 
 const complianceSchema = new mongoose.Schema({
-  // Student who submitted the compliance
-  student: {
+  // Submitter details (can be student or exam division member)
+  submitter: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  studentName: {
+  submitterType: {
+    type: String,
+    required: true,
+    enum: ['student', 'exam-division']
+  },
+  submitterName: {
     type: String,
     required: true
   },
-  studentEmail: {
+  submitterEmail: {
     type: String,
     required: true
   },
-  studentIndexNumber: {
+  submitterIndexNumber: {
     type: String,
-    required: true
+    required: function() {
+      return this.submitterType === 'student';
+    }
   },
+  
+  // Legacy fields for backward compatibility (will be deprecated)
+  student: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  studentName: String,
+  studentEmail: String,
+  studentIndexNumber: String,
   
   // Compliance details
   topic: {
@@ -36,11 +52,11 @@ const complianceSchema = new mongoose.Schema({
   recipient: {
     type: String,
     required: true,
-    enum: ['admin', 'exam-division'],
+    enum: ['admin', 'exam-division', 'students'],
   },
   selectedGroups: [{
     type: String,
-    enum: ['Teachers', 'Exam Officers', 'Admin Staff']
+    enum: ['System Issues', 'Result Management', 'User Access', 'Data Accuracy', 'Performance', 'Other', 'Teachers', 'Exam Officers', 'Admin Staff']
   }],
   
   // Importance level
