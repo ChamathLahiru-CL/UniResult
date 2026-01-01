@@ -8,7 +8,6 @@ import {
   DocumentIcon,
   ArrowRightIcon,
   ClockIcon,
-  UserIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../../utils/formatDate';
@@ -222,9 +221,12 @@ const LastUpdatedResults = ({ isLoading }) => {
                 </h4>
                 
                 {/* Enhanced badges */}
-                <div className="flex flex-wrap items-center gap-2 mb-3">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getFacultyBadgeColor(result.faculty)}`}>
                     <span className="truncate max-w-xs">{result.faculty}</span>
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
+                    <span className="truncate max-w-xs">{result.department}</span>
                   </span>
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
                     {result.credits} Credit{result.credits !== '1' ? 's' : ''}
@@ -232,14 +234,7 @@ const LastUpdatedResults = ({ isLoading }) => {
                 </div>
 
                 {/* Metadata with better spacing */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <UserIcon className="h-4 w-4 text-gray-400 shrink-0" />
-                    <span className="truncate text-xs font-medium">
-                      {result.uploadedByName}
-                      {result.uploadedByRole && ` • ${result.uploadedByRole}`}
-                    </span>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-1 text-sm text-gray-600">
                   <div className="flex items-center gap-1.5">
                     <ClockIcon className="h-4 w-4 text-blue-500 shrink-0" />
                     <span className="text-xs font-medium text-blue-700">
@@ -254,14 +249,8 @@ const LastUpdatedResults = ({ isLoading }) => {
                   </div>
                 </div>
 
-                {/* File details */}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                  <span className="font-medium text-gray-700 truncate max-w-xs">{result.department}</span>
-                  <span className="text-gray-300">•</span>
-                  <span>{result.fileSize}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="capitalize font-medium text-gray-600">PDF File</span>
-                </div>
+                {/* File details - removed department as it's now in badges */}
+                <div></div>
               </div>
 
               {/* Modern action buttons */}
