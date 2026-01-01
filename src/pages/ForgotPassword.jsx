@@ -42,6 +42,7 @@ const ForgotPassword = () => {
       // Reset form
       setEmail('');
     } catch (err) {
+      console.error('Forgot password error:', err);
       setEmailError('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
