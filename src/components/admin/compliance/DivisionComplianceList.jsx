@@ -14,27 +14,26 @@ const DivisionComplianceList = () => {
   const filterComplaints = useCallback(() => {
     let filtered = [...complaints];
 
-    // Search filter
+    // Search filter - adapt to database field names
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(complaint => 
-        complaint.senderName.toLowerCase().includes(query) ||
-        complaint.topic.toLowerCase().includes(query) ||
-        complaint.department.toLowerCase().includes(query) ||
-        complaint.email.toLowerCase().includes(query)
+        (complaint.submitterName && complaint.submitterName.toLowerCase().includes(query)) ||
+        (complaint.topic && complaint.topic.toLowerCase().includes(query)) ||
+        (complaint.submitterEmail && complaint.submitterEmail.toLowerCase().includes(query))
       );
     }
 
     // Status filter
     switch (statusFilter) {
       case 'unread':
-        filtered = filtered.filter(c => !c.read);
+        filtered = filtered.filter(c => !c.isRead);
         break;
       case 'read':
-        filtered = filtered.filter(c => c.read);
+        filtered = filtered.filter(c => c.isRead);
         break;
       case 'replied':
-        filtered = filtered.filter(c => c.replies && c.replies.length > 0);
+        filtered = filtered.filter(c => c.response && c.response.message);
         break;
       default:
         // 'all' - no additional filtering
@@ -42,7 +41,7 @@ const DivisionComplianceList = () => {
     }
 
     // Sort by submission date (newest first)
-    filtered.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     setFilteredComplaints(filtered);
   }, [complaints, searchQuery, statusFilter]);
@@ -61,8 +60,8 @@ const DivisionComplianceList = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await complaintsAPI.getDivisionComplaints();
-      setComplaints(data);
+      const response = await complaintsAPI.fetchComplaints('exam-division');
+      setComplaints(response.data);
     } catch (err) {
       setError('Failed to load division complaints. Please try again.');
       console.error('Error fetching division complaints:', err);

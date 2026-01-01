@@ -4,7 +4,7 @@ const activitySchema = new mongoose.Schema({
     activityType: {
         type: String,
         required: [true, 'Activity type is required'],
-        enum: ['TIMETABLE_UPLOAD', 'RESULT_UPLOAD', 'NEWS_POST', 'USER_LOGIN', 'SYSTEM_UPDATE']
+        enum: ['TIMETABLE_UPLOAD', 'RESULT_UPLOAD', 'NEWS_POST', 'USER_LOGIN', 'SYSTEM_UPDATE', 'COMPLIANCE_SUBMIT']
     },
     activityName: {
         type: String,

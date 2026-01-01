@@ -5,7 +5,7 @@ const notificationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['result', 'news', 'timetable', 'gpa', 'system']
+        enum: ['result', 'news', 'timetable', 'gpa', 'system', 'compliance']
     },
     
     // Title of the notification
@@ -47,6 +47,11 @@ const notificationSchema = new mongoose.Schema({
         semester: {
             type: String,
             default: null // null means all semesters
+        },
+        role: {
+            type: String,
+            enum: ['student', 'admin', 'examDiv', 'examdivision'],
+            default: null // null means for students
         }
     },
     
@@ -136,29 +141,37 @@ notificationSchema.methods.markAsReadByUser = async function(userId) {
 notificationSchema.statics.getForUser = async function(user, options = {}) {
     console.log('🔍 Building notification query for user:', {
         faculty: user.faculty,
-        year: user.year
+        year: user.year,
+        role: user.role
     });
     
     const query = {
         isActive: true,
         $or: [
-            { 'recipients.faculty': user.faculty },
-            { 'recipients.faculty': null } // Notifications for all faculties
+            // Role-specific notifications
+            { 'recipients.role': user.role },
+            { 'recipients.role': null }, // For backward compatibility
+            // Faculty-specific notifications (for students)
+            { 
+                'recipients.role': { $in: [null, 'student'] },
+                $or: [
+                    { 'recipients.faculty': user.faculty },
+                    { 'recipients.faculty': null }
+                ]
+            }
         ]
     };
     
-    // Filter by year if specified in recipients
-    if (user.year) {
+    // For students, filter by year if specified in recipients
+    if (user.role === 'student' && user.year) {
         const yearCondition = [
             { 'recipients.year': user.year },
             { 'recipients.year': null }
         ];
-        // Combine with existing $or condition
         query.$and = [
-            { $or: query.$or },
+            query,
             { $or: yearCondition }
         ];
-        delete query.$or;
     }
     
     console.log('📝 Query:', JSON.stringify(query, null, 2));
@@ -172,7 +185,7 @@ notificationSchema.statics.getForUser = async function(user, options = {}) {
     
     console.log(`📊 Found ${notifications.length} notifications in database`);
     notifications.forEach(notif => {
-        console.log(`  - ${notif.type}: ${notif.title} (Faculty: ${notif.recipients.faculty}, Year: ${notif.recipients.year})`);
+        console.log(`  - ${notif.type}: ${notif.title} (Role: ${notif.recipients.role}, Faculty: ${notif.recipients.faculty}, Year: ${notif.recipients.year})`);
     });
     
     const userId = user.id || user._id;

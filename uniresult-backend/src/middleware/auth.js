@@ -29,12 +29,15 @@ export const protect = async (req, res, next) => {
 
 export const authorize = (...roles) => {
     return (req, res, next) => {
+        console.log('🔒 Authorization Check - Required roles:', roles, '| User role:', req.user.role);
         if (!roles.includes(req.user.role)) {
+            console.log('❌ Authorization failed - User role not in allowed roles');
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to access this route'
             });
         }
+        console.log('✅ Authorization successful');
         next();
     };
 };

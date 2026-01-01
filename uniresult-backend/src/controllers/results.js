@@ -250,6 +250,9 @@ async function createStudentResults(resultSheet, studentResults) {
         for (const sr of studentResults) {
             console.log(`\n  Processing: ${sr.registrationNo} - Grade: ${sr.grade} - Remark: ${sr.remark || 'None'}`);
             
+            // IMPORTANT: Log the exact registration number being stored
+            console.log(`  📋 Will store registrationNo as: "${sr.registrationNo}"`);
+            
             // Check if student exists with this registration number
             const student = await User.findOne({
                 $or: [
@@ -259,16 +262,17 @@ async function createStudentResults(resultSheet, studentResults) {
             });
 
             if (student) {
-                console.log(`  ✅ Found student: ${student.name} (${student.enrollmentNumber || student.username})`);
+                console.log(`  ✅ Found student: ${student.name} (Enrollment: ${student.enrollmentNumber}, Username: ${student.username})`);
                 studentsFound++;
             } else {
                 console.log(`  ⚠️ Student not registered yet: ${sr.registrationNo}`);
+                console.log(`  💡 This result will be stored with registrationNo="${sr.registrationNo}" but no student account found`);
                 studentsNotFound++;
             }
 
             studentResultDocs.push({
                 student: student ? student._id : null,
-                registrationNo: sr.registrationNo,
+                registrationNo: sr.registrationNo, // CRITICAL: This must match user's enrollmentNumber or username
                 resultSheet: resultSheet._id,
                 grade: sr.grade,
                 remark: sr.remark || '',
@@ -383,6 +387,13 @@ export const getMyResults = async (req, res) => {
         // Get registration number from user
         const registrationNo = user.enrollmentNumber || user.username;
         
+        console.log(`\n🔍 getMyResults called for user:`, {
+            userId: user._id,
+            username: user.username,
+            enrollmentNumber: user.enrollmentNumber,
+            queryingWith: registrationNo
+        });
+        
         if (!registrationNo) {
             return res.status(400).json({
                 success: false,
@@ -390,12 +401,57 @@ export const getMyResults = async (req, res) => {
             });
         }
 
+        // Parse registration number components (UWU/DEPT/YEAR/NUMBER)
+        // Example: UWU/ICT/22/001 -> dept=ICT, year=22, number=001
+        let query = {};
+        
+        const regNoPattern = /^UWU\/([A-Z]+)\/(\d{2})\/(\d{3})$/i;
+        const match = registrationNo.match(regNoPattern);
+        
+        if (match) {
+            const [, department, year, studentNumber] = match;
+            console.log(`\n📋 Parsed registration number components:`, {
+                fullRegNo: registrationNo,
+                department: department,
+                year: year,
+                studentNumber: studentNumber
+            });
+            
+            // Build query to match all three components
+            // This prevents UWU/CST/22/001 from seeing UWU/ICT/22/001 results
+            query = {
+                $and: [
+                    { registrationNo: { $regex: new RegExp(`/${department}/`, 'i') } },  // Match department (ICT, CST, etc.)
+                    { registrationNo: { $regex: new RegExp(`/${year}/`, 'i') } },        // Match year (22, 23, etc.)
+                    { registrationNo: { $regex: new RegExp(`/${studentNumber}$`, 'i') } } // Match student number (001, 002, etc.)
+                ]
+            };
+            
+            console.log(`\n🎯 Using component-based filtering:`, query);
+        } else {
+            // Fallback to exact match if format doesn't match
+            console.log(`\n⚠️ Registration number doesn't match standard format, using exact match`);
+            query = { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } };
+        }
+
         // Find all results for this student
-        const results = await StudentResult.find({
-            registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
-        })
+        const results = await StudentResult.find(query)
         .populate('resultSheet', 'originalFileName uploadedByName createdAt')
         .sort({ createdAt: -1 });
+
+        console.log(`\n📊 Query results:`, {
+            resultsFound: results.length,
+            sampleResults: results.slice(0, 3).map(r => ({
+                id: r._id,
+                registrationNo: r.registrationNo,
+                subject: r.subjectName,
+                grade: r.grade,
+                faculty: r.faculty,
+                department: r.department,
+                level: r.level,
+                semester: r.semester
+            }))
+        });
 
         // Mark results as viewed
         const resultIds = results.map(r => r._id);
@@ -456,67 +512,50 @@ export const getMyResultsOrganized = async (req, res) => {
             });
         }
 
-        // Find all results for this student with flexible matching
-        let results = [];
-
-        // Try multiple matching strategies
-        const matchingStrategies = [
-            // Strategy 1: Exact match
-            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } } },
-
-            // Strategy 2: Match without slashes (for users like "UWUICT22")
-            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo.replace(/\//g, '')}$`, 'i') } } },
-
-            // Strategy 3: Match core registration number (last part)
-            (() => {
-                const parts = registrationNo.split('/');
-                const lastPart = parts[parts.length - 1];
-                if (lastPart && lastPart.match(/\d{2,4}$/)) {
-                    return { query: { registrationNo: { $regex: new RegExp(`${lastPart}$`, 'i') } } };
-                }
-                return null;
-            })(),
-
-            // Strategy 4: Match with normalized format (convert user format to PDF format)
-            (() => {
-                // If user has format like "UWUICT22", try to convert to "UWU/ICT/22/022"
-                if (registrationNo.match(/^UWU[A-Z]+(\d+)$/)) {
-                    const match = registrationNo.match(/^UWU([A-Z]+)(\d+)$/);
-                    if (match) {
-                        const dept = match[1];
-                        const num = match[2];
-                        // Try different year formats
-                        const possibleFormats = [
-                            `UWU/${dept}/22/${num}`,
-                            `UWU/${dept}/23/${num}`,
-                            `UWU/${dept}/21/${num}`
-                        ];
-                        return {
-                            query: {
-                                registrationNo: { $in: possibleFormats }
-                            }
-                        };
-                    }
-                }
-                return null;
-            })()
-        ].filter(strategy => strategy !== null);
-
-        // Try each strategy until we find results
-        for (const strategy of matchingStrategies) {
-            console.log('Trying matching strategy:', strategy.query);
-            const foundResults = await StudentResult.find(strategy.query)
-                .populate('resultSheet', 'originalFileName uploadedByName createdAt')
-                .sort({ createdAt: -1 });
-
-            if (foundResults.length > 0) {
-                results = foundResults;
-                console.log(`✅ Found ${results.length} results using strategy`);
-                break;
-            }
+        // Find all results for this student - Component-based filtering
+        console.log(`\n🔍 Querying results for registration number: "${registrationNo}"`);
+        
+        let query = {};
+        
+        // Parse registration number: UWU/DEPT/YEAR/NUMBER (e.g., UWU/ICT/22/001)
+        const regNoPattern = /^UWU\/([A-Z]+)\/(\d{2})\/(\d{3})$/i;
+        const match = registrationNo.match(regNoPattern);
+        
+        if (match) {
+            const [, department, year, studentNumber] = match;
+            console.log(`\n📋 Parsed components: Dept=${department}, Year=${year}, Number=${studentNumber}`);
+            
+            // Filter by all three components to ensure exact match
+            query = {
+                $and: [
+                    { registrationNo: { $regex: new RegExp(`/${department}/`, 'i') } },
+                    { registrationNo: { $regex: new RegExp(`/${year}/`, 'i') } },
+                    { registrationNo: { $regex: new RegExp(`/${studentNumber}$`, 'i') } }
+                ]
+            };
+            
+            console.log(`\n🎯 Component-based filter applied`);
+        } else {
+            // Fallback to exact match
+            console.log(`\n⚠️ Using exact match fallback`);
+            query = { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } };
         }
+        
+        const results = await StudentResult.find(query)
+        .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+        .sort({ createdAt: -1 });
 
-        console.log(`Student ${registrationNo}: Found ${results.length} results`);
+        console.log(`📊 Found ${results.length} results for ${registrationNo}`);
+        if (results.length > 0) {
+            console.log(`Sample results:`, results.slice(0, 3).map(r => ({
+                registrationNo: r.registrationNo,
+                subject: r.subjectName,
+                faculty: r.faculty,
+                department: r.department,
+                level: r.level,
+                semester: r.semester
+            })));
+        }
 
         // Organize results by level and semester
         const organizedData = {
@@ -621,26 +660,33 @@ export const getLatestResults = async (req, res) => {
             });
         }
 
-        // Find latest results for this student
-        let results = [];
-
-        // Try multiple matching strategies
-        const matchingStrategies = [
-            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } } },
-            { query: { registrationNo: { $regex: new RegExp(`^${registrationNo.replace(/\//g, '')}$`, 'i') } } }
-        ];
-
-        for (const strategy of matchingStrategies) {
-            const foundResults = await StudentResult.find(strategy.query)
-                .populate('resultSheet', 'originalFileName uploadedByName createdAt')
-                .sort({ createdAt: -1 })
-                .limit(limit);
-
-            if (foundResults.length > 0) {
-                results = foundResults;
-                break;
-            }
+        // Find latest results for this student - Component-based filtering
+        let query = {};
+        
+        // Parse registration number: UWU/DEPT/YEAR/NUMBER
+        const regNoPattern = /^UWU\/([A-Z]+)\/(\d{2})\/(\d{3})$/i;
+        const match = registrationNo.match(regNoPattern);
+        
+        if (match) {
+            const [, department, year, studentNumber] = match;
+            
+            // Filter by department, year, and student number
+            query = {
+                $and: [
+                    { registrationNo: { $regex: new RegExp(`/${department}/`, 'i') } },
+                    { registrationNo: { $regex: new RegExp(`/${year}/`, 'i') } },
+                    { registrationNo: { $regex: new RegExp(`/${studentNumber}$`, 'i') } }
+                ]
+            };
+        } else {
+            // Fallback to exact match
+            query = { registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') } };
         }
+
+        const results = await StudentResult.find(query)
+            .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+            .sort({ createdAt: -1 })
+            .limit(limit);
 
         // Map semester to level
         const semesterToLevel = {

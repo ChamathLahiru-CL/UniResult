@@ -9,7 +9,8 @@ import {
   UsersIcon,
   ArrowPathIcon,
   DocumentIcon,
-  PhotoIcon
+  PhotoIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 
@@ -68,6 +69,8 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
         return DocumentIcon;
       case 'news_post':
         return PhotoIcon;
+      case 'compliance_submit':
+        return ExclamationTriangleIcon;
       case 'activity':
         return CalendarDaysIcon;
       default:
@@ -98,6 +101,8 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
         return 'text-green-500 bg-green-100';
       case 'news_post':
         return 'text-purple-500 bg-purple-100';
+      case 'compliance_submit':
+        return 'text-orange-500 bg-orange-100';
       case 'activity':
         return 'text-orange-500 bg-orange-100';
       default:
@@ -200,14 +205,16 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
                         {activity.title}
                       </p>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${activity.type === 'timetable_upload' ? 'bg-blue-100 text-blue-800' :
-                          activity.type === 'result_upload' ? 'bg-green-100 text-green-800' :
-                            activity.type === 'news_post' ? 'bg-purple-100 text-purple-800' :
+                        activity.type === 'result_upload' ? 'bg-green-100 text-green-800' :
+                          activity.type === 'news_post' ? 'bg-purple-100 text-purple-800' :
+                            activity.type === 'compliance_submit' ? 'bg-orange-100 text-orange-800' :
                               'bg-gray-100 text-gray-800'
                         }`}>
                         {activity.type === 'timetable_upload' ? 'Time Table' :
                           activity.type === 'result_upload' ? 'Result' :
                             activity.type === 'news_post' ? 'News' :
-                              'Activity'}
+                              activity.type === 'compliance_submit' ? 'Complaint' :
+                                'Activity'}
                       </span>
                     </div>
 
@@ -295,6 +302,8 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
                             navigate('/exam/results');
                           } else if (activity.type === 'news_post') {
                             navigate('/exam/news');
+                          } else if (activity.type === 'compliance_submit') {
+                            navigate('/exam/complaints');
                           }
                         }}
                         className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-200 hover:border-blue-300 transition-colors flex-1 sm:flex-initial min-w-[100px]"

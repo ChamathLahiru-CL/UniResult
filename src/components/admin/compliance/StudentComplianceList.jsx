@@ -2,7 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import ComplaintListCard from './ComplaintListCard';
 import { complaintsAPI } from '../../../utils/complaintsAPI';
-import { complaintStatuses } from '../../../data/mockComplaints';
+
+// Status filter options
+const complaintStatuses = [
+  { value: 'all', label: 'All Complaints' },
+  { value: 'unread', label: 'Unread' },
+  { value: 'read', label: 'Read' },
+  { value: 'replied', label: 'Replied' }
+];
 
 const StudentComplianceList = () => {
   const [complaints, setComplaints] = useState([]);
@@ -15,27 +22,30 @@ const StudentComplianceList = () => {
   const filterComplaints = useCallback(() => {
     let filtered = [...complaints];
 
-    // Search filter
+    // Search filter - adapt to database field names
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(complaint => 
-        complaint.senderName.toLowerCase().includes(query) ||
-        complaint.topic.toLowerCase().includes(query) ||
-        complaint.enrollmentId.toLowerCase().includes(query) ||
-        complaint.email.toLowerCase().includes(query)
+        (complaint.submitterName && complaint.submitterName.toLowerCase().includes(query)) ||
+        (complaint.studentName && complaint.studentName.toLowerCase().includes(query)) ||
+        (complaint.topic && complaint.topic.toLowerCase().includes(query)) ||
+        (complaint.submitterIndexNumber && complaint.submitterIndexNumber.toLowerCase().includes(query)) ||
+        (complaint.studentIndexNumber && complaint.studentIndexNumber.toLowerCase().includes(query)) ||
+        (complaint.submitterEmail && complaint.submitterEmail.toLowerCase().includes(query)) ||
+        (complaint.studentEmail && complaint.studentEmail.toLowerCase().includes(query))
       );
     }
 
     // Status filter
     switch (statusFilter) {
       case 'unread':
-        filtered = filtered.filter(c => !c.read);
+        filtered = filtered.filter(c => !c.isRead);
         break;
       case 'read':
-        filtered = filtered.filter(c => c.read);
+        filtered = filtered.filter(c => c.isRead);
         break;
       case 'replied':
-        filtered = filtered.filter(c => c.replies && c.replies.length > 0);
+        filtered = filtered.filter(c => c.response && c.response.message);
         break;
       default:
         // 'all' - no additional filtering
@@ -43,7 +53,7 @@ const StudentComplianceList = () => {
     }
 
     // Sort by submission date (newest first)
-    filtered.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     setFilteredComplaints(filtered);
   }, [complaints, searchQuery, statusFilter]);

@@ -11,6 +11,7 @@ import GPAAnalytics from './pages/dashboard/GPAAnalytics'; // GPA Analytics page
 import GPATrend from './pages/dashboard/GPATrend'; // GPA Trend Analysis page
 import AcademicProgress from './pages/dashboard/AcademicProgress'; // Academic Progress page
 import ExamTimeTable from './pages/dashboard/ExamTimeTable'; // Exam timetable page
+import YearTimetables from './pages/dashboard/YearTimetables'; // Year-specific timetables page
 import Notifications from './pages/dashboard/Notifications'; // Notifications page
 import News from './pages/dashboard/News'; // News and Announcements page
 import ProfileAndSettings from './pages/dashboard/ProfileAndSettings'; // Combined Profile and Settings page
@@ -36,6 +37,7 @@ import ExamTimeTableUploadPage from './pages/examdivision/ExamTimeTableUploadPag
 import ExamProfileSettings from './pages/examdivision/ExamProfileSettings';
 import ExamDivisionHelp from './pages/examdivision/ExamDivisionHelp';
 import ExamResultUploadPage from './pages/examdivision/ExamResultUploadPage';
+import ExamDivisionComplaints from './pages/examdivision/ExamDivisionComplaints';
 
 // Import Admin Compliance components
 import AdminCompliancePage from './pages/admin/AdminCompliancePage';
@@ -83,6 +85,7 @@ function App() {
           <Route path="gpa-trend" element={<GPATrend />} /> {/* GPA trend analysis page */}
           <Route path="progress" element={<AcademicProgress />} /> {/* Academic Progress page */}
           <Route path="exam-time-table" element={<ExamTimeTable />} /> {/* Exam timetable page */}
+          <Route path="exam-time-table/:year" element={<YearTimetables />} /> {/* Year-specific timetables page */}
           <Route path="notifications" element={<Notifications />} /> {/* Notifications page */}
           <Route path="news" element={<News />} /> {/* News and Announcements page */}
           <Route path="profile-settings" element={<ProfileAndSettings />} /> {/* Combined Profile and Settings page */}
@@ -106,6 +109,7 @@ function App() {
           <Route path="time-table" element={<ExamTimeTableUploadPage />} />
           <Route path="news" element={<ExamNewsPage />} />
           <Route path="compliance" element={<ExamCompliance />} />
+          <Route path="complaints" element={<ExamDivisionComplaints />} />
           <Route path="activities" element={<ExamActivities />} />
           <Route path="members" element={<ExamDivisionMembers />} />
           <Route path="members/:memberId" element={<ExamDivisionMemberDetails />} />

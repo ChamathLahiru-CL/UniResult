@@ -19,6 +19,43 @@ const GPAAnalytics = () => {
   const location = useLocation();
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [highlightedLevel, setHighlightedLevel] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [gpaData, setGpaData] = useState(null);
+
+  // Fetch GPA analytics from backend
+  useEffect(() => {
+    const fetchGPAAnalytics = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/gpa/analytics', {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setGpaData(result.data);
+          } else {
+            setError('Failed to fetch GPA data');
+          }
+        } else {
+          setError('Failed to fetch GPA data');
+        }
+      } catch (err) {
+        console.error('Error fetching GPA analytics:', err);
+        setError('Error fetching GPA analytics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGPAAnalytics();
+  }, []);
 
   // Handle navigation from dashboard GPA card
   useEffect(() => {
@@ -31,63 +68,6 @@ const GPAAnalytics = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
-  // Mock GPA data
-  const gpaData = {
-    levels: {
-      '100': {
-        level: '100 Level',
-        gpa: 3.65,
-        creditHours: 30,
-        trend: 'up',
-        trendValue: 0.15,
-        semesters: [
-          { semester: '1st Semester', gpa: 3.55, credits: 15, subjects: 5 },
-          { semester: '2nd Semester', gpa: 3.75, credits: 15, subjects: 5 }
-        ]
-      },
-      '200': {
-        level: '200 Level',
-        gpa: 3.80,
-        creditHours: 30,
-        trend: 'up',
-        trendValue: 0.15,
-        semesters: [
-          { semester: '3rd Semester', gpa: 3.70, credits: 15, subjects: 5 },
-          { semester: '4th Semester', gpa: 3.90, credits: 15, subjects: 5 }
-        ]
-      },
-      '300': {
-        level: '300 Level',
-        gpa: 3.70,
-        creditHours: 30,
-        trend: 'down',
-        trendValue: -0.10,
-        semesters: [
-          { semester: '5th Semester', gpa: 3.70, credits: 15, subjects: 5 },
-          { semester: '6th Semester', gpa: null, credits: 15, subjects: 5, status: 'in-progress' }
-        ]
-      },
-      '400': {
-        level: '400 Level',
-        gpa: null,
-        creditHours: 28,
-        trend: null,
-        trendValue: null,
-        semesters: [
-          { semester: '7th Semester', gpa: null, credits: 14, subjects: 5, status: 'upcoming' },
-          { semester: '8th Semester', gpa: null, credits: 14, subjects: 4, status: 'upcoming' }
-        ]
-      }
-    },
-    overall: {
-      currentGPA: 3.72,
-      totalCredits: 90,
-      completedCredits: 75,
-      targetGPA: 3.80,
-      projectedGPA: 3.75
-    }
-  };
 
   const getGradeColor = (gpa) => {
     if (!gpa) return 'text-gray-400';
@@ -104,6 +84,44 @@ const GPAAnalytics = () => {
     if (gpa >= 2.5) return 'from-yellow-50 to-yellow-100';
     return 'from-red-50 to-red-100';
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading GPA Analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !gpaData) {
+    return (
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <ChartBarIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600 mb-2">{error || 'No GPA data available'}</p>
+          <p className="text-sm text-gray-500">Please check back after results are uploaded</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show no results state
+  if (!gpaData.hasResults) {
+    return (
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <ChartBarIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600 mb-2">No results found</p>
+          <p className="text-sm text-gray-500">Your GPA will appear here once results are available</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
@@ -172,9 +190,9 @@ const GPAAnalytics = () => {
         <h2 className="text-xl font-bold text-gray-900 mb-6">GPA Progress</h2>
         <div className="h-80">
           <GPAChart 
-            data={Object.values(gpaData.levels).map(level => level.gpa).filter(gpa => gpa !== null)}
+            data={Object.values(gpaData.levels).map(level => level.gpa).filter(gpa => gpa !== null && gpa > 0)}
             labels={Object.values(gpaData.levels)
-              .filter(level => level.gpa !== null)
+              .filter(level => level.gpa !== null && level.gpa > 0)
               .map(level => level.level)}
             targetGPA={gpaData.overall.targetGPA}
             showTarget={true}

@@ -15,6 +15,8 @@ import activityRoutes from './routes/activity.js';
 import newsRoutes from './routes/news.js';
 import resultsRoutes from './routes/results.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import gpaRoutes from './routes/gpa.js';
+import complianceRoutes from './routes/compliance.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -76,6 +78,8 @@ app.use('/api/activities', activityRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/results', resultsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/gpa', gpaRoutes);
+app.use('/api/compliance', complianceRoutes);
 
 // Error handler middleware
 // eslint-disable-next-line no-unused-vars
