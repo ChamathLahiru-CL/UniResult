@@ -37,7 +37,7 @@ const LastUpdatedResults = ({ isLoading }) => {
           if (data.success && Array.isArray(data.data)) {
             // Get last 5 results sorted by upload date
             const last5 = data.data
-              .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .slice(0, 5);
             setResults(last5);
           }
@@ -53,7 +53,7 @@ const LastUpdatedResults = ({ isLoading }) => {
   }, []);
 
   const handleViewAll = () => {
-    navigate('/exam/new-result');
+    navigate('/exam/results');
   };
 
   const handlePreview = async (result) => {
@@ -139,24 +139,30 @@ const LastUpdatedResults = ({ isLoading }) => {
 
   if (loading || isLoading) {
     return (
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden">
-        <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 border-b border-gray-200 bg-gray-50">
-          <div className="h-4 sm:h-5 md:h-6 bg-gray-200 rounded w-32 sm:w-40 md:w-48 mb-1.5 sm:mb-2 animate-pulse"></div>
-          <div className="h-3 sm:h-3.5 md:h-4 bg-gray-200 rounded w-20 sm:w-24 md:w-32 animate-pulse"></div>
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="h-5 bg-gray-200 rounded w-40 mb-1 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
         </div>
         <div className="divide-y divide-gray-100">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="p-3 sm:p-4 md:p-5 lg:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 md:gap-4">
-                <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 flex-1">
-                  <div className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 bg-gray-200 rounded animate-pulse shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <div className="h-3.5 sm:h-4 md:h-5 bg-gray-200 rounded w-full max-w-[200px] sm:max-w-xs mb-1.5 sm:mb-2 animate-pulse"></div>
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-4">
-                      <div className="h-2.5 sm:h-3 md:h-4 bg-gray-200 rounded w-16 sm:w-20 md:w-24 animate-pulse"></div>
-                      <div className="h-2.5 sm:h-3 md:h-4 bg-gray-200 rounded w-14 sm:w-16 md:w-20 animate-pulse"></div>
-                    </div>
+            <div key={i} className="p-4 sm:p-6">
+              <div className="flex items-start gap-4">
+                <div className="h-8 w-8 bg-gray-200 rounded-lg animate-pulse shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-5 bg-gray-200 rounded w-full max-w-xs mb-2 animate-pulse"></div>
+                  <div className="flex gap-2 mb-3">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
                   </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                  <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -168,18 +174,21 @@ const LastUpdatedResults = ({ isLoading }) => {
 
   if (results.length === 0) {
     return (
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-md p-6 sm:p-8 md:p-10 text-center">
-        <DocumentIcon className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 text-gray-300 mx-auto mb-2 sm:mb-3" />
-        <p className="text-gray-500 text-xs sm:text-sm md:text-base">No results uploaded yet</p>
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 sm:p-10 md:p-12 text-center border border-gray-100">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full mb-4">
+          <DocumentIcon className="h-8 w-8 text-blue-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Yet</h3>
+        <p className="text-gray-500 text-sm max-w-sm mx-auto">Result sheets will appear here once they're uploaded by exam division members.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden">
-      <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900">Past Result Uploads</h3>
-        <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mt-0.5 sm:mt-1">
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+        <h3 className="text-lg font-semibold text-gray-900">Past Result Uploads</h3>
+        <p className="text-sm text-gray-600 mt-1">
           {results.length} latest result sheet{results.length !== 1 ? 's' : ''}
         </p>
       </div>
@@ -191,78 +200,86 @@ const LastUpdatedResults = ({ isLoading }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="p-3 sm:p-4 md:p-5 lg:p-6 hover:bg-gray-50 transition-colors"
+            className="group p-4 sm:p-6 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-indigo-50/30 transition-all duration-300 border-b border-gray-50 last:border-b-0 relative overflow-hidden"
           >
-            <div className="flex flex-col sm:flex-row sm:items-start gap-2.5 sm:gap-3 md:gap-4">
-              {/* File Icon */}
-              <div className="shrink-0 mt-0.5">
-                <DocumentIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-red-500" />
+            {/* Subtle background pattern */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full transform translate-x-16 -translate-y-16"></div>
+            </div>
+
+            <div className="flex items-start gap-4 relative z-10">
+              {/* File Icon with modern styling */}
+              <div className="shrink-0">
+                <div className="p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200/50 group-hover:shadow-md transition-shadow duration-300">
+                  <DocumentIcon className="h-6 w-6 text-red-500" />
+                </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                {/* Title */}
-                <h4 className="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-1.5 sm:mb-2 break-words leading-tight">
+                {/* Title with better typography */}
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-900 transition-colors line-clamp-2">
                   {result.subjectName}
                 </h4>
                 
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 mb-2 sm:mb-2.5 md:mb-3">
-                  <span className={`inline-flex items-center px-1.5 sm:px-2 md:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border ${getFacultyBadgeColor(result.faculty)}`}>
-                    <span className="truncate max-w-[120px] sm:max-w-[150px] md:max-w-none">{result.faculty}</span>
+                {/* Enhanced badges */}
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getFacultyBadgeColor(result.faculty)}`}>
+                    <span className="truncate max-w-xs">{result.faculty}</span>
                   </span>
-                  <span className="inline-flex items-center px-1.5 sm:px-2 md:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
                     {result.credits} Credit{result.credits !== '1' ? 's' : ''}
                   </span>
                 </div>
 
-                {/* Metadata */}
-                <div className="space-y-1 sm:space-y-1.5 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-3 lg:gap-4 text-[10px] sm:text-xs md:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                  <div className="flex items-center gap-1">
-                    <UserIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 shrink-0" />
-                    <span className="truncate">
+                {/* Metadata with better spacing */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 text-sm text-gray-600">
+                  <div className="flex items-center gap-1.5">
+                    <UserIcon className="h-4 w-4 text-gray-400 shrink-0" />
+                    <span className="truncate text-xs font-medium">
                       {result.uploadedByName}
-                      {result.uploadedByRole && ` - ${result.uploadedByRole}`}
+                      {result.uploadedByRole && ` • ${result.uploadedByRole}`}
                     </span>
                   </div>
-                  <span className="hidden md:inline">•</span>
-                  <div className="flex items-center gap-1">
-                    <ClockIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 shrink-0" />
-                    <span className="truncate">{formatDate(result.uploadedAt)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <ClockIcon className="h-4 w-4 text-blue-500 shrink-0" />
+                    <span className="text-xs font-medium text-blue-700">
+                      {result.createdAt ? formatDate(result.createdAt) : 'Date not available'}
+                    </span>
                   </div>
-                  <span className="hidden md:inline">•</span>
-                  <div className="flex items-center gap-1">
-                    <AcademicCapIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 shrink-0" />
-                    <span>{result.resultCount} result{result.resultCount !== 1 ? 's' : ''}</span>
+                  <div className="flex items-center gap-1.5">
+                    <AcademicCapIcon className="h-4 w-4 text-green-500 shrink-0" />
+                    <span className="text-xs font-medium text-green-700">
+                      {result.resultCount || 0} result{(result.resultCount || 0) !== 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
 
                 {/* File details */}
-                <div className="flex flex-wrap items-center gap-x-1.5 sm:gap-x-2 md:gap-x-3 gap-y-0.5 sm:gap-y-1 text-[10px] sm:text-xs md:text-sm text-gray-500">
-                  <span className="font-medium text-gray-700 truncate max-w-[150px] sm:max-w-[200px] md:max-w-none">{result.department}</span>
-                  <span className="hidden sm:inline">•</span>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                  <span className="font-medium text-gray-700 truncate max-w-xs">{result.department}</span>
+                  <span className="text-gray-300">•</span>
                   <span>{result.fileSize}</span>
-                  <span className="hidden sm:inline">•</span>
-                  <span className="capitalize">Pdf File</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="capitalize font-medium text-gray-600">PDF File</span>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-1.5 sm:gap-2 md:gap-3 sm:shrink-0 sm:ml-auto mt-2 sm:mt-0">
+              {/* Modern action buttons */}
+              <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => handlePreview(result)}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md sm:rounded-lg transition-colors border border-blue-200 hover:border-blue-300"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md transform hover:scale-105"
                 >
-                  <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                  <span className="hidden xs:inline">Preview</span>
-                  <span className="xs:hidden">View</span>
+                  <EyeIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Preview</span>
                 </button>
 
                 <button
                   onClick={() => handleDownload(result)}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md sm:rounded-lg transition-colors border border-red-200 hover:border-red-300"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300 hover:shadow-md transform hover:scale-105"
                 >
-                  <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                  <span>Download</span>
+                  <ArrowDownTrayIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Download</span>
                 </button>
               </div>
             </div>
@@ -271,13 +288,13 @@ const LastUpdatedResults = ({ isLoading }) => {
       </div>
 
       {/* View All Button */}
-      <div className="border-t border-gray-200 bg-gray-50 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4">
+      <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-4">
         <button
           onClick={handleViewAll}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md sm:rounded-lg transition-colors duration-200"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md transform hover:scale-105"
         >
           <span>View All Results</span>
-          <ArrowRightIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <ArrowRightIcon className="h-4 w-4" />
         </button>
       </div>
 

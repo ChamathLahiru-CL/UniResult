@@ -137,7 +137,7 @@ const ResultHistoryList = ({ results = [], onPreview }) => {
                     <span className="hidden sm:inline">•</span>
                     <div className="flex items-center gap-1">
                       <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="truncate">{formatDate(result.uploadedAt)}</span>
+                      <span className="truncate">{formatDate(result.createdAt)}</span>
                     </div>
                     <span className="hidden sm:inline">•</span>
                     <div className="flex items-center gap-1">
