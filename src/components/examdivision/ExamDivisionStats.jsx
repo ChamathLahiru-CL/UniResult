@@ -123,23 +123,23 @@ const ExamDivisionStats = ({ isLoading }) => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
         {[...Array(4)].map((_, index) => (
           <motion.div
             key={index}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="bg-white rounded-xl shadow-lg p-4 sm:p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
             <div className="animate-pulse">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-lg"></div>
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full"></div>
               </div>
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-5 sm:h-6 bg-gray-200 rounded w-1/2"></div>
               </div>
             </div>
           </motion.div>
@@ -149,7 +149,7 @@ const ExamDivisionStats = ({ isLoading }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
       {statCards.map((card, index) => (
         <motion.div
           key={card.id}
@@ -162,24 +162,24 @@ const ExamDivisionStats = ({ isLoading }) => {
           {/* Gradient background overlay */}
           <div className={`absolute inset-0 bg-gradient-to-br ${card.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
 
-          <div className="relative p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg bg-gradient-to-br ${card.color} shadow-lg`}>
-                <card.icon className="w-6 h-6 text-white" />
+          <div className="relative p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${card.color} shadow-lg`}>
+                <card.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${card.color} shadow-sm`}></div>
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-600">{card.title}</p>
-              <p className={`text-2xl font-bold ${card.textColor}`}>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 leading-tight">{card.title}</p>
+              <p className={`text-xl sm:text-2xl font-bold ${card.textColor}`}>
                 {card.value.toLocaleString()}
               </p>
             </div>
 
             {/* Subtle pattern overlay */}
-            <div className="absolute top-0 right-0 w-20 h-20 opacity-5">
-              <div className="w-full h-full bg-gradient-to-br from-gray-900 to-transparent rounded-full transform translate-x-6 -translate-y-6"></div>
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 opacity-5">
+              <div className="w-full h-full bg-gradient-to-br from-gray-900 to-transparent rounded-full transform translate-x-4 sm:translate-x-6 -translate-y-4 sm:-translate-y-6"></div>
             </div>
           </div>
         </motion.div>

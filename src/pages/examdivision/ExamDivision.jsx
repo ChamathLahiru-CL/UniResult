@@ -31,7 +31,7 @@ const ExamDivision = () => {
         >
           {/* Welcome Message */}
           <motion.div
-            className="mb-3 sm:mb-4"
+            className="mb-1 sm:mb-2"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
@@ -72,12 +72,12 @@ const ExamDivision = () => {
             transition={{ delay: 0.5 }}
           >
             <div className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
                 <h2 className="text-xl font-bold text-white flex items-center">
                   <DocumentTextIcon className="w-6 h-6 mr-3" />
                   Last Updated Results
                 </h2>
-                <p className="text-indigo-100 mt-1">Recently uploaded result sheets</p>
+                <p className="text-blue-100 mt-1">Recently uploaded result sheets</p>
               </div>
               <div className="p-6">
                 <LastUpdatedResults isLoading={isLoading} />
@@ -93,14 +93,14 @@ const ExamDivision = () => {
             transition={{ delay: 0.6 }}
           >
             <div className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
                   <div>
                     <h2 className="text-xl font-bold text-white flex items-center">
                       <BoltIcon className="w-6 h-6 mr-3" />
                       Recent Activities
                     </h2>
-                    <p className="text-emerald-100 mt-1">Your latest exam division activities</p>
+                    <p className="text-blue-100 mt-1">Your latest exam division activities</p>
                   </div>
                   <button
                     onClick={() => navigate('/exam/activities')}

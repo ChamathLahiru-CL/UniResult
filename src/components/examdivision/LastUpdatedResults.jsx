@@ -206,7 +206,7 @@ const LastUpdatedResults = ({ isLoading }) => {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full transform translate-x-16 -translate-y-16"></div>
             </div>
 
-            <div className="flex items-start gap-4 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 relative z-10">
               {/* File Icon with modern styling */}
               <div className="shrink-0">
                 <div className="p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200/50 group-hover:shadow-md transition-shadow duration-300">
@@ -221,20 +221,20 @@ const LastUpdatedResults = ({ isLoading }) => {
                 </h4>
                 
                 {/* Enhanced badges */}
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getFacultyBadgeColor(result.faculty)}`}>
-                    <span className="truncate max-w-xs">{result.faculty}</span>
+                <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border shadow-sm ${getFacultyBadgeColor(result.faculty)}`}>
+                    <span className="truncate max-w-[120px] sm:max-w-xs">{result.faculty}</span>
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
-                    <span className="truncate max-w-xs">{result.department}</span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
+                    <span className="truncate max-w-[100px] sm:max-w-xs">{result.department}</span>
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
-                    {result.credits} Credit{result.credits !== '1' ? 's' : ''}
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                    {result.credits}C
                   </span>
                 </div>
 
                 {/* Metadata with better spacing */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-1 text-sm text-gray-600">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1 text-sm text-gray-600">
                   <div className="flex items-center gap-1.5">
                     <ClockIcon className="h-4 w-4 text-blue-500 shrink-0" />
                     <span className="text-xs font-medium text-blue-700">
@@ -254,20 +254,20 @@ const LastUpdatedResults = ({ isLoading }) => {
               </div>
 
               {/* Modern action buttons */}
-              <div className="flex gap-2 shrink-0">
+              <div className="flex gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
                 <button
                   onClick={() => handlePreview(result)}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md transform hover:scale-105"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md"
                 >
-                  <EyeIcon className="h-4 w-4" />
+                  <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Preview</span>
                 </button>
 
                 <button
                   onClick={() => handleDownload(result)}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300 hover:shadow-md transform hover:scale-105"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300 hover:shadow-md"
                 >
-                  <ArrowDownTrayIcon className="h-4 w-4" />
+                  <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Download</span>
                 </button>
               </div>
@@ -277,13 +277,13 @@ const LastUpdatedResults = ({ isLoading }) => {
       </div>
 
       {/* View All Button */}
-      <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-4">
+      <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-3 sm:px-6 py-3 sm:py-4">
         <button
           onClick={handleViewAll}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md transform hover:scale-105"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 hover:shadow-md"
         >
           <span>View All Results</span>
-          <ArrowRightIcon className="h-4 w-4" />
+          <ArrowRightIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
       </div>
 
