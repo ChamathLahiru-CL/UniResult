@@ -714,21 +714,47 @@ export const downloadCompliancePDF = async (req, res) => {
       });
     }
 
+    // Get compliance statistics
+    const stats = {
+      total: await Compliance.countDocuments({ submitterType: { $in: ['student', 'exam-division'] } }),
+      pending: await Compliance.countDocuments({ status: 'pending', submitterType: { $in: ['student', 'exam-division'] } }),
+      resolved: await Compliance.countDocuments({ status: 'resolved', submitterType: { $in: ['student', 'exam-division'] } }),
+      unread: await Compliance.countDocuments({ isRead: false, submitterType: { $in: ['student', 'exam-division'] } }),
+      studentComplaints: await Compliance.countDocuments({ submitterType: 'student' }),
+      examDivisionComplaints: await Compliance.countDocuments({ submitterType: 'exam-division' })
+    };
+
     // Create PDF document
     const doc = new PDFDocument({ margin: 50 });
 
     // Set response headers
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=compliance-${compliance._id}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=compliance-report-${compliance._id}.pdf`);
 
     // Pipe PDF to response
     doc.pipe(res);
 
     // Add header
-    doc.fontSize(20).font('Helvetica-Bold').text('COMPLIANCE REPORT', { align: 'center' });
+    doc.fontSize(20).font('Helvetica-Bold').text('COMPLIANCE DETAILED REPORT', { align: 'center' });
     doc.moveDown();
     doc.fontSize(10).font('Helvetica').text(`Reference ID: ${compliance._id}`, { align: 'center' });
     doc.moveDown(2);
+
+    // Add horizontal line
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Compliance Statistics Section
+    doc.fontSize(14).font('Helvetica-Bold').text('Compliance Statistics Overview', { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(11).font('Helvetica');
+    doc.text(`Total Complaints Received: ${stats.total}`);
+    doc.text(`Pending Review: ${stats.pending}`);
+    doc.text(`Resolved: ${stats.resolved}`);
+    doc.text(`Unread Complaints: ${stats.unread}`);
+    doc.text(`Student Complaints: ${stats.studentComplaints}`);
+    doc.text(`Exam Division Complaints: ${stats.examDivisionComplaints}`);
+    doc.moveDown(1.5);
 
     // Add horizontal line
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
@@ -834,6 +860,166 @@ export const downloadCompliancePDF = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error generating PDF',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Export comprehensive compliance report
+ */
+export const exportComplianceReport = async (req, res) => {
+  try {
+    // Get all complaints with statistics
+    const allComplaints = await Compliance.find({ submitterType: { $in: ['student', 'exam-division'] } })
+      .populate('submitter', 'name email indexNumber role nameWithInitial firstName lastName username position')
+      .sort({ createdAt: -1 });
+
+    // Get comprehensive statistics
+    const stats = {
+      total: allComplaints.length,
+      pending: allComplaints.filter(c => c.status === 'pending').length,
+      inProgress: allComplaints.filter(c => c.status === 'in-progress').length,
+      resolved: allComplaints.filter(c => c.status === 'resolved').length,
+      closed: allComplaints.filter(c => c.status === 'closed').length,
+      studentComplaints: allComplaints.filter(c => c.submitterType === 'student').length,
+      examDivisionComplaints: allComplaints.filter(c => c.submitterType === 'exam-division').length,
+      unread: allComplaints.filter(c => !c.isRead).length,
+      highPriority: allComplaints.filter(c => c.importance === 'High').length,
+      mediumPriority: allComplaints.filter(c => c.importance === 'Medium').length,
+      lowPriority: allComplaints.filter(c => c.importance === 'Low').length
+    };
+
+    // Create PDF document
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=compliance-report-${new Date().toISOString().split('T')[0]}.pdf`);
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Add title
+    doc.fontSize(24).font('Helvetica-Bold').text('COMPLIANCE MANAGEMENT REPORT', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(12).font('Helvetica').text('System-Generated Report', { align: 'center', color: 'gray' });
+    doc.moveDown();
+
+    // Add generation date
+    doc.fontSize(10).font('Helvetica').text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' });
+    doc.moveDown(2);
+
+    // Add horizontal line
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Executive Summary
+    doc.fontSize(16).font('Helvetica-Bold').text('Executive Summary', { underline: true });
+    doc.moveDown(0.5);
+    
+    doc.fontSize(11).font('Helvetica');
+    doc.text(`Report Period: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}`);
+    doc.moveDown(1);
+
+    // Statistics Overview - Table Format
+    doc.fontSize(13).font('Helvetica-Bold').text('Compliance Statistics');
+    doc.moveDown(0.5);
+
+    const tableData = [
+      ['Metric', 'Count', 'Percentage'],
+      ['Total Complaints', stats.total.toString(), '100%'],
+      ['Pending Review', stats.pending.toString(), `${((stats.pending / stats.total) * 100).toFixed(1)}%`],
+      ['In Progress', stats.inProgress.toString(), `${((stats.inProgress / stats.total) * 100).toFixed(1)}%`],
+      ['Resolved', stats.resolved.toString(), `${((stats.resolved / stats.total) * 100).toFixed(1)}%`],
+      ['Closed', stats.closed.toString(), `${((stats.closed / stats.total) * 100).toFixed(1)}%`],
+      ['', '', ''],
+      ['Student Complaints', stats.studentComplaints.toString(), `${((stats.studentComplaints / stats.total) * 100).toFixed(1)}%`],
+      ['Exam Division Complaints', stats.examDivisionComplaints.toString(), `${((stats.examDivisionComplaints / stats.total) * 100).toFixed(1)}%`],
+      ['', '', ''],
+      ['High Priority', stats.highPriority.toString(), `${((stats.highPriority / stats.total) * 100).toFixed(1)}%`],
+      ['Medium Priority', stats.mediumPriority.toString(), `${((stats.mediumPriority / stats.total) * 100).toFixed(1)}%`],
+      ['Low Priority', stats.lowPriority.toString(), `${((stats.lowPriority / stats.total) * 100).toFixed(1)}%`],
+      ['Unread Complaints', stats.unread.toString(), `${((stats.unread / stats.total) * 100).toFixed(1)}%`]
+    ];
+
+    // Draw table
+    const columnWidths = [220, 100, 130];
+    const rowHeight = 20;
+    let y = doc.y;
+
+    tableData.forEach((row, rowIndex) => {
+      let x = 50;
+      row.forEach((cell, colIndex) => {
+        if (rowIndex === 0) {
+          doc.fontSize(10).font('Helvetica-Bold').text(cell, x, y, {
+            width: columnWidths[colIndex],
+            align: 'left'
+          });
+        } else if (row[0] === '') {
+          // Empty row for spacing
+        } else {
+          doc.fontSize(10).font('Helvetica').text(cell, x, y, {
+            width: columnWidths[colIndex],
+            align: 'left'
+          });
+        }
+        x += columnWidths[colIndex];
+      });
+      y += rowHeight;
+    });
+
+    doc.moveDown(2);
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Detailed Complaints List
+    if (allComplaints.length > 0) {
+      doc.fontSize(14).font('Helvetica-Bold').text('Detailed Complaints List', { underline: true });
+      doc.moveDown(0.5);
+
+      allComplaints.slice(0, 50).forEach((complaint, index) => {
+        // Check if we need a new page
+        if (doc.y > 700) {
+          doc.addPage();
+        }
+
+        doc.fontSize(11).font('Helvetica-Bold').text(`${index + 1}. ${complaint.topic}`, { width: 500 });
+        doc.fontSize(10).font('Helvetica');
+        doc.text(`ID: ${complaint._id} | Status: ${complaint.status} | Importance: ${complaint.importance}`, { width: 500 });
+        doc.text(`Submitted: ${new Date(complaint.createdAt).toLocaleString()}`, { width: 500 });
+        doc.text(`Submitter: ${complaint.submitterName} (${complaint.submitterType})`, { width: 500 });
+        
+        if (complaint.response && complaint.response.message) {
+          doc.text(`Response: Replied on ${new Date(complaint.response.respondedAt).toLocaleDateString()}`, { width: 500 });
+        }
+        
+        doc.moveDown(0.5);
+      });
+
+      if (allComplaints.length > 50) {
+        doc.fontSize(10).font('Helvetica-Oblique').text(`... and ${allComplaints.length - 50} more complaints`, { color: 'gray' });
+      }
+    }
+
+    doc.moveDown(2);
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Footer
+    doc.fontSize(9).font('Helvetica').text(
+      'This report is confidential and generated from UniResult Exam Management System',
+      { align: 'center', color: 'gray' }
+    );
+
+    // Finalize PDF
+    doc.end();
+
+  } catch (error) {
+    console.error('Error exporting report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error exporting compliance report',
       error: error.message
     });
   }

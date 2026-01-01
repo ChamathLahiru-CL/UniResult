@@ -225,5 +225,35 @@ export const complaintsAPI = {
       console.error('Error downloading PDF:', error);
       throw new Error(error.response?.data?.message || 'Failed to download PDF');
     }
+  },
+
+  // Export comprehensive compliance report
+  exportComplianceReport: async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/compliance/export/report`,
+        {
+          ...getConfig(),
+          responseType: 'blob'
+        }
+      );
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('📊 Compliance report exported successfully');
+      
+      return true;
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      throw new Error(error.response?.data?.message || 'Failed to export report');
+    }
   }
 };

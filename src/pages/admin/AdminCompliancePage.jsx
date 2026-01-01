@@ -23,6 +23,7 @@ const AdminCompliancePage = () => {
     unread: 0
   });
   const [loading, setLoading] = useState(true);
+  const [exportingReport, setExportingReport] = useState(false);
 
   // Fetch statistics on mount
   useEffect(() => {
@@ -38,6 +39,18 @@ const AdminCompliancePage = () => {
       console.error('Error fetching statistics:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportReport = async () => {
+    try {
+      setExportingReport(true);
+      await complaintsAPI.exportComplianceReport();
+    } catch (err) {
+      console.error('Error exporting report:', err);
+      alert('Failed to export report. Please try again.');
+    } finally {
+      setExportingReport(false);
     }
   };
 
@@ -111,8 +124,13 @@ const AdminCompliancePage = () => {
           
           {/* Quick Actions */}
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Export Report
+            <button 
+              onClick={handleExportReport}
+              disabled={exportingReport}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export compliance report as PDF"
+            >
+              {exportingReport ? 'Exporting...' : 'Export Report'}
             </button>
             <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
               Send Announcement

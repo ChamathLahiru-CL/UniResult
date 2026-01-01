@@ -15,7 +15,8 @@ import {
   downloadAttachment,
   getExamDivisionCompliances,
   markAsRead,
-  downloadCompliancePDF
+  downloadCompliancePDF,
+  exportComplianceReport
 } from '../controllers/complianceController.js';
 
 const router = express.Router();
@@ -91,13 +92,18 @@ router.get('/my', protect, getMyCompliances);
 router.get('/exam-division/list', protect, authorize('examDiv', 'admin'), getExamDivisionCompliances);
 
 /**
- * Admin/Exam Division Routes
+ * Admin Routes
  */
 
 // @route   GET /api/compliance
 // @desc    Get all compliances (Admin/Exam Division)
 // @access  Private (Admin, Exam Division)
 router.get('/', protect, authorize('admin', 'examDiv'), getAllCompliances);
+
+// @route   GET /api/compliance/export/report
+// @desc    Export comprehensive compliance report as PDF
+// @access  Private (Admin)
+router.get('/export/report', protect, authorize('admin'), exportComplianceReport);
 
 // @route   GET /api/compliance/:id
 // @desc    Get a single compliance by ID
