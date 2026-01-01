@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   UserGroupIcon, 
   BuildingOfficeIcon,
@@ -10,30 +10,57 @@ import {
 import TabSelector from '../../components/admin/compliance/TabSelector';
 import StudentComplianceList from '../../components/admin/compliance/StudentComplianceList';
 import DivisionComplianceList from '../../components/admin/compliance/DivisionComplianceList';
+import { complaintsAPI } from '../../utils/complaintsAPI';
 
 const AdminCompliancePage = () => {
   const [activeTab, setActiveTab] = useState('students');
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    resolved: 0,
+    studentComplaints: 0,
+    examDivisionComplaints: 0,
+    unread: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch statistics on mount
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const response = await complaintsAPI.getComplaintStats();
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     {
       id: 'students',
       label: 'Student Complaints',
       icon: UserGroupIcon,
-      count: 12
+      count: stats.studentComplaints
     },
     {
       id: 'divisions',
       label: 'Division Complaints',
       icon: BuildingOfficeIcon,
-      count: 7
+      count: stats.examDivisionComplaints
     }
   ];
 
-  const stats = [
+  const statisticsCards = [
     {
       id: 'total',
       name: 'Total Complaints',
-      value: '19',
+      value: stats.total.toString(),
       icon: ChartBarIcon,
       color: 'bg-blue-500',
       bgColor: 'bg-blue-50',
@@ -42,7 +69,7 @@ const AdminCompliancePage = () => {
     {
       id: 'pending',
       name: 'Pending Review',
-      value: '8',
+      value: stats.pending.toString(),
       icon: ClockIcon,
       color: 'bg-orange-500',
       bgColor: 'bg-orange-50',
@@ -51,16 +78,16 @@ const AdminCompliancePage = () => {
     {
       id: 'resolved',
       name: 'Resolved',
-      value: '11',
+      value: stats.resolved.toString(),
       icon: CheckCircleIcon,
       color: 'bg-green-500',
       bgColor: 'bg-green-50',
       textColor: 'text-green-600'
     },
     {
-      id: 'urgent',
-      name: 'Urgent',
-      value: '3',
+      id: 'unread',
+      name: 'Unread',
+      value: stats.unread.toString(),
       icon: ExclamationTriangleIcon,
       color: 'bg-red-500',
       bgColor: 'bg-red-50',
@@ -96,22 +123,37 @@ const AdminCompliancePage = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => {
-          const IconComponent = stat.icon;
-          return (
-            <div key={stat.id} className="bg-white rounded-lg p-6 shadow-sm border">
+        {loading ? (
+          // Loading skeleton
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg p-6 shadow-sm border animate-pulse">
               <div className="flex items-center">
-                <div className={`${stat.bgColor} rounded-lg p-3`}>
-                  <IconComponent className={`h-6 w-6 ${stat.textColor}`} />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <div className="bg-gray-200 rounded-lg p-3 w-12 h-12"></div>
+                <div className="ml-4 flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-12"></div>
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          statisticsCards.map((stat) => {
+            const IconComponent = stat.icon;
+            return (
+              <div key={stat.id} className="bg-white rounded-lg p-6 shadow-sm border">
+                <div className="flex items-center">
+                  <div className={`${stat.bgColor} rounded-lg p-3`}>
+                    <IconComponent className={`h-6 w-6 ${stat.textColor}`} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Main Content */}

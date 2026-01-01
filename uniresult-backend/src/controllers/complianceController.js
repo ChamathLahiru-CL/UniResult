@@ -284,30 +284,42 @@ export const getMyCompliances = async (req, res) => {
   }
 };
 
-/**
- * Get a single compliance by ID
- */
 export const getComplianceById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
+    console.log(`🔍 Fetching compliance with ID: ${id} for user: ${userId} (role: ${req.user.role})`);
+
     const compliance = await Compliance.findById(id);
 
     if (!compliance) {
+      console.log(`❌ Compliance not found: ${id}`);
       return res.status(404).json({
         success: false,
         message: 'Compliance not found'
       });
     }
 
+    console.log(`✅ Found compliance: ${compliance._id}, submitter: ${compliance.submitter}, submitterType: ${compliance.submitterType}`);
+
     // Check if user is authorized to view this compliance
-    if (compliance.student.toString() !== userId && req.user.role !== 'admin' && req.user.role !== 'examDiv') {
+    // For students: only their own complaints
+    // For admins/examDiv: all complaints
+    const isOwner = compliance.submitter && compliance.submitter.toString() === userId;
+    const isAdminOrExamDiv = req.user.role === 'admin' || req.user.role === 'examDiv';
+    
+    console.log(`🔐 Authorization check - isOwner: ${isOwner}, isAdminOrExamDiv: ${isAdminOrExamDiv}`);
+
+    if (!isOwner && !isAdminOrExamDiv) {
+      console.log(`❌ Authorization failed for user ${userId}`);
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view this compliance'
       });
     }
+
+    console.log(`✅ Authorization successful, returning compliance data`);
 
     res.status(200).json({
       success: true,
@@ -315,7 +327,7 @@ export const getComplianceById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching compliance:', error);
+    console.error('❌ Error fetching compliance:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching compliance',
@@ -329,35 +341,62 @@ export const getComplianceById = async (req, res) => {
  */
 export const getAllCompliances = async (req, res) => {
   try {
-    const { status, importance, recipient, page = 1, limit = 10 } = req.query;
+    const { status, importance, recipient, submitterType, search, page = 1, limit = 10 } = req.query;
 
     // Build query
     const query = {};
     if (status) query.status = status;
     if (importance) query.importance = importance;
     if (recipient) query.recipient = recipient;
+    
+    // Filter by submitter type (student or exam-division)
+    if (submitterType) {
+      query.submitterType = submitterType;
+    }
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { submitterName: { $regex: search, $options: 'i' } },
+        { submitterEmail: { $regex: search, $options: 'i' } },
+        { submitterIndexNumber: { $regex: search, $options: 'i' } },
+        { topic: { $regex: search, $options: 'i' } },
+        { message: { $regex: search, $options: 'i' } },
+        { studentName: { $regex: search, $options: 'i' } },
+        { studentEmail: { $regex: search, $options: 'i' } },
+        { studentIndexNumber: { $regex: search, $options: 'i' } }
+      ];
+    }
 
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const compliances = await Compliance.find(query)
-      .populate('submitter', 'name email indexNumber role')
-      .populate('student', 'name email indexNumber') // For backward compatibility
+      .populate('submitter', 'name email indexNumber enrollmentNumber role')
+      .populate('student', 'name email indexNumber enrollmentNumber') // For backward compatibility
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
     const total = await Compliance.countDocuments(query);
 
-    // Get statistics
+    // Get comprehensive statistics
     const stats = {
-      total: await Compliance.countDocuments(),
-      pending: await Compliance.countDocuments({ status: 'pending' }),
-      inProgress: await Compliance.countDocuments({ status: 'in-progress' }),
-      resolved: await Compliance.countDocuments({ status: 'resolved' }),
-      high: await Compliance.countDocuments({ importance: 'High', status: { $ne: 'resolved' } }),
-      medium: await Compliance.countDocuments({ importance: 'Medium', status: { $ne: 'resolved' } }),
-      low: await Compliance.countDocuments({ importance: 'Low', status: { $ne: 'resolved' } })
+      total: await Compliance.countDocuments({ submitterType: { $in: ['student', 'exam-division'] } }),
+      pending: await Compliance.countDocuments({ status: 'pending', submitterType: { $in: ['student', 'exam-division'] } }),
+      inProgress: await Compliance.countDocuments({ status: 'in-progress', submitterType: { $in: ['student', 'exam-division'] } }),
+      resolved: await Compliance.countDocuments({ status: 'resolved', submitterType: { $in: ['student', 'exam-division'] } }),
+      closed: await Compliance.countDocuments({ status: 'closed', submitterType: { $in: ['student', 'exam-division'] } }),
+      high: await Compliance.countDocuments({ importance: 'High', status: { $ne: 'resolved' }, submitterType: { $in: ['student', 'exam-division'] } }),
+      medium: await Compliance.countDocuments({ importance: 'Medium', status: { $ne: 'resolved' }, submitterType: { $in: ['student', 'exam-division'] } }),
+      low: await Compliance.countDocuments({ importance: 'Low', status: { $ne: 'resolved' }, submitterType: { $in: ['student', 'exam-division'] } }),
+      // Submitter type stats
+      studentComplaints: await Compliance.countDocuments({ submitterType: 'student' }),
+      examDivisionComplaints: await Compliance.countDocuments({ submitterType: 'exam-division' }),
+      // Unread stats
+      unread: await Compliance.countDocuments({ isRead: false, submitterType: { $in: ['student', 'exam-division'] } }),
+      studentUnread: await Compliance.countDocuments({ submitterType: 'student', isRead: false }),
+      examDivUnread: await Compliance.countDocuments({ submitterType: 'exam-division', isRead: false })
     };
 
     res.status(200).json({
@@ -665,7 +704,7 @@ export const downloadCompliancePDF = async (req, res) => {
     const { id } = req.params;
 
     const compliance = await Compliance.findById(id)
-      .populate('submitter', 'name email indexNumber role')
+      .populate('submitter', 'name email indexNumber role nameWithInitial firstName lastName username position')
       .populate('student', 'name email indexNumber'); // For backward compatibility
 
     if (!compliance) {
@@ -695,13 +734,25 @@ export const downloadCompliancePDF = async (req, res) => {
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown();
 
-    // Student Information Section
-    doc.fontSize(14).font('Helvetica-Bold').text('Student Information', { underline: true });
-    doc.moveDown(0.5);
-    doc.fontSize(11).font('Helvetica');
-    doc.text(`Name: ${compliance.studentName}`);
-    doc.text(`Index Number: ${compliance.studentIndexNumber}`);
-    doc.text(`Email: ${compliance.studentEmail}`);
+    // Submitter Information Section - Different for students vs exam division
+    if (compliance.submitterType === 'exam-division') {
+      // Exam Division Member Information
+      doc.fontSize(14).font('Helvetica-Bold').text('Exam Division Member Information', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Name: ${compliance.submitterName || (compliance.submitter ? compliance.submitter.nameWithInitial || `${compliance.submitter.firstName} ${compliance.submitter.lastName}` : 'N/A')}`);
+      doc.text(`Member ID: ${compliance.submitter ? compliance.submitter.username : compliance.submitterIndexNumber || 'N/A'}`);
+      doc.text(`Email: ${compliance.submitterEmail || (compliance.submitter ? compliance.submitter.email : 'N/A')}`);
+      doc.text(`Position: ${compliance.submitter ? compliance.submitter.position : 'N/A'}`);
+    } else {
+      // Student Information
+      doc.fontSize(14).font('Helvetica-Bold').text('Student Information', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Name: ${compliance.submitterName || compliance.studentName || (compliance.submitter ? compliance.submitter.name : 'N/A')}`);
+      doc.text(`Index Number: ${compliance.submitterIndexNumber || compliance.studentIndexNumber || (compliance.submitter ? compliance.submitter.indexNumber : 'N/A')}`);
+      doc.text(`Email: ${compliance.submitterEmail || compliance.studentEmail || (compliance.submitter ? compliance.submitter.email : 'N/A')}`);
+    }
     doc.moveDown(1.5);
 
     // Compliance Details Section

@@ -1,152 +1,229 @@
-// import axios from 'axios'; // Will be used in production
-import { mockStudentComplaints, mockDivisionComplaints } from '../data/mockComplaints';
+import axios from 'axios';
 
-// Mock API functions for development
+const API_URL = 'http://localhost:5000/api';
+
+// Get auth token from localStorage
+const getAuthToken = () => {
+  return localStorage.getItem('token');
+};
+
+// Configure axios headers
+const getConfig = () => ({
+  headers: {
+    'Authorization': `Bearer ${getAuthToken()}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// API functions for compliance management
 export const complaintsAPI = {
-  // Fetch complaints by type
-  fetchComplaints: async (type = 'student') => {
+  // Fetch complaints by submitter type (for admin)
+  fetchComplaints: async (submitterType = 'student') => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      console.log('🔑 Making request with token:', token ? 'Token present' : 'No token');
+      console.log('📡 Request URL:', `${API_URL}/compliance?submitterType=${submitterType}&limit=100`);
       
-      const data = type === 'student' ? mockStudentComplaints : mockDivisionComplaints;
-      console.log(`📋 Fetched ${data.length} ${type} complaints`);
+      const response = await axios.get(
+        `${API_URL}/compliance?submitterType=${submitterType}&limit=100`,
+        getConfig()
+      );
+      
+      console.log(`📋 Fetched ${response.data.data.length} ${submitterType} complaints`);
       
       return {
         success: true,
-        data,
-        total: data.length
+        data: response.data.data,
+        total: response.data.pagination.total,
+        stats: response.data.stats
       };
-      
-      // Production code:
-      // const response = await axios.get(`/api/admin/compliance?type=${type}`);
-      // return response.data;
     } catch (error) {
-      console.error('Error fetching complaints:', error);
-      throw new Error('Failed to fetch complaints');
+      console.error('❌ Error fetching complaints:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.response?.status === 404) {
+        throw new Error('API endpoint not found. Please check backend is running.');
+      }
+      
+      throw new Error(error.response?.data?.message || 'Failed to fetch complaints');
     }
   },
 
   // Fetch single complaint by ID
-  fetchComplaintById: async (id) => {
+  getComplaintById: async (id) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const response = await axios.get(
+        `${API_URL}/compliance/${id}`,
+        getConfig()
+      );
       
-      const allComplaints = [...mockStudentComplaints, ...mockDivisionComplaints];
-      const complaint = allComplaints.find(c => c.id === id);
+      console.log(`📄 Fetched complaint:`, response.data.data);
       
-      if (!complaint) {
-        throw new Error('Complaint not found');
-      }
-
-      console.log(`📄 Fetched complaint: ${complaint.topic}`);
-      
-      return {
-        success: true,
-        data: complaint
-      };
-      
-      // Production code:
-      // const response = await axios.get(`/api/admin/compliance/${id}`);
-      // return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching complaint:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Complaint not found');
     }
   },
 
   // Mark complaint as read
   markAsRead: async (id) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Find and update complaint in mock data
-      const studentComplaint = mockStudentComplaints.find(c => c.id === id);
-      const divisionComplaint = mockDivisionComplaints.find(c => c.id === id);
-      
-      if (studentComplaint) {
-        studentComplaint.read = true;
-      } else if (divisionComplaint) {
-        divisionComplaint.read = true;
-      }
+      const response = await axios.post(
+        `${API_URL}/compliance/${id}/read`,
+        {},
+        getConfig()
+      );
       
       console.log(`✅ Marked complaint ${id} as read`);
       
-      return { success: true };
-      
-      // Production code:
-      // const response = await axios.patch(`/api/admin/compliance/${id}/read`);
-      // return response.data;
+      return response.data;
     } catch (error) {
       console.error('Error marking complaint as read:', error);
-      throw new Error('Failed to mark complaint as read');
+      throw new Error(error.response?.data?.message || 'Failed to mark complaint as read');
     }
   },
 
-  // Send reply to complaint
-  sendReply: async (complaintId, message) => {
+  // Update complaint status
+  updateStatus: async (id, status, responseMessage = null) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 600));
+      const response = await axios.put(
+        `${API_URL}/compliance/${id}/status`,
+        { status, responseMessage },
+        getConfig()
+      );
       
-      const reply = {
-        message,
-        sender: 'Admin',
-        date: new Date().toISOString()
-      };
+      console.log(`✅ Updated complaint ${id} status to ${status}`);
       
-      // Find and add reply to complaint
-      const allComplaints = [...mockStudentComplaints, ...mockDivisionComplaints];
-      const complaint = allComplaints.find(c => c.id === complaintId);
-      
-      if (complaint) {
-        complaint.replies = complaint.replies || [];
-        complaint.replies.push(reply);
-        complaint.read = true; // Mark as read when replied
-      }
+      return response.data.data;
+    } catch (error) {
+      console.error('Error updating complaint status:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update complaint status');
+    }
+  },
+
+  // Send reply to complaint (update status with response message)
+  addReply: async (complaintId, replyData) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/compliance/${complaintId}/status`,
+        { 
+          status: 'in-progress',
+          responseMessage: replyData.message 
+        },
+        getConfig()
+      );
       
       console.log(`💬 Reply sent to complaint ${complaintId}`);
       
-      return {
-        success: true,
-        data: reply
-      };
-      
-      // Production code:
-      // const response = await axios.post(`/api/admin/compliance/reply`, {
-      //   complaintId,
-      //   message
-      // });
-      // return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error sending reply:', error);
-      throw new Error('Failed to send reply');
+      throw new Error(error.response?.data?.message || 'Failed to send reply');
     }
   },
 
   // Get complaint statistics
   getComplaintStats: async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      const response = await axios.get(
+        `${API_URL}/compliance?limit=1`,
+        getConfig()
+      );
       
-      const allComplaints = [...mockStudentComplaints, ...mockDivisionComplaints];
-      
-      const stats = {
-        total: allComplaints.length,
-        unread: allComplaints.filter(c => !c.read).length,
-        replied: allComplaints.filter(c => c.replies && c.replies.length > 0).length,
-        student: mockStudentComplaints.length,
-        division: mockDivisionComplaints.length
-      };
+      const stats = response.data.stats || {};
       
       console.log('📊 Complaint statistics:', stats);
       
       return {
         success: true,
-        data: stats
+        data: {
+          total: (stats.studentComplaints || 0) + (stats.examDivisionComplaints || 0),
+          unread: stats.unread || 0,
+          replied: stats.inProgress || 0,
+          student: stats.studentComplaints || 0,
+          division: stats.examDivisionComplaints || 0,
+          pending: stats.pending || 0,
+          resolved: stats.resolved || 0
+        }
       };
     } catch (error) {
       console.error('Error fetching stats:', error);
-      throw new Error('Failed to fetch complaint statistics');
+      throw new Error(error.response?.data?.message || 'Failed to fetch complaint statistics');
+    }
+  },
+
+  // Download attachment
+  downloadAttachment: async (complaintId, attachmentId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/compliance/${complaintId}/attachment/${attachmentId}`,
+        {
+          ...getConfig(),
+          responseType: 'blob'
+        }
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error downloading attachment:', error);
+      throw new Error(error.response?.data?.message || 'Failed to download attachment');
+    }
+  },
+
+  // Delete complaint (admin only)
+  deleteComplaint: async (id) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/compliance/${id}`,
+        getConfig()
+      );
+      
+      console.log(`🗑️ Deleted complaint ${id}`);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting complaint:', error);
+      throw new Error(error.response?.data?.message || 'Failed to delete complaint');
+    }
+  },
+
+  // Download complaint as PDF
+  downloadPDF: async (id) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/compliance/${id}/pdf`,
+        {
+          ...getConfig(),
+          responseType: 'blob'
+        }
+      );
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `complaint-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log(`📄 Downloaded PDF for complaint ${id}`);
+      
+      return true;
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      throw new Error(error.response?.data?.message || 'Failed to download PDF');
     }
   }
 };
