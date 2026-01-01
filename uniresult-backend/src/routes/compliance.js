@@ -12,7 +12,10 @@ import {
   getAllCompliances,
   updateComplianceStatus,
   deleteCompliance,
-  downloadAttachment
+  downloadAttachment,
+  getExamDivisionCompliances,
+  markAsRead,
+  downloadCompliancePDF
 } from '../controllers/complianceController.js';
 
 const router = express.Router();
@@ -82,10 +85,10 @@ router.post('/', protect, upload.array('attachments', 5), submitCompliance);
 // @access  Private (Student)
 router.get('/my', protect, getMyCompliances);
 
-// @route   GET /api/compliance/:id
-// @desc    Get a single compliance by ID
-// @access  Private
-router.get('/:id', protect, getComplianceById);
+// @route   GET /api/compliance/exam-division/list
+// @desc    Get compliances for Exam Division
+// @access  Private (Exam Division)
+router.get('/exam-division/list', protect, authorize('examDiv', 'admin'), getExamDivisionCompliances);
 
 /**
  * Admin/Exam Division Routes
@@ -94,12 +97,27 @@ router.get('/:id', protect, getComplianceById);
 // @route   GET /api/compliance
 // @desc    Get all compliances (Admin/Exam Division)
 // @access  Private (Admin, Exam Division)
-router.get('/', protect, authorize('admin', 'examDivision'), getAllCompliances);
+router.get('/', protect, authorize('admin', 'examDiv'), getAllCompliances);
+
+// @route   GET /api/compliance/:id
+// @desc    Get a single compliance by ID
+// @access  Private
+router.get('/:id', protect, getComplianceById);
+
+// @route   GET /api/compliance/:id/pdf
+// @desc    Download compliance as PDF document
+// @access  Private
+router.get('/:id/pdf', protect, downloadCompliancePDF);
+
+// @route   POST /api/compliance/:id/read
+// @desc    Mark compliance as read
+// @access  Private (Admin, Exam Division)
+router.post('/:id/read', protect, authorize('admin', 'examDiv'), markAsRead);
 
 // @route   PUT /api/compliance/:id/status
 // @desc    Update compliance status
 // @access  Private (Admin, Exam Division)
-router.put('/:id/status', protect, authorize('admin', 'examDivision'), updateComplianceStatus);
+router.put('/:id/status', protect, authorize('admin', 'examDiv'), updateComplianceStatus);
 
 // @route   DELETE /api/compliance/:id
 // @desc    Delete a compliance
