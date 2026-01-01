@@ -106,8 +106,8 @@ const StudentCompliance = () => {
         const transformedCompliances = response.data.data.map(comp => ({
           id: comp._id,
           type: statusToType[comp.status] || 'unread',
-          enrollmentNumber: comp.studentIndexNumber,
-          studentName: comp.studentName,
+          enrollmentNumber: comp.submitterIndexNumber || comp.studentIndexNumber || comp.submitter?.indexNumber || comp.submitter?.enrollmentNumber || 'N/A',
+          studentName: comp.submitterName || comp.studentName || comp.submitter?.name || 'Unknown',
           message: comp.message,
           topic: comp.topic,
           importance: comp.importance,
@@ -118,7 +118,7 @@ const StudentCompliance = () => {
           status: comp.status,
           response: comp.response,
           attachments: comp.attachments,
-          studentEmail: comp.studentEmail
+          studentEmail: comp.submitterEmail || comp.studentEmail || comp.submitter?.email
         }));
 
         setCompliances(transformedCompliances);
@@ -214,9 +214,13 @@ const StudentCompliance = () => {
         const newType = statusToType[newStatus] || newStatus;
         setSelectedCompliance({ ...selectedCompliance, status: newStatus, type: newType });
       }
+      
+      // Show success confirmation
+      alert(`✅ Status updated successfully to "${newStatus.replace('-', ' ')}"`);
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Failed to update status. Please try again.');
+      const errorMessage = err.response?.data?.message || 'Failed to update status. Please try again.';
+      alert(errorMessage);
     }
   };
 

@@ -6,7 +6,8 @@ import {
   CalendarIcon,
   ChartBarIcon,
   CheckCircleIcon,
-  NewspaperIcon
+  NewspaperIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -74,6 +75,8 @@ const Notifications = () => {
         return CalendarIcon;
       case 'news':
         return NewspaperIcon;
+      case 'compliance':
+        return ClipboardDocumentIcon;
       default:
         return BellIcon;
     }
