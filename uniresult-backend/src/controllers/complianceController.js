@@ -1,6 +1,8 @@
 import Compliance from '../models/Compliance.js';
 import User from '../models/User.js';
+import ExamDivisionMember from '../models/ExamDivisionMember.js';
 import Notification from '../models/Notification.js';
+import Activity from '../models/Activity.js';
 import fs from 'fs/promises';
 import PDFDocument from 'pdfkit';
 
@@ -11,6 +13,7 @@ export const submitCompliance = async (req, res) => {
   try {
     const { topic, recipient, importance, message, selectedGroups } = req.body;
     const userId = req.user.id;
+    const userRole = req.user.role; // Get role from JWT token
 
     // Validate required fields
     if (!topic || !recipient || !importance || !message) {
@@ -29,20 +32,40 @@ export const submitCompliance = async (req, res) => {
       });
     }
 
-    // Get user details
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    // Get user details based on role
+    let user;
+    let submitterName;
+    let submitterEmail;
+    let submitterUsername;
+    let submitterType;
+
+    if (userRole === 'examDiv') {
+      // For exam division members, check ExamDivisionMember collection
+      user = await ExamDivisionMember.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Exam Division member not found'
+        });
+      }
+      submitterName = user.nameWithInitial || user.firstName + ' ' + user.lastName;
+      submitterEmail = user.email;
+      submitterUsername = user.username;
+      submitterType = 'exam-division';
+    } else {
+      // For students/admins, check User collection
+      user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+      submitterName = user.name;
+      submitterEmail = user.email;
+      submitterUsername = user.username;
+      submitterType = user.role === 'admin' ? 'admin' : 'student';
     }
-
-    // Define submitter name for notifications
-    const submitterName = user.name;
-
-    // Determine submitter type
-    const submitterType = user.role === 'examDiv' ? 'exam-division' : 'student';
 
     // Process attachments
     const attachments = [];
@@ -63,14 +86,14 @@ export const submitCompliance = async (req, res) => {
     const compliance = new Compliance({
       submitter: userId,
       submitterType,
-      submitterName: user.name,
-      submitterEmail: user.email,
-      submitterIndexNumber: submitterType === 'student' ? (user.indexNumber || user.email) : undefined,
+      submitterName: submitterName,
+      submitterEmail: submitterEmail,
+      submitterIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || submitterEmail) : undefined,
       // Legacy fields for backward compatibility
       student: submitterType === 'student' ? userId : undefined,
-      studentName: submitterType === 'student' ? user.name : undefined,
-      studentEmail: submitterType === 'student' ? user.email : undefined,
-      studentIndexNumber: submitterType === 'student' ? (user.indexNumber || user.email) : undefined,
+      studentName: submitterType === 'student' ? submitterName : undefined,
+      studentEmail: submitterType === 'student' ? submitterEmail : undefined,
+      studentIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || submitterEmail) : undefined,
       topic,
       recipient,
       importance,
@@ -173,6 +196,33 @@ export const submitCompliance = async (req, res) => {
     } catch (notificationError) {
       console.error('Error creating notifications:', notificationError);
       // Don't fail the compliance submission if notifications fail
+    }
+
+    // Create activity record for exam division member
+    try {
+      if (submitterType === 'exam-division') {
+        await Activity.create({
+          activityType: 'COMPLIANCE_SUBMIT',
+          activityName: `Complaint Submitted - ${topic}`,
+          description: `Submitted a ${importance.toLowerCase()} priority complaint in ${groups[0] || 'General'} category to ${recipient}`,
+          performedBy: userId,
+          performedByName: submitterName,
+          performedByUsername: submitterUsername,
+          performedByEmail: submitterEmail,
+          performedByRole: 'examDiv',
+          priority: importance === 'High' ? 'HIGH' : importance === 'Medium' ? 'MEDIUM' : 'LOW',
+          metadata: {
+            complianceId: compliance._id,
+            recipient: recipient,
+            importance: importance,
+            category: groups[0] || 'General',
+            topic: topic
+          }
+        });
+      }
+    } catch (activityError) {
+      console.error('Error creating activity:', activityError);
+      // Don't fail the compliance submission if activity creation fails
     }
 
     res.status(201).json({

@@ -77,7 +77,7 @@ const upload = multer({
 
 // @route   POST /api/compliance
 // @desc    Submit a new compliance
-// @access  Private (Student)
+// @access  Private (Student, Exam Division)
 router.post('/', protect, upload.array('attachments', 5), submitCompliance);
 
 // @route   GET /api/compliance/my
