@@ -85,7 +85,7 @@ const DashboardLayout = () => {
           />
           
           {/* Page content - rendered via React Router outlet */}
-          <main className="flex-grow p-6 overflow-y-auto bg-gradient-to-br from-gray-50/50 to-white">
+          <main className="flex-grow p-6 overflow-y-auto bg-[#f1f9ff]">
             <div className="max-w-full">
               <Outlet />
             </div>
