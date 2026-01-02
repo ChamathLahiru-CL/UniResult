@@ -328,9 +328,25 @@ async function createStudentResults(resultSheet, studentResults) {
 // @access  Private
 export const getAllResults = async (req, res) => {
     try {
-        const results = await Result.find()
-            .select('-studentResults') // Exclude student results for list view
-            .sort({ createdAt: -1 });
+        // Parse query parameters
+        const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+        const sortBy = req.query.sort || '-createdAt'; // Default sort by createdAt
+
+        let query = Result.find().select('-studentResults');
+
+        // Apply sorting first
+        if (sortBy.startsWith('-')) {
+            query = query.sort({ [sortBy.substring(1)]: -1 });
+        } else {
+            query = query.sort({ [sortBy]: 1 });
+        }
+
+        // Apply limit if specified (must be positive integer)
+        if (limit && !isNaN(limit) && limit > 0) {
+            query = query.limit(limit);
+        }
+
+        const results = await query.exec();
 
         res.status(200).json({
             success: true,
