@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   DocumentChartBarIcon,
   FunnelIcon,
@@ -7,18 +7,17 @@ import {
   CalendarDaysIcon,
   AcademicCapIcon,
   ChartBarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import ResultTable from '../../components/admin/results/ResultTable';
-import { 
-  mockResultUploads, 
-  degreeOptions, 
-  levelOptions, 
-  semesterOptions, 
-  statusOptions 
-} from '../../data/mockResultUploads';
+import { degreeOptions, levelOptions, semesterOptions, statusOptions } from '../../data/mockResultUploads';
 
 const AdminStudentResultPage = () => {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     degree: 'all',
@@ -31,13 +30,97 @@ const AdminStudentResultPage = () => {
     direction: 'desc'
   });
 
+  // Fetch results from API
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/results', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch results');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Transform backend data to match frontend expectations
+          const transformedResults = result.data.map(item => {
+            // Extract semester number from semester string (e.g., "1st Semester" -> 1)
+            const semesterMatch = item.semester.match(/(\d+)/);
+            const semesterNumber = semesterMatch ? parseInt(semesterMatch[1]) : 1;
+
+            return {
+              id: item._id,
+              subject: item.courseCode
+                ? `${item.courseCode} - ${item.subjectName}`
+                : item.subjectName,
+              degree: item.degreeProgram || `${item.faculty} - ${item.department}`,
+              year: item.academicYear || new Date(item.createdAt).getFullYear().toString(),
+              semester: semesterNumber,
+              uploadedBy: {
+                name: item.uploadedByName || 'Unknown User',
+                id: item.uploadedByUsername || 'Unknown',
+                memberId: item.uploadedBy?._id?.toString() || 'Unknown',
+                email: item.uploadedByEmail || 'unknown@example.com',
+                department: item.department || 'Unknown'
+              },
+              statistics: {
+                totalStudents: item.resultCount || 0,
+                passedStudents: 0, // Will be calculated when viewing details
+                failedStudents: 0, // Will be calculated when viewing details
+                averageGrade: 0, // Will be calculated when viewing details
+                highestGrade: 0, // Will be calculated when viewing details
+                lowestGrade: 0 // Will be calculated when viewing details
+              },
+              status: item.parseStatus || 'pending',
+              fileSize: 'Unknown', // Will be calculated when viewing details
+              uploadTime: 'Unknown', // Will be calculated when viewing details
+              date: item.createdAt,
+              faculty: item.faculty,
+              department: item.department,
+              level: parseInt(item.level) || 100,
+              courseCode: item.courseCode,
+              subjectName: item.subjectName,
+              fileUrl: item.fileUrl,
+              parseStatus: item.parseStatus
+            };
+          });
+
+          setResults(transformedResults);
+        } else {
+          setError(result.message || 'Failed to load results');
+        }
+      } catch (err) {
+        console.error('Error fetching results:', err);
+        setError(err.message || 'Failed to load results');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, []);
+
   // Filter and search results
   const filteredResults = useMemo(() => {
-    let filtered = mockResultUploads;
+    let filtered = results;
 
     // Apply search
     if (searchTerm) {
-      filtered = filtered.filter(result => 
+      filtered = filtered.filter(result =>
         result.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         result.degree.toLowerCase().includes(searchTerm.toLowerCase()) ||
         result.uploadedBy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,7 +170,7 @@ const AdminStudentResultPage = () => {
     });
 
     return filtered;
-  }, [searchTerm, filters, sortConfig]);
+  }, [results, searchTerm, filters, sortConfig]);
 
   // Calculate statistics
   const statistics = useMemo(() => {
@@ -159,6 +242,71 @@ const AdminStudentResultPage = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <DocumentChartBarIcon className="h-8 w-8 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-800">Student Result Management</h1>
+              <p className="text-gray-600 mt-1">Loading result uploads...</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-red-100 rounded-lg">
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-800">Student Result Management</h1>
+              <p className="text-gray-600 mt-1">Unable to load result uploads</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Error loading results
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                {error}
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -361,7 +509,7 @@ const AdminStudentResultPage = () => {
       {/* Results Summary */}
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          Showing {filteredResults.length} of {mockResultUploads.length} result uploads
+          Showing {filteredResults.length} of {results.length} result uploads
         </p>
       </div>
 

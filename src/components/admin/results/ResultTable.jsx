@@ -63,6 +63,9 @@ const ResultTable = ({ results, onSort, sortConfig }) => {
               <SortableHeader field="date" icon={CalendarDaysIcon}>
                 Upload Date
               </SortableHeader>
+              <SortableHeader field="faculty" icon={AcademicCapIcon}>
+                Faculty
+              </SortableHeader>
               <SortableHeader field="degree" icon={AcademicCapIcon}>
                 Degree
               </SortableHeader>

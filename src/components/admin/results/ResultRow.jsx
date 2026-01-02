@@ -55,6 +55,13 @@ const ResultRow = ({ result }) => {
         </div>
       </td>
 
+      {/* Faculty */}
+      <td className="py-4 px-4 text-sm">
+        <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-green-800 font-medium">
+          {result.faculty}
+        </span>
+      </td>
+
       {/* Degree */}
       <td className="py-4 px-4 text-sm">
         <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-800 font-medium">
@@ -99,7 +106,6 @@ const ResultRow = ({ result }) => {
               {result.uploadedBy.name}
             </Link>
             <p className="text-xs text-slate-500">ID: {result.uploadedBy.id}</p>
-            <p className="text-xs text-slate-400">{result.uploadedBy.department}</p>
           </div>
         </div>
       </td>

@@ -1168,3 +1168,30 @@ export const addManualStudentResults = async (req, res) => {
         });
     }
 };
+
+// @desc    Get all faculties
+// @route   GET /api/results/faculties
+// @access  Private (Admin/ExamDiv)
+export const getFaculties = async (req, res) => {
+    try {
+        const faculties = [
+            'Faculty of Technological Studies',
+            'Faculty of Applied Science',
+            'Faculty of Management',
+            'Faculty of Agriculture',
+            'Faculty of Medicine'
+        ];
+
+        res.status(200).json({
+            success: true,
+            data: faculties
+        });
+    } catch (error) {
+        console.error('Get faculties error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching faculties',
+            error: error.message
+        });
+    }
+};
