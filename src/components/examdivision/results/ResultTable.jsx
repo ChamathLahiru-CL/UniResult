@@ -1,39 +1,39 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { format } from 'date-fns';
 import { getSemesterColor } from '../../../utils/getSemesterColor';
 import ResultDetailModal from './ResultDetailModal';
 import { EyeIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
-const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selectedDepartment, selectedUser }) => {
+const ResultTable = forwardRef(({ results, currentUser, searchQuery, selectedFaculty, selectedDepartment, selectedUser }, ref) => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const tableScrollRef = useRef(null);
 
-  // Check scroll state
-  const checkScrollState = useCallback(() => {
-    if (tableScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tableScrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  useImperativeHandle(ref, () => ({
+    scrollLeft: () => {
+      if (tableScrollRef.current) {
+        tableScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      }
+    },
+    scrollRight: () => {
+      if (tableScrollRef.current) {
+        tableScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      }
     }
-  }, []);
+  }));
 
   // Scroll functions
   const scrollLeft = useCallback(() => {
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-      setTimeout(checkScrollState, 300);
     }
-  }, [checkScrollState]);
+  }, []);
 
   const scrollRight = useCallback(() => {
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-      setTimeout(checkScrollState, 300);
     }
-  }, [checkScrollState]);
+  }, []);
 
   // Keyboard navigation
   const handleKeyDown = useCallback((e) => {
@@ -57,22 +57,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [handleKeyDown]);
-
-  // Check scroll state on mount and when results change
-  useEffect(() => {
-    const timer = setTimeout(checkScrollState, 100);
-    return () => clearTimeout(timer);
-  }, [results, checkScrollState]);
-
-  // Add scroll event listener
-  useEffect(() => {
-    const handleScroll = () => checkScrollState();
-    const element = tableScrollRef.current;
-    if (element) {
-      element.addEventListener('scroll', handleScroll);
-      return () => element.removeEventListener('scroll', handleScroll);
-    }
-  }, [checkScrollState]);
 
   // Filter results based on search query and filters
   const filteredResults = results.filter(result => {
@@ -101,32 +85,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden relative">
-      {/* Floating Scroll Controls - Always visible on screen when table needs scrolling */}
-      {filteredResults.length > 0 && (canScrollLeft || canScrollRight) && (
-        <div className="fixed top-24 right-4 z-50 flex flex-col space-y-2 hidden md:flex">
-          <button
-            onClick={scrollLeft}
-            className={`bg-white shadow-lg hover:shadow-xl rounded-full p-3 border border-gray-300 hover:bg-gray-50 transition-all duration-200 ${
-              canScrollLeft ? 'opacity-100 hover:scale-105' : 'opacity-50 cursor-not-allowed'
-            }`}
-            title="Scroll Table Left"
-            disabled={!canScrollLeft}
-          >
-            <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
-          </button>
-          <button
-            onClick={scrollRight}
-            className={`bg-white shadow-lg hover:shadow-xl rounded-full p-3 border border-gray-300 hover:bg-gray-50 transition-all duration-200 ${
-              canScrollRight ? 'opacity-100 hover:scale-105' : 'opacity-50 cursor-not-allowed'
-            }`}
-            title="Scroll Table Right"
-            disabled={!canScrollRight}
-          >
-            <ChevronRightIcon className="h-6 w-6 text-gray-700" />
-          </button>
-        </div>
-      )}
-
       {/* Desktop View */}
       <div className="hidden md:block relative">
 
@@ -188,59 +146,96 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
             ) : (
               filteredResults.map((result, index) => {
                 const isCurrentUser = result.uploadedBy === currentUser.name;
+                const rowClassName = result.isDeleted 
+                  ? 'bg-red-50 border-red-200 hover:bg-red-100'
+                  : isCurrentUser 
+                    ? 'bg-green-50 hover:bg-blue-50' 
+                    : 'odd:bg-white even:bg-gray-50 hover:bg-blue-50';
+                
                 return (
                   <tr
                     key={result.id}
-                    className={`${
-                      isCurrentUser ? 'bg-green-50' : 'odd:bg-white even:bg-gray-50'
-                    } hover:bg-blue-50 transition-colors duration-150`}
+                    className={`${rowClassName} transition-colors duration-150 border-b`}
                   >
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-blue-700 truncate max-w-xs">{result.subject}</div>
+                      <div className={`font-medium truncate max-w-xs ${result.isDeleted ? 'line-through text-red-700' : 'text-blue-700'}`}>
+                        {result.subject}
+                      </div>
+                      {result.isDeleted && (
+                        <div className="text-xs text-red-600 mt-1">
+                          ❌ Deleted by Admin
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="truncate max-w-xs">{result.degree}</div>
+                      <div className={`truncate max-w-xs ${result.isDeleted ? 'line-through text-red-700' : ''}`}>
+                        {result.degree}
+                      </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="truncate max-w-xs">{result.faculty}</div>
+                      <div className={`truncate max-w-xs ${result.isDeleted ? 'line-through text-red-700' : ''}`}>
+                        {result.faculty}
+                      </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {result.year}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs text-white rounded-full ${getSemesterColor(result.semester)}`}>
-                        Semester {result.semester}
+                      <span className={result.isDeleted ? 'line-through text-red-700' : ''}>
+                        {result.year}
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
+                      {result.isDeleted ? (
+                        <span className="px-2 py-1 text-xs text-white rounded-full bg-red-500 line-through">
+                          Semester {result.semester}
+                        </span>
+                      ) : (
+                        <span className={`px-2 py-1 text-xs text-white rounded-full ${getSemesterColor(result.semester)}`}>
+                          Semester {result.semester}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="group relative">
-                        <span className={`text-sm ${isCurrentUser ? 'font-semibold text-green-600' : 'text-gray-900'} truncate block max-w-xs`}>
+                        <span className={`text-sm ${isCurrentUser ? 'font-semibold text-green-600' : 'text-gray-900'} ${result.isDeleted ? 'line-through text-red-700' : ''} truncate block max-w-xs`}>
                           {result.uploadedBy}
                         </span>
                         {/* Tooltip */}
                         <div className="hidden group-hover:block absolute z-10 w-48 p-2 mt-1 text-sm bg-gray-900 text-white rounded-md shadow-lg">
                           <p className="font-medium">{result.uploadedBy}</p>
                           <p className="text-gray-300">{result.userEmail}</p>
+                          {result.isDeleted && (
+                            <p className="text-red-400 mt-1 text-xs">
+                              🗑️ Deleted on {format(new Date(result.deletedAt), 'MMM d, yyyy')} by {result.deletedBy}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(result.timestamp), 'MMM d, yyyy – h:mm a')}
+                      <span className={result.isDeleted ? 'line-through text-red-700' : ''}>
+                        {format(new Date(result.timestamp), 'MMM d, yyyy – h:mm a')}
+                      </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${result.count > 50 ? 'bg-yellow-100 text-yellow-800' : 
-                            result.count < 10 ? 'bg-red-100 text-red-800' : 
-                            'bg-blue-100 text-blue-800'}`}
-                        >
-                          {result.count} Results
-                        </span>
-                        <button
-                          onClick={() => {
+                        {result.isDeleted ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 line-through">
+                            {result.count} Results
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            ${result.count > 50 ? 'bg-yellow-100 text-yellow-800' : 
+                              result.count < 10 ? 'bg-red-100 text-red-800' : 
+                              'bg-blue-100 text-blue-800'}`}
+                          >
+                            {result.count} Results
+                          </span>
+                        )}
+                        {!result.isDeleted && (
+                          <button
+                            onClick={() => {
                             const baseUrl = 'http://localhost:5000';
                             const fullUrl = result.fileUrl 
                               ? (result.fileUrl.startsWith('http') ? result.fileUrl : `${baseUrl}${result.fileUrl}`)
@@ -258,6 +253,7 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
                         >
                           <EyeIcon className="h-5 w-5" />
                         </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -365,6 +361,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
       />
     </div>
   );
-};
+});
 
 export default ResultTable;

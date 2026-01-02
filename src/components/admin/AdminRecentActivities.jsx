@@ -96,6 +96,8 @@ const AdminRecentActivities = () => {
         return <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />;
       case ACTIVITY_TYPES.RESULT_UPLOAD:
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+      case ACTIVITY_TYPES.RESULT_DELETED:
+        return <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />;
       case ACTIVITY_TYPES.TIMETABLE_UPLOAD:
         return <CalendarIcon className="h-5 w-5 text-blue-500" />;
       case ACTIVITY_TYPES.NEWS_UPLOAD:

@@ -18,7 +18,8 @@ import {
     getNewResultsCount,
     linkStudentResults,
     getAllStudentResults,
-    addManualStudentResults
+    addManualStudentResults,
+    getFaculties
 } from '../controllers/results.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -77,6 +78,7 @@ router.post('/link-student', linkStudentResults);
 router.post('/upload', authorize('admin', 'examDiv'), upload.single('file'), uploadResult);
 router.post('/:id/manual-results', authorize('admin', 'examDiv'), addManualStudentResults);
 router.get('/', getAllResults);
+router.get('/faculties', getFaculties);
 router.get('/student-results', authorize('admin', 'examDiv'), getAllStudentResults);
 router.get('/search/:registrationNo', authorize('admin', 'examDiv'), searchByRegistration);
 router.get('/:id', getResultById);

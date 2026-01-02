@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeftIcon,
@@ -18,12 +18,142 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
-import { getResultById } from '../../data/mockResultUploads';
 
 const ResultDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const result = getResultById(id);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch result details from API
+  useEffect(() => {
+    const fetchResultDetails = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/results/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Result not found');
+          } else {
+            throw new Error('Failed to fetch result details');
+          }
+          return;
+        }
+
+        const resultData = await response.json();
+
+        if (resultData.success) {
+          setResult(resultData.data);
+        } else {
+          setError(resultData.message || 'Failed to load result details');
+        }
+      } catch (err) {
+        console.error('Error fetching result details:', err);
+        setError(err.message || 'Failed to load result details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchResultDetails();
+    }
+  }, [id]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/admin/results')}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
+            </button>
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <DocumentChartBarIcon className="h-8 w-8 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-semibold text-gray-800">Result Upload Details</h1>
+                <p className="text-gray-600 mt-1">Loading result details...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/admin/results')}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
+            </button>
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-semibold text-gray-800">Result Not Found</h1>
+                <p className="text-gray-600 mt-1">Unable to load result details</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Error loading result
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                {error}
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => navigate('/admin/results')}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span>Back to Results</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!result) {
     return (
@@ -77,8 +207,22 @@ const ResultDetailsPage = () => {
     return format(new Date(date), 'EEEE, MMMM dd, yyyy');
   };
 
-  const formatTime = (date) => {
-    return format(new Date(date), 'HH:mm:ss');
+  const handleViewPdf = () => {
+    if (result.fileUrl) {
+      // Open PDF in new tab
+      window.open(`http://localhost:5000${result.fileUrl}`, '_blank');
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    if (result.fileUrl) {
+      const link = document.createElement('a');
+      link.href = `http://localhost:5000${result.fileUrl}`;
+      link.download = result.originalFileName || 'result.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (
@@ -104,13 +248,19 @@ const ResultDetailsPage = () => {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={handleDownloadPdf}
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <ArrowDownTrayIcon className="h-4 w-4" />
-              <span>Download Report</span>
+              <span>Download PDF</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={handleViewPdf}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <EyeIcon className="h-4 w-4" />
-              <span>View Student List</span>
+              <span>View PDF</span>
             </button>
           </div>
         </div>
@@ -124,9 +274,9 @@ const ResultDetailsPage = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-800">Upload Information</h2>
               <div className="flex items-center space-x-2">
-                {getStatusIcon(result.status)}
-                <span className={getStatusBadge(result.status)}>
-                  {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
+                {getStatusIcon(result.parseStatus)}
+                <span className={getStatusBadge(result.parseStatus)}>
+                  {result.parseStatus.charAt(0).toUpperCase() + result.parseStatus.slice(1)}
                 </span>
               </div>
             </div>
@@ -138,7 +288,6 @@ const ResultDetailsPage = () => {
                   <div>
                     <p className="text-sm text-gray-600">Upload Date</p>
                     <p className="font-medium text-gray-900">{formatDate(result.date)}</p>
-                    <p className="text-sm text-gray-500">{formatTime(result.date)}</p>
                   </div>
                 </div>
 
@@ -297,14 +446,20 @@ const ResultDetailsPage = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
             
             <div className="space-y-3">
-              <button className="w-full flex items-center space-x-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={handleViewPdf}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 <EyeIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-700">View Student List</span>
+                <span className="text-sm font-medium text-gray-700">View PDF</span>
               </button>
 
-              <button className="w-full flex items-center space-x-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={handleDownloadPdf}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 <ArrowDownTrayIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-700">Download Results</span>
+                <span className="text-sm font-medium text-gray-700">Download PDF</span>
               </button>
 
               <button className="w-full flex items-center space-x-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   DocumentChartBarIcon,
   FunnelIcon,
@@ -7,18 +7,32 @@ import {
   CalendarDaysIcon,
   AcademicCapIcon,
   ChartBarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import ResultTable from '../../components/admin/results/ResultTable';
-import { 
-  mockResultUploads, 
-  degreeOptions, 
-  levelOptions, 
-  semesterOptions, 
-  statusOptions 
-} from '../../data/mockResultUploads';
+import { degreeOptions, levelOptions, semesterOptions, statusOptions } from '../../data/mockResultUploads';
 
 const AdminStudentResultPage = () => {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const tableRef = useRef(null);
+
+  const scrollTableLeft = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollLeft();
+    }
+  };
+
+  const scrollTableRight = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollRight();
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     degree: 'all',
@@ -30,14 +44,104 @@ const AdminStudentResultPage = () => {
     field: 'date',
     direction: 'desc'
   });
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Fetch results from API
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/results', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch results');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Transform backend data to match frontend expectations
+          const transformedResults = result.data.map(item => {
+            // Extract semester number from semester string (e.g., "1st Semester" -> 1)
+            const semesterMatch = item.semester.match(/(\d+)/);
+            const semesterNumber = semesterMatch ? parseInt(semesterMatch[1]) : 1;
+
+            return {
+              id: item._id,
+              subject: item.courseCode
+                ? `${item.courseCode} - ${item.subjectName}`
+                : item.subjectName,
+              degree: item.degreeProgram || `${item.faculty} - ${item.department}`,
+              year: item.academicYear || new Date(item.createdAt).getFullYear().toString(),
+              semester: semesterNumber,
+              uploadedBy: {
+                name: item.uploadedByName || 'Unknown User',
+                id: item.uploadedByUsername || 'Unknown',
+                memberId: item.uploadedBy?._id?.toString() || 'Unknown',
+                email: item.uploadedByEmail || 'unknown@example.com',
+                department: item.department || 'Unknown'
+              },
+              statistics: {
+                totalStudents: item.resultCount || 0,
+                passedStudents: 0, // Will be calculated when viewing details
+                failedStudents: 0, // Will be calculated when viewing details
+                averageGrade: 0, // Will be calculated when viewing details
+                highestGrade: 0, // Will be calculated when viewing details
+                lowestGrade: 0 // Will be calculated when viewing details
+              },
+              status: item.parseStatus || 'pending',
+              fileSize: 'Unknown', // Will be calculated when viewing details
+              uploadTime: 'Unknown', // Will be calculated when viewing details
+              date: item.createdAt,
+              faculty: item.faculty,
+              department: item.department,
+              level: parseInt(item.level) || 100,
+              courseCode: item.courseCode,
+              subjectName: item.subjectName,
+              fileUrl: item.fileUrl,
+              parseStatus: item.parseStatus,
+              isDeleted: item.isDeleted || false,
+              deletedAt: item.deletedAt,
+              deletedBy: item.deletedByName,
+              deletedByUsername: item.deletedByUsername
+            };
+          });
+
+          setResults(transformedResults);
+        } else {
+          setError(result.message || 'Failed to load results');
+        }
+      } catch (err) {
+        console.error('Error fetching results:', err);
+        setError(err.message || 'Failed to load results');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, []);
 
   // Filter and search results
   const filteredResults = useMemo(() => {
-    let filtered = mockResultUploads;
+    let filtered = results;
 
     // Apply search
     if (searchTerm) {
-      filtered = filtered.filter(result => 
+      filtered = filtered.filter(result =>
         result.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         result.degree.toLowerCase().includes(searchTerm.toLowerCase()) ||
         result.uploadedBy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,7 +191,7 @@ const AdminStudentResultPage = () => {
     });
 
     return filtered;
-  }, [searchTerm, filters, sortConfig]);
+  }, [results, searchTerm, filters, sortConfig]);
 
   // Calculate statistics
   const statistics = useMemo(() => {
@@ -129,6 +233,64 @@ const AdminStudentResultPage = () => {
     setSearchTerm('');
   };
 
+  const handleDeleteResult = (result) => {
+    setDeleteConfirm(result);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/results/${deleteConfirm.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete result');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Mark the result as deleted in local state instead of removing it
+        setResults(prev => prev.map(r => 
+          r.id === deleteConfirm.id 
+            ? { 
+                ...r, 
+                isDeleted: true, 
+                deletedAt: new Date().toISOString(),
+                deletedBy: result.data?.deletedByName || 'Admin',
+                deletedByUsername: result.data?.deletedByUsername || 'admin'
+              }
+            : r
+        ));
+        setDeleteConfirm(null);
+        // Could add a success notification here
+      } else {
+        setError(result.message || 'Failed to delete result');
+      }
+    } catch (err) {
+      console.error('Error deleting result:', err);
+      setError(err.message || 'Failed to delete result');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirm(null);
+  };
+
   const exportToExcel = () => {
     // Create CSV content
     const headers = ['Date', 'Degree', 'Subject', 'Level', 'Semester', 'Uploader', 'Uploader ID', 'Total Students', 'Average Grade', 'Status'];
@@ -159,6 +321,71 @@ const AdminStudentResultPage = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <DocumentChartBarIcon className="h-8 w-8 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-800">Student Result Management</h1>
+              <p className="text-gray-600 mt-1">Loading result uploads...</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-red-100 rounded-lg">
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-800">Student Result Management</h1>
+              <p className="text-gray-600 mt-1">Unable to load result uploads</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Error loading results
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                {error}
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -361,16 +588,85 @@ const AdminStudentResultPage = () => {
       {/* Results Summary */}
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          Showing {filteredResults.length} of {mockResultUploads.length} result uploads
+          Showing {filteredResults.length} of {results.length} result uploads
         </p>
       </div>
 
       {/* Results Table */}
       <ResultTable 
+        ref={tableRef}
         results={filteredResults}
         onSort={handleSort}
         sortConfig={sortConfig}
+        onDelete={handleDeleteResult}
       />
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-center mb-4">
+                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
+                Delete Result Upload
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500 text-center">
+                  Are you sure you want to delete the result upload for <strong>{deleteConfirm.subject}</strong>?
+                  <br />
+                  <br />
+                  <span className="text-red-600 font-medium">
+                    This action cannot be undone. All associated student results will be permanently deleted from the database.
+                  </span>
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-4 mt-4">
+                <button
+                  onClick={cancelDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+                >
+                  {deleting && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  <span>{deleting ? 'Deleting...' : 'Delete'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fixed Scroll Controls */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className="flex items-center space-x-2 bg-white rounded-lg shadow-lg border p-3">
+          <button 
+            onClick={scrollTableLeft}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table left"
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={scrollTableRight}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table right"
+          >
+            <ChevronRightIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

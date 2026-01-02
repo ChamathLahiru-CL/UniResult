@@ -328,9 +328,25 @@ async function createStudentResults(resultSheet, studentResults) {
 // @access  Private
 export const getAllResults = async (req, res) => {
     try {
-        const results = await Result.find()
-            .select('-studentResults') // Exclude student results for list view
-            .sort({ createdAt: -1 });
+        // Parse query parameters
+        const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+        const sortBy = req.query.sort || '-createdAt'; // Default sort by createdAt
+
+        let query = Result.find().select('-studentResults');
+
+        // Apply sorting first
+        if (sortBy.startsWith('-')) {
+            query = query.sort({ [sortBy.substring(1)]: -1 });
+        } else {
+            query = query.sort({ [sortBy]: 1 });
+        }
+
+        // Apply limit if specified (must be positive integer)
+        if (limit && !isNaN(limit) && limit > 0) {
+            query = query.limit(limit);
+        }
+
+        const results = await query.exec();
 
         res.status(200).json({
             success: true,
@@ -372,6 +388,119 @@ export const getResultById = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching result',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Delete a result upload and all associated data
+// @route   DELETE /api/results/:id
+// @access  Private (Admin only)
+export const deleteResult = async (req, res) => {
+    try {
+        const result = await Result.findById(req.params.id);
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Result not found'
+            });
+        }
+
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin privileges required.'
+            });
+        }
+
+        // Permanently delete associated student results
+        await StudentResult.deleteMany({ resultId: req.params.id });
+
+        // Mark the result as deleted (soft delete)
+        result.isDeleted = true;
+        result.deletedAt = new Date();
+        result.deletedBy = req.user.id;
+        result.deletedByName = req.user.name || req.user.username;
+        result.deletedByUsername = req.user.username;
+        await result.save();
+
+        // Create activity log for deletion
+        await Activity.create({
+            activityType: 'RESULT_DELETED',
+            activityName: 'Exam Result Deleted',
+            description: `Result upload deleted by admin: ${result.subjectName} (${result.courseCode}) - ${result.resultCount} students affected`,
+            performedBy: req.user.id,
+            performedByName: req.user.name || req.user.username,
+            performedByUsername: req.user.username,
+            performedByEmail: req.user.email,
+            performedByRole: req.user.role,
+            faculty: result.faculty,
+            year: result.level,
+            status: 'NEW',
+            priority: 'HIGH',
+            metadata: {
+                resultId: req.params.id,
+                subject: result.subjectName,
+                courseCode: result.courseCode,
+                faculty: result.faculty,
+                department: result.department,
+                deletedStudents: result.resultCount,
+                uploadedBy: result.uploadedByName,
+                uploadedByUsername: result.uploadedByUsername
+            }
+        });
+
+        // Notify the exam division member who uploaded this result
+        if (result.uploadedBy && result.uploadedByRole === 'examDiv') {
+            try {
+                // Create notification for exam division member
+                await Activity.create({
+                    activityType: 'RESULT_DELETED',
+                    activityName: 'Your Result Upload Was Deleted',
+                    description: `Admin deleted your uploaded result: ${result.subjectName} (${result.courseCode}) - ${result.resultCount} students affected`,
+                    performedBy: result.uploadedBy,
+                    performedByName: result.uploadedByName,
+                    performedByUsername: result.uploadedByUsername,
+                    performedByEmail: result.uploadedByEmail,
+                    performedByRole: result.uploadedByRole,
+                    faculty: result.faculty,
+                    year: result.level,
+                    status: 'NEW',
+                    priority: 'HIGH',
+                    metadata: {
+                        resultId: req.params.id,
+                        subject: result.subjectName,
+                        courseCode: result.courseCode,
+                        faculty: result.faculty,
+                        department: result.department,
+                        deletedStudents: result.resultCount,
+                        deletedByAdmin: req.user.name || req.user.username,
+                        deletedByAdminUsername: req.user.username,
+                        deletedAt: new Date().toISOString()
+                    }
+                });
+                console.log(`📧 Notified exam division member ${result.uploadedByName} about result deletion`);
+            } catch (notifError) {
+                console.warn('Could not create exam division notification:', notifError.message);
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Result and all associated data deleted successfully',
+            data: {
+                deletedResultId: req.params.id,
+                deletedStudents: result.resultCount
+            }
+        });
+
+    } catch (error) {
+        console.error('Delete result error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting result',
             error: error.message
         });
     }
@@ -436,12 +565,19 @@ export const getMyResults = async (req, res) => {
 
         // Find all results for this student
         const results = await StudentResult.find(query)
-        .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+        .populate({
+            path: 'resultSheet',
+            match: { isDeleted: { $ne: true } }, // Exclude deleted results
+            select: 'originalFileName uploadedByName createdAt'
+        })
         .sort({ createdAt: -1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
         console.log(`\n📊 Query results:`, {
-            resultsFound: results.length,
-            sampleResults: results.slice(0, 3).map(r => ({
+            resultsFound: activeResults.length,
+            sampleResults: activeResults.slice(0, 3).map(r => ({
                 id: r._id,
                 registrationNo: r.registrationNo,
                 subject: r.subjectName,
@@ -454,7 +590,7 @@ export const getMyResults = async (req, res) => {
         });
 
         // Mark results as viewed
-        const resultIds = results.map(r => r._id);
+        const resultIds = activeResults.map(r => r._id);
         await StudentResult.updateMany(
             { _id: { $in: resultIds }, isViewed: false },
             { $set: { isViewed: true, viewedAt: new Date() } }
@@ -462,9 +598,9 @@ export const getMyResults = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            count: results.length,
+            count: activeResults.length,
             registrationNo,
-            data: results.map(r => ({
+            data: activeResults.map(r => ({
                 id: r._id,
                 subjectName: r.subjectName,
                 courseCode: r.courseCode,
@@ -542,12 +678,19 @@ export const getMyResultsOrganized = async (req, res) => {
         }
         
         const results = await StudentResult.find(query)
-        .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+        .populate({
+            path: 'resultSheet',
+            match: { isDeleted: { $ne: true } }, // Exclude deleted results
+            select: 'originalFileName uploadedByName createdAt'
+        })
         .sort({ createdAt: -1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
-        console.log(`📊 Found ${results.length} results for ${registrationNo}`);
-        if (results.length > 0) {
-            console.log(`Sample results:`, results.slice(0, 3).map(r => ({
+        console.log(`📊 Found ${activeResults.length} active results for ${registrationNo} (filtered out ${results.length - activeResults.length} deleted results)`);
+        if (activeResults.length > 0) {
+            console.log(`Sample results:`, activeResults.slice(0, 3).map(r => ({
                 registrationNo: r.registrationNo,
                 subject: r.subjectName,
                 faculty: r.faculty,
@@ -602,7 +745,7 @@ export const getMyResultsOrganized = async (req, res) => {
         };
 
         // Organize results into the structure
-        results.forEach(result => {
+        activeResults.forEach(result => {
             const semesterKey = result.semester;
             const mapping = semesterToLevelMap[semesterKey];
 
@@ -620,7 +763,7 @@ export const getMyResultsOrganized = async (req, res) => {
         });
 
         // Mark results as viewed
-        const resultIds = results.map(r => r._id);
+        const resultIds = activeResults.map(r => r._id);
         await StudentResult.updateMany(
             { _id: { $in: resultIds }, isViewed: false },
             { $set: { isViewed: true, viewedAt: new Date() } }
@@ -684,9 +827,16 @@ export const getLatestResults = async (req, res) => {
         }
 
         const results = await StudentResult.find(query)
-            .populate('resultSheet', 'originalFileName uploadedByName createdAt')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'originalFileName uploadedByName createdAt'
+            })
             .sort({ createdAt: -1 })
             .limit(limit);
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
         // Map semester to level
         const semesterToLevel = {
@@ -707,7 +857,7 @@ export const getLatestResults = async (req, res) => {
         };
 
         // Transform results to match frontend structure
-        const latestResults = results.map(result => ({
+        const latestResults = activeResults.map(result => ({
             code: result.courseCode || '',
             subject: result.subjectName,
             level: semesterToLevel[result.semester] || 100,
@@ -911,47 +1061,6 @@ export const downloadResult = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error downloading file',
-            error: error.message
-        });
-    }
-};
-
-// @desc    Delete a result
-// @route   DELETE /api/results/:id
-// @access  Private (Admin)
-export const deleteResult = async (req, res) => {
-    try {
-        const result = await Result.findById(req.params.id);
-
-        if (!result) {
-            return res.status(404).json({
-                success: false,
-                message: 'Result not found'
-            });
-        }
-
-        // Delete the file
-        const filePath = path.join(__dirname, '../../public', result.fileUrl);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-        }
-
-        // Delete associated StudentResult entries
-        await StudentResult.deleteMany({ resultSheet: result._id });
-
-        // Delete the result document
-        await Result.findByIdAndDelete(req.params.id);
-
-        res.status(200).json({
-            success: true,
-            message: 'Result deleted successfully'
-        });
-
-    } catch (error) {
-        console.error('Delete result error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error deleting result',
             error: error.message
         });
     }
@@ -1164,6 +1273,33 @@ export const addManualStudentResults = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error adding manual results',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get all faculties
+// @route   GET /api/results/faculties
+// @access  Private (Admin/ExamDiv)
+export const getFaculties = async (req, res) => {
+    try {
+        const faculties = [
+            'Faculty of Technological Studies',
+            'Faculty of Applied Science',
+            'Faculty of Management',
+            'Faculty of Agriculture',
+            'Faculty of Medicine'
+        ];
+
+        res.status(200).json({
+            success: true,
+            data: faculties
+        });
+    } catch (error) {
+        console.error('Get faculties error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching faculties',
             error: error.message
         });
     }
