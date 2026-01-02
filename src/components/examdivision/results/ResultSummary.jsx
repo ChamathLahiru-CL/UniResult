@@ -74,18 +74,18 @@ const ResultSummary = ({ results }) => {
   ];
 
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {summaryItems.map((item, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-6">
+        <div key={index} className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <div className={`${item.bgColor} p-3 rounded-lg`}>
-              <item.icon className={`w-6 h-6 ${item.color}`} />
+            <div className={`${item.bgColor} p-2 sm:p-3 rounded-lg flex-shrink-0`}>
+              <item.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.color}`} />
             </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">{item.title}</h3>
-              <p className={`text-xl font-semibold ${item.color}`}>{item.value}</p>
+            <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 truncate">{item.title}</h3>
+              <p className={`text-lg sm:text-xl font-semibold ${item.color} truncate`}>{item.value}</p>
               {item.subtitle && (
-                <p className="text-xs text-gray-400 mt-1">{item.subtitle}</p>
+                <p className="text-xs text-gray-400 mt-1 truncate">{item.subtitle}</p>
               )}
             </div>
           </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ResultSummary from '../../components/examdivision/results/ResultSummary';
 import ResultTable from '../../components/examdivision/results/ResultTable';
 import { useAuth } from '../../context/useAuth';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const ResultManagement = () => {
   const { user } = useAuth();
@@ -9,8 +10,26 @@ const ResultManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedUser, setSelectedUser] = useState('all');
+
+  // Faculty and Department data
+  const faculties = [
+    'Faculty of Technological Studies',
+    'Faculty of Applied Science',
+    'Faculty of Management',
+    'Faculty of Agriculture',
+    'Faculty of Medicine'
+  ];
+
+  const facultyDepartments = {
+    'Faculty of Technological Studies': ['ICT', 'ET', 'BST'],
+    'Faculty of Applied Science': ['SET', 'CST', 'IIT'],
+    'Faculty of Management': ['ENM', 'EAG', 'English Lit'],
+    'Faculty of Agriculture': ['TEA'],
+    'Faculty of Medicine': ['DOC']
+  };
 
   // Fetch results from backend
   useEffect(() => {
@@ -85,8 +104,13 @@ const ResultManagement = () => {
     setSearchQuery(query);
   };
 
-  const handleDateRangeChange = (range) => {
-    setDateRange(range);
+  const handleFacultyChange = (faculty) => {
+    setSelectedFaculty(faculty);
+    setSelectedDepartment('all'); // Reset department when faculty changes
+  };
+
+  const handleDepartmentChange = (department) => {
+    setSelectedDepartment(department);
   };
 
   const handleUserFilter = (userId) => {
@@ -164,29 +188,50 @@ const ResultManagement = () => {
       <ResultSummary results={results} />
 
       {/* Filters Section */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Search Input */}
-        <div>
+        <div className="relative">
           <input
             type="text"
-            placeholder="Search by subject or degree..."
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Search by subject, degree program, or faculty..."
+            className="w-full px-4 py-2 pr-14 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             onChange={(e) => handleSearch(e.target.value)}
           />
+          <button
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+            title="Search"
+          >
+            <MagnifyingGlassIcon className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* Date Range Filter */}
-        <div className="flex space-x-2">
-          <input
-            type="date"
+        {/* Faculty Filter */}
+        <div>
+          <select
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            onChange={(e) => handleDateRangeChange({ ...dateRange, start: e.target.value })}
-          />
-          <input
-            type="date"
+            onChange={(e) => handleFacultyChange(e.target.value)}
+            value={selectedFaculty}
+          >
+            <option value="all">All Faculties</option>
+            {faculties.map(faculty => (
+              <option key={faculty} value={faculty}>{faculty}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Department Filter */}
+        <div>
+          <select
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            onChange={(e) => handleDateRangeChange({ ...dateRange, end: e.target.value })}
-          />
+            onChange={(e) => handleDepartmentChange(e.target.value)}
+            value={selectedDepartment}
+            disabled={selectedFaculty === 'all'}
+          >
+            <option value="all">All Departments</option>
+            {selectedFaculty !== 'all' && facultyDepartments[selectedFaculty]?.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </select>
         </div>
 
         {/* User Filter */}
@@ -210,7 +255,8 @@ const ResultManagement = () => {
         results={results}
         currentUser={user}
         searchQuery={searchQuery}
-        dateRange={dateRange}
+        selectedFaculty={selectedFaculty}
+        selectedDepartment={selectedDepartment}
         selectedUser={selectedUser}
       />
     </div>

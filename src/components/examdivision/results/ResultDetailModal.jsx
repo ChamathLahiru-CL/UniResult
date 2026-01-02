@@ -6,6 +6,11 @@ import { format } from 'date-fns';
 const ResultDetailModal = ({ result, isOpen, onClose }) => {
   if (!result) return null;
 
+  const baseUrl = 'http://localhost:5000';
+  const fullFileUrl = result.fileUrl 
+    ? (result.fileUrl.startsWith('http') ? result.fileUrl : `${baseUrl}${result.fileUrl}`)
+    : null;
+
   return (
     <Dialog
       open={isOpen}
@@ -105,8 +110,23 @@ const ResultDetailModal = ({ result, isOpen, onClose }) => {
             >
               Close
             </button>
+            {fullFileUrl && (
+              <button
+                onClick={() => window.open(fullFileUrl, '_blank')}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                View Result Sheet
+              </button>
+            )}
             <button
-              onClick={() => console.log('Download results')}
+              onClick={() => {
+                if (fullFileUrl) {
+                  const link = document.createElement('a');
+                  link.href = fullFileUrl;
+                  link.download = `${result.subject}_results.pdf`;
+                  link.click();
+                }
+              }}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Download Results
