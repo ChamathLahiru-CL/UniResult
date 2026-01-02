@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ResultSummary from '../../components/examdivision/results/ResultSummary';
 import ResultTable from '../../components/examdivision/results/ResultTable';
 import { useAuth } from '../../context/useAuth';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const ResultManagement = () => {
   const { user } = useAuth();
@@ -13,6 +13,7 @@ const ResultManagement = () => {
   const [selectedFaculty, setSelectedFaculty] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedUser, setSelectedUser] = useState('all');
+  const tableRef = useRef(null);
 
   // Faculty and Department data
   const faculties = [
@@ -119,6 +120,18 @@ const ResultManagement = () => {
 
   const handleUserFilter = (userId) => {
     setSelectedUser(userId);
+  };
+
+  const scrollTableLeft = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollLeft();
+    }
+  };
+
+  const scrollTableRight = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollRight();
+    }
   };
 
   // Get unique users for filter dropdown
@@ -256,6 +269,7 @@ const ResultManagement = () => {
 
       {/* Results Table */}
       <ResultTable
+        ref={tableRef}
         results={results}
         currentUser={user}
         searchQuery={searchQuery}
@@ -263,6 +277,26 @@ const ResultManagement = () => {
         selectedDepartment={selectedDepartment}
         selectedUser={selectedUser}
       />
+
+      {/* Fixed Scroll Controls */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className="flex items-center space-x-2 bg-white rounded-lg shadow-lg border p-3">
+          <button 
+            onClick={scrollTableLeft}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table left"
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={scrollTableRight}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table right"
+          >
+            <ChevronRightIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

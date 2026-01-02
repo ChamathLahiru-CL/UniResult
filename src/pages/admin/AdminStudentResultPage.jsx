@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   DocumentChartBarIcon,
   FunnelIcon,
@@ -9,7 +9,9 @@ import {
   ChartBarIcon,
   UserGroupIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import ResultTable from '../../components/admin/results/ResultTable';
 import { degreeOptions, levelOptions, semesterOptions, statusOptions } from '../../data/mockResultUploads';
@@ -18,6 +20,19 @@ const AdminStudentResultPage = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const tableRef = useRef(null);
+
+  const scrollTableLeft = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollLeft();
+    }
+  };
+
+  const scrollTableRight = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollRight();
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     degree: 'all',
@@ -579,6 +594,7 @@ const AdminStudentResultPage = () => {
 
       {/* Results Table */}
       <ResultTable 
+        ref={tableRef}
         results={filteredResults}
         onSort={handleSort}
         sortConfig={sortConfig}
@@ -631,6 +647,26 @@ const AdminStudentResultPage = () => {
           </div>
         </div>
       )}
+
+      {/* Fixed Scroll Controls */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className="flex items-center space-x-2 bg-white rounded-lg shadow-lg border p-3">
+          <button 
+            onClick={scrollTableLeft}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table left"
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={scrollTableRight}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            title="Scroll table right"
+          >
+            <ChevronRightIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

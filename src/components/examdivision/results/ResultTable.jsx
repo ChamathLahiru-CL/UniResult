@@ -1,39 +1,39 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { format } from 'date-fns';
 import { getSemesterColor } from '../../../utils/getSemesterColor';
 import ResultDetailModal from './ResultDetailModal';
 import { EyeIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
-const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selectedDepartment, selectedUser }) => {
+const ResultTable = forwardRef(({ results, currentUser, searchQuery, selectedFaculty, selectedDepartment, selectedUser }, ref) => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const tableScrollRef = useRef(null);
 
-  // Check scroll state
-  const checkScrollState = useCallback(() => {
-    if (tableScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tableScrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  useImperativeHandle(ref, () => ({
+    scrollLeft: () => {
+      if (tableScrollRef.current) {
+        tableScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      }
+    },
+    scrollRight: () => {
+      if (tableScrollRef.current) {
+        tableScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      }
     }
-  }, []);
+  }));
 
   // Scroll functions
   const scrollLeft = useCallback(() => {
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-      setTimeout(checkScrollState, 300);
     }
-  }, [checkScrollState]);
+  }, []);
 
   const scrollRight = useCallback(() => {
     if (tableScrollRef.current) {
       tableScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-      setTimeout(checkScrollState, 300);
     }
-  }, [checkScrollState]);
+  }, []);
 
   // Keyboard navigation
   const handleKeyDown = useCallback((e) => {
@@ -57,22 +57,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [handleKeyDown]);
-
-  // Check scroll state on mount and when results change
-  useEffect(() => {
-    const timer = setTimeout(checkScrollState, 100);
-    return () => clearTimeout(timer);
-  }, [results, checkScrollState]);
-
-  // Add scroll event listener
-  useEffect(() => {
-    const handleScroll = () => checkScrollState();
-    const element = tableScrollRef.current;
-    if (element) {
-      element.addEventListener('scroll', handleScroll);
-      return () => element.removeEventListener('scroll', handleScroll);
-    }
-  }, [checkScrollState]);
 
   // Filter results based on search query and filters
   const filteredResults = results.filter(result => {
@@ -101,32 +85,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden relative">
-      {/* Floating Scroll Controls - Always visible on screen when table needs scrolling */}
-      {filteredResults.length > 0 && (canScrollLeft || canScrollRight) && (
-        <div className="fixed top-24 right-4 z-50 flex flex-col space-y-2 hidden md:flex">
-          <button
-            onClick={scrollLeft}
-            className={`bg-white shadow-lg hover:shadow-xl rounded-full p-3 border border-gray-300 hover:bg-gray-50 transition-all duration-200 ${
-              canScrollLeft ? 'opacity-100 hover:scale-105' : 'opacity-50 cursor-not-allowed'
-            }`}
-            title="Scroll Table Left"
-            disabled={!canScrollLeft}
-          >
-            <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
-          </button>
-          <button
-            onClick={scrollRight}
-            className={`bg-white shadow-lg hover:shadow-xl rounded-full p-3 border border-gray-300 hover:bg-gray-50 transition-all duration-200 ${
-              canScrollRight ? 'opacity-100 hover:scale-105' : 'opacity-50 cursor-not-allowed'
-            }`}
-            title="Scroll Table Right"
-            disabled={!canScrollRight}
-          >
-            <ChevronRightIcon className="h-6 w-6 text-gray-700" />
-          </button>
-        </div>
-      )}
-
       {/* Desktop View */}
       <div className="hidden md:block relative">
 
@@ -403,6 +361,6 @@ const ResultTable = ({ results, currentUser, searchQuery, selectedFaculty, selec
       />
     </div>
   );
-};
+});
 
 export default ResultTable;

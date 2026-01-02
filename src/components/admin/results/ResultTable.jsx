@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { 
   ChevronUpIcon, 
   ChevronDownIcon,
@@ -9,12 +9,28 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   CheckCircleIcon,
-  EyeIcon
+  EyeIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import ResultRow from './ResultRow';
 
-const ResultTable = ({ results, onSort, sortConfig, onDelete }) => {
+const ResultTable = forwardRef(({ results, onSort, sortConfig, onDelete }, ref) => {
   const [hoveredRow, setHoveredRow] = useState(null);
+  const scrollRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollLeft: () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft -= 200;
+      }
+    },
+    scrollRight: () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft += 200;
+      }
+    }
+  }));
 
   const getSortIcon = (field) => {
     if (sortConfig.field === field) {
@@ -56,7 +72,7 @@ const ResultTable = ({ results, onSort, sortConfig, onDelete }) => {
 
   return (
     <div className="bg-white rounded-lg shadow border overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" ref={scrollRef}>
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -125,6 +141,6 @@ const ResultTable = ({ results, onSort, sortConfig, onDelete }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ResultTable;
