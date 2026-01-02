@@ -131,6 +131,29 @@ const resultSchema = new mongoose.Schema({
     uploadedByRole: {
         type: String,
         default: ''
+    },
+    
+    // Soft delete fields
+    deletedAt: {
+        type: Date,
+        default: null
+    },
+    deletedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
+    deletedByName: {
+        type: String,
+        default: ''
+    },
+    deletedByUsername: {
+        type: String,
+        default: ''
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

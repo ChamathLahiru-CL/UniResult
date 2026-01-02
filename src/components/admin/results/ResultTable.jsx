@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ResultRow from './ResultRow';
 
-const ResultTable = ({ results, onSort, sortConfig }) => {
+const ResultTable = ({ results, onSort, sortConfig, onDelete }) => {
   const [hoveredRow, setHoveredRow] = useState(null);
 
   const getSortIcon = (field) => {
@@ -100,6 +100,7 @@ const ResultTable = ({ results, onSort, sortConfig }) => {
               <ResultRow 
                 key={result.id} 
                 result={result}
+                onDelete={onDelete}
                 isHovered={hoveredRow === index}
                 onMouseEnter={() => setHoveredRow(index)}
                 onMouseLeave={() => setHoveredRow(null)}

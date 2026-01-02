@@ -81,7 +81,11 @@ const ResultManagement = () => {
               courseCode: item.courseCode,
               subjectName: item.subjectName,
               fileUrl: item.fileUrl,
-              parseStatus: item.parseStatus
+              parseStatus: item.parseStatus,
+              isDeleted: item.isDeleted || false,
+              deletedAt: item.deletedAt,
+              deletedBy: item.deletedByName,
+              deletedByUsername: item.deletedByUsername
             };
           });
 

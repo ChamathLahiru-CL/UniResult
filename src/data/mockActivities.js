@@ -4,6 +4,7 @@ import { subDays, subHours, subMinutes } from 'date-fns';
 export const ACTIVITY_TYPES = {
   COMPLIANCE: 'COMPLIANCE',
   RESULT_UPLOAD: 'RESULT_UPLOAD',
+  RESULT_DELETED: 'RESULT_DELETED',
   TIMETABLE_UPLOAD: 'TIMETABLE_UPLOAD',
   NEWS_UPLOAD: 'NEWS_UPLOAD',
   STUDENT_REGISTRATION: 'STUDENT_REGISTRATION',
@@ -252,6 +253,12 @@ export const activityColors = {
     border: 'border-blue-600',
     text: 'text-blue-800',
     badge: 'bg-blue-100 text-blue-800'
+  },
+  [ACTIVITY_TYPES.RESULT_DELETED]: {
+    bg: 'bg-red-50',
+    border: 'border-red-600',
+    text: 'text-red-800',
+    badge: 'bg-red-100 text-red-800'
   },
   [ACTIVITY_TYPES.TIMETABLE_UPLOAD]: {
     bg: 'bg-purple-50',

@@ -27,20 +27,27 @@ export const getAcademicProgress = async (req, res) => {
         const results = await StudentResult.find({
             registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
         })
-            .populate('resultSheet', 'subjectName faculty department uploadedAt')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'subjectName faculty department uploadedAt'
+            })
             .sort({ academicYear: 1, semester: 1, createdAt: -1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
         // Fetch academic achievements
         const achievements = await AcademicAchievement.findByStudent(user._id);
 
         // Calculate overall GPA data
-        const gpaData = calculateCumulativeGPA(results);
+        const gpaData = calculateCumulativeGPA(activeResults);
 
         // Group results by academic year and semester
         const semestersByYear = {};
         const processedSemesters = new Set();
 
-        results.forEach(result => {
+        activeResults.forEach(result => {
             const year = result.academicYear;
             const semesterKey = `${year}-${result.semester}`;
 

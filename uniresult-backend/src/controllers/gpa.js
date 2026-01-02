@@ -28,22 +28,29 @@ export const getGPAAnalytics = async (req, res) => {
         const results = await StudentResult.find({ 
             registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
         })
-            .populate('resultSheet', 'subjectName faculty department uploadedAt')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'subjectName faculty department uploadedAt'
+            })
             .sort({ level: 1, semester: 1, createdAt: -1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
         // DEBUG: Log sample results to check data structure
         console.log('=== GPA DEBUG ===');
         console.log('Registration No:', registrationNo);
-        console.log('Results found:', results.length);
-        if (results.length > 0) {
+        console.log('Active results found:', activeResults.length, `(filtered out ${results.length - activeResults.length} deleted results)`);
+        if (activeResults.length > 0) {
             console.log('Sample result data:');
-            results.slice(0, 3).forEach((r, i) => {
+            activeResults.slice(0, 3).forEach((r, i) => {
                 console.log(`  Result ${i + 1}: grade="${r.grade}", credits=${r.credits}, level="${r.level}", semester="${r.semester}", subject="${r.subjectName}"`);
             });
         }
         console.log('=================');
 
-        if (!results || results.length === 0) {
+        if (!activeResults || activeResults.length === 0) {
             return res.status(200).json({
                 success: true,
                 data: {
@@ -64,7 +71,7 @@ export const getGPAAnalytics = async (req, res) => {
         }
 
         // Calculate cumulative GPA with level breakdown
-        const gpaData = calculateCumulativeGPA(results);
+        const gpaData = calculateCumulativeGPA(activeResults);
 
         // Transform level data into object format for frontend
         const levelsObject = {};
@@ -179,17 +186,24 @@ export const getGPAByLevel = async (req, res) => {
         const results = await StudentResult.find({ 
             registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
         })
-            .populate('resultSheet', 'subjectName faculty department')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'subjectName faculty department'
+            })
             .sort({ level: 1, semester: 1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
-        if (!results || results.length === 0) {
+        if (!activeResults || activeResults.length === 0) {
             return res.status(200).json({
                 success: true,
                 data: []
             });
         }
 
-        const levelData = calculateLevelGPA(results);
+        const levelData = calculateLevelGPA(activeResults);
 
         res.status(200).json({
             success: true,
@@ -225,17 +239,24 @@ export const getGPABySemester = async (req, res) => {
         const results = await StudentResult.find({ 
             registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
         })
-            .populate('resultSheet', 'subjectName faculty department')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'subjectName faculty department'
+            })
             .sort({ semester: 1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
-        if (!results || results.length === 0) {
+        if (!activeResults || activeResults.length === 0) {
             return res.status(200).json({
                 success: true,
                 data: []
             });
         }
 
-        const semesterData = calculateSemesterGPA(results);
+        const semesterData = calculateSemesterGPA(activeResults);
 
         res.status(200).json({
             success: true,
@@ -271,10 +292,17 @@ export const getGPATrend = async (req, res) => {
         const results = await StudentResult.find({ 
             registrationNo: { $regex: new RegExp(`^${registrationNo}$`, 'i') }
         })
-            .populate('resultSheet', 'subjectName uploadedAt')
+            .populate({
+                path: 'resultSheet',
+                match: { isDeleted: { $ne: true } }, // Exclude deleted results
+                select: 'subjectName uploadedAt'
+            })
             .sort({ semester: 1, createdAt: 1 });
+        
+        // Filter out results where resultSheet was deleted (populate returns null)
+        const activeResults = results.filter(r => r.resultSheet !== null);
 
-        if (!results || results.length === 0) {
+        if (!activeResults || activeResults.length === 0) {
             return res.status(200).json({
                 success: true,
                 data: {
@@ -286,7 +314,7 @@ export const getGPATrend = async (req, res) => {
             });
         }
 
-        const semesterData = calculateSemesterGPA(results);
+        const semesterData = calculateSemesterGPA(activeResults);
         
         // Calculate cumulative GPA progression
         let cumulativeGPA = [];

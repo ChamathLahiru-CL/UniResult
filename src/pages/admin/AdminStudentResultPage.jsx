@@ -29,6 +29,8 @@ const AdminStudentResultPage = () => {
     field: 'date',
     direction: 'desc'
   });
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch results from API
   useEffect(() => {
@@ -95,7 +97,11 @@ const AdminStudentResultPage = () => {
               courseCode: item.courseCode,
               subjectName: item.subjectName,
               fileUrl: item.fileUrl,
-              parseStatus: item.parseStatus
+              parseStatus: item.parseStatus,
+              isDeleted: item.isDeleted || false,
+              deletedAt: item.deletedAt,
+              deletedBy: item.deletedByName,
+              deletedByUsername: item.deletedByUsername
             };
           });
 
@@ -210,6 +216,64 @@ const AdminStudentResultPage = () => {
       status: 'all'
     });
     setSearchTerm('');
+  };
+
+  const handleDeleteResult = (result) => {
+    setDeleteConfirm(result);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/results/${deleteConfirm.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete result');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Mark the result as deleted in local state instead of removing it
+        setResults(prev => prev.map(r => 
+          r.id === deleteConfirm.id 
+            ? { 
+                ...r, 
+                isDeleted: true, 
+                deletedAt: new Date().toISOString(),
+                deletedBy: result.data?.deletedByName || 'Admin',
+                deletedByUsername: result.data?.deletedByUsername || 'admin'
+              }
+            : r
+        ));
+        setDeleteConfirm(null);
+        // Could add a success notification here
+      } else {
+        setError(result.message || 'Failed to delete result');
+      }
+    } catch (err) {
+      console.error('Error deleting result:', err);
+      setError(err.message || 'Failed to delete result');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirm(null);
   };
 
   const exportToExcel = () => {
@@ -518,7 +582,55 @@ const AdminStudentResultPage = () => {
         results={filteredResults}
         onSort={handleSort}
         sortConfig={sortConfig}
+        onDelete={handleDeleteResult}
       />
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-center mb-4">
+                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
+                Delete Result Upload
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500 text-center">
+                  Are you sure you want to delete the result upload for <strong>{deleteConfirm.subject}</strong>?
+                  <br />
+                  <br />
+                  <span className="text-red-600 font-medium">
+                    This action cannot be undone. All associated student results will be permanently deleted from the database.
+                  </span>
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-4 mt-4">
+                <button
+                  onClick={cancelDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+                >
+                  {deleting && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  <span>{deleting ? 'Deleting...' : 'Delete'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
