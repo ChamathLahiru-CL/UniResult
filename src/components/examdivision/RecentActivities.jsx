@@ -146,7 +146,7 @@ const RecentActivities = ({ activeFilter = 'all', limit = null }) => {
 
   return (
     <div className="bg-white rounded-xl overflow-hidden">
-      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
         <div className="flex-1">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
             {activeFilter === 'my' ? 'My Activities' : 'All Exam Division Activities'}

@@ -7,6 +7,7 @@ import {
   CalendarIcon,
   NewspaperIcon,
   ClipboardDocumentCheckIcon,
+  BoltIcon
 } from '@heroicons/react/24/outline';
 
 const QuickActions = ({ isLoading }) => {
@@ -69,74 +70,92 @@ const QuickActions = ({ isLoading }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5 md:p-6 relative"
+      className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
     >
-      {isLoading ? (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-lg sm:rounded-xl z-10">
-          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
-        </div>
-      ) : null}
-      <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-5 md:mb-6">Quick Actions</h2>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {actions.map((action) => (
-          <motion.div
-            key={action.id}
-            className={`relative p-4 sm:p-5 md:p-6 rounded-lg border ${
-              hoveredCard === action.id
-                ? 'border-blue-500 bg-blue-50/50'
-                : 'border-gray-200 bg-white'
-            } cursor-pointer transition-colors duration-200`}
-            variants={cardVariants}
-            whileHover="hover"
-            onHoverStart={() => setHoveredCard(action.id)}
-            onHoverEnd={() => setHoveredCard(null)}
-          >
-            <div className="space-y-3 sm:space-y-4">
-              <div className={`
-                inline-flex p-2 sm:p-2.5 md:p-3 rounded-lg
-                ${hoveredCard === action.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
-                transition-colors duration-200
-              `}>
-                <action.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-              </div>
-              
-              <div>
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">{action.title}</h3>
-                <p className="mt-1 text-xs sm:text-sm text-gray-500 line-clamp-2">{action.description}</p>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleAction(action)}
-                className={`
-                  w-full px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium
-                  ${hoveredCard === action.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }
-                  transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                `}
-              >
-                {action.buttonText}
-              </motion.button>
-            </div>
-
-            {/* Animated highlight effect */}
-            <motion.div
-              className="absolute inset-0 rounded-lg pointer-events-none"
-              initial={false}
-              animate={{
-                boxShadow: hoveredCard === action.id
-                  ? '0 0 0 2px rgba(59, 130, 246, 0.5)'
-                  : '0 0 0 0px rgba(59, 130, 246, 0)'
-              }}
-              transition={{ duration: 0.2 }}
-            />
-          </motion.div>
-        ))}
+      {/* Header with gradient */}
+      <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-6">
+        <h2 className="text-xl font-bold text-white flex items-center">
+          <BoltIcon className="w-6 h-6 mr-3" />
+          Quick Actions
+        </h2>
+        <p className="text-cyan-100 mt-1">Common tasks and shortcuts</p>
       </div>
+
+      {isLoading ? (
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="bg-gray-200 rounded-lg p-6 space-y-4">
+                  <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                  <div className="h-8 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {actions.map((action) => (
+              <motion.div
+                key={action.id}
+                className="group relative bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                variants={cardVariants}
+                whileHover="hover"
+                onHoverStart={() => setHoveredCard(action.id)}
+                onHoverEnd={() => setHoveredCard(null)}
+                onClick={() => handleAction(action)}
+              >
+                <div className="space-y-4">
+                  <div className={`
+                    inline-flex p-3 rounded-xl transition-all duration-300
+                    ${hoveredCard === action.id
+                      ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg scale-110'
+                      : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-blue-600'
+                    }
+                  `}>
+                    <action.icon className="h-6 w-6" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-900 transition-colors line-clamp-2">
+                      {action.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 group-hover:text-blue-700 transition-colors line-clamp-2">
+                      {action.description}
+                    </p>
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`
+                      w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300
+                      ${hoveredCard === action.id
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-blue-50 hover:to-blue-100 hover:text-blue-700'
+                      }
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                    `}
+                  >
+                    {action.buttonText}
+                  </motion.button>
+                </div>
+
+                {/* Subtle background pattern */}
+                <div className="absolute top-0 right-0 w-20 h-20 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                  <div className="w-full h-full bg-gradient-to-br from-blue-600 to-transparent rounded-full transform translate-x-8 -translate-y-8"></div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

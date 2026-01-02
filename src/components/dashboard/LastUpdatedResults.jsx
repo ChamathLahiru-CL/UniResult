@@ -30,7 +30,7 @@ const LastUpdatedResults = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/results/my-results/latest?limit=5', {
+        const response = await fetch('http://localhost:5000/api/results/my-results/latest?limit=6', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

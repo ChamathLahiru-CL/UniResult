@@ -88,12 +88,12 @@ export const submitCompliance = async (req, res) => {
       submitterType,
       submitterName: submitterName,
       submitterEmail: submitterEmail,
-      submitterIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || submitterEmail) : undefined,
+      submitterIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || 'N/A') : undefined,
       // Legacy fields for backward compatibility
       student: submitterType === 'student' ? userId : undefined,
       studentName: submitterType === 'student' ? submitterName : undefined,
       studentEmail: submitterType === 'student' ? submitterEmail : undefined,
-      studentIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || submitterEmail) : undefined,
+      studentIndexNumber: submitterType === 'student' ? (user.indexNumber || user.enrollmentNumber || 'N/A') : undefined,
       topic,
       recipient,
       importance,
@@ -428,6 +428,15 @@ export const updateComplianceStatus = async (req, res) => {
     const { id } = req.params;
     const { status, responseMessage } = req.body;
 
+    // Validate status
+    const allowedStatuses = ['pending', 'in-progress', 'resolved', 'closed'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status value'
+      });
+    }
+
     const compliance = await Compliance.findById(id);
 
     if (!compliance) {
@@ -437,6 +446,7 @@ export const updateComplianceStatus = async (req, res) => {
       });
     }
 
+    const oldStatus = compliance.status;
     compliance.status = status || compliance.status;
 
     if (responseMessage) {
@@ -449,6 +459,37 @@ export const updateComplianceStatus = async (req, res) => {
     }
 
     await compliance.save();
+
+    // Create notification for the student when status is updated
+    if (status && status !== oldStatus && compliance.submitter) { // Only if status actually changed and submitter exists
+      try {
+        const statusMessages = {
+          'in-progress': 'Your compliance is now being processed',
+          'resolved': 'Your compliance has been resolved',
+          'closed': 'Your compliance has been closed',
+          'pending': 'Your compliance status has been updated to pending'
+        };
+
+        const notification = new Notification({
+          user: compliance.submitter, // Use submitter instead of student for consistency
+          type: 'compliance',
+          title: 'Compliance Status Updated',
+          message: statusMessages[status] || `Your compliance status has been updated to ${status.replace('-', ' ')}`,
+          priority: status === 'resolved' || status === 'closed' ? 'normal' : 'low',
+          link: '/dash/compliance/new',
+          data: {
+            complianceId: compliance._id,
+            status: status,
+            topic: compliance.topic
+          }
+        });
+
+        await notification.save();
+      } catch (notificationError) {
+        console.error('Error creating notification:', notificationError);
+        // Don't fail the status update if notification creation fails
+      }
+    }
 
     res.status(200).json({
       success: true,

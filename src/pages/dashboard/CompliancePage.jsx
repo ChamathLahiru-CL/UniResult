@@ -17,7 +17,7 @@ import {
 
 const CompliancePage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('submit'); // 'submit' or 'history'
+  const [activeTab, setActiveTab] = useState('history'); // 'submit' or 'history' - default to history to show status updates
   const [formData, setFormData] = useState({
     topic: '',
     recipient: '',
@@ -632,8 +632,21 @@ const CompliancePage = () => {
           // History Tab
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <h3 className="text-lg font-semibold text-gray-900">My Compliance History</h3>
-              <p className="text-sm text-gray-600 mt-1">View and track all your submitted compliances</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">My Compliance History</h3>
+                  <p className="text-sm text-gray-600 mt-1">View and track all your submitted compliances</p>
+                </div>
+                <button
+                  onClick={fetchCompliances}
+                  disabled={loadingCompliances}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Refresh compliances"
+                >
+                  <ArrowPathIcon className={`h-5 w-5 ${loadingCompliances ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
 
             {loadingCompliances ? (

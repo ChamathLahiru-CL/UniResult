@@ -106,8 +106,8 @@ const StudentCompliance = () => {
         const transformedCompliances = response.data.data.map(comp => ({
           id: comp._id,
           type: statusToType[comp.status] || 'unread',
-          enrollmentNumber: comp.studentIndexNumber,
-          studentName: comp.studentName,
+          enrollmentNumber: comp.submitterIndexNumber || comp.studentIndexNumber || comp.submitter?.indexNumber || comp.submitter?.enrollmentNumber || 'N/A',
+          studentName: comp.submitterName || comp.studentName || comp.submitter?.name || 'Unknown',
           message: comp.message,
           topic: comp.topic,
           importance: comp.importance,
@@ -118,7 +118,7 @@ const StudentCompliance = () => {
           status: comp.status,
           response: comp.response,
           attachments: comp.attachments,
-          studentEmail: comp.studentEmail
+          studentEmail: comp.submitterEmail || comp.studentEmail || comp.submitter?.email
         }));
 
         setCompliances(transformedCompliances);
@@ -160,6 +160,67 @@ const StudentCompliance = () => {
       }));
     } catch (err) {
       console.error('Error marking as read:', err);
+    }
+  };
+
+  // Update compliance status
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${API_URL}/compliance/${id}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Update local state
+      setCompliances(prev =>
+        prev.map(comp => {
+          if (comp.id === id) {
+            const newType = statusToType[newStatus] || newStatus;
+            return { ...comp, status: newStatus, type: newType };
+          }
+          return comp;
+        })
+      );
+      
+      // Update stats
+      setStats(prev => {
+        const newStats = { ...prev };
+        // Decrease old status count
+        const oldCompliance = compliances.find(c => c.id === id);
+        if (oldCompliance) {
+          const oldType = oldCompliance.type;
+          if (oldType === 'unread') newStats.unread = Math.max(0, newStats.unread - 1);
+          else if (oldType === 'in-procedure') newStats.inProgress = Math.max(0, newStats.inProgress - 1);
+          else if (oldType === 'done') newStats.resolved = Math.max(0, newStats.resolved - 1);
+          else if (oldType === 'issue') newStats.pending = Math.max(0, newStats.pending - 1);
+        }
+        // Increase new status count
+        const newType = statusToType[newStatus] || newStatus;
+        if (newType === 'unread') newStats.unread += 1;
+        else if (newType === 'in-procedure') newStats.inProgress += 1;
+        else if (newType === 'done') newStats.resolved += 1;
+        else if (newType === 'issue') newStats.pending += 1;
+        return newStats;
+      });
+      
+      // Update selected compliance if it's the one being updated
+      if (selectedCompliance && selectedCompliance.id === id) {
+        const newType = statusToType[newStatus] || newStatus;
+        setSelectedCompliance({ ...selectedCompliance, status: newStatus, type: newType });
+      }
+      
+      // Show success confirmation
+      alert(`✅ Status updated successfully to "${newStatus.replace('-', ' ')}"`);
+    } catch (err) {
+      console.error('Error updating status:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to update status. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -284,25 +345,26 @@ const StudentCompliance = () => {
     <div className="bg-white rounded-lg shadow">
       {/* Header */}
       <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
           <h3 className="text-lg font-medium leading-6 text-gray-900">
             Student Compliance
           </h3>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3">
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex items-center">
+            <form onSubmit={handleSearch} className="w-full sm:w-auto">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search compliances..."
-                  className="px-4 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full sm:w-48 px-4 py-2 pr-12 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+                  title="Search"
                 >
                   <MagnifyingGlassIcon className="w-5 h-5" />
                 </button>
@@ -310,10 +372,10 @@ const StudentCompliance = () => {
             </form>
             
             {/* Filter Dropdown */}
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <button
                 type="button"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
               >
                 Filter
@@ -351,7 +413,7 @@ const StudentCompliance = () => {
         </div>
 
         {/* Stats */}
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-5">
           {[
             { type: complianceTypes.UNREAD, label: 'Unread', count: stats.unread || 0 },
             { type: complianceTypes.IN_PROCEDURE, label: 'In Procedure', count: stats.inProgress || 0 },
@@ -365,15 +427,15 @@ const StudentCompliance = () => {
             return (
               <div
                 key={stat.type}
-                className={`px-4 py-3 rounded-lg ${styles.bg} ${styles.border} border`}
+                className={`px-3 sm:px-4 py-3 rounded-lg ${styles.bg} ${styles.border} border`}
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1 sm:gap-2">
                   {styles.icon}
-                  <span className={`ml-2 text-sm font-medium ${styles.text}`}>
+                  <span className={`text-xs sm:text-sm font-medium ${styles.text} truncate`}>
                     {stat.label}
                   </span>
                 </div>
-                <p className={`mt-1 text-2xl font-semibold ${styles.text}`}>{stat.count}</p>
+                <p className={`mt-1 text-lg sm:text-2xl font-semibold ${styles.text}`}>{stat.count}</p>
               </div>
             );
           })}
@@ -570,6 +632,29 @@ const StudentCompliance = () => {
                   }`}>
                     {selectedCompliance.importance} Priority
                   </span>
+                </div>
+              </div>
+
+              {/* Status Update */}
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Update Status</h4>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={selectedCompliance.status}
+                    onChange={(e) => setSelectedCompliance({ ...selectedCompliance, status: e.target.value })}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedCompliance.id, selectedCompliance.status)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  >
+                    Update Status
+                  </button>
                 </div>
               </div>
 

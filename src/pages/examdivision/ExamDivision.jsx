@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
+import { DocumentTextIcon, ArrowRightIcon, BoltIcon } from '@heroicons/react/24/outline';
 import QuickActions from '../../components/examdivision/QuickActions';
 import LastUpdatedResults from '../../components/examdivision/LastUpdatedResults';
 import RecentActivities from '../../components/examdivision/RecentActivities';
+import ExamDivisionStats from '../../components/examdivision/ExamDivisionStats';
 
 const ExamDivision = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,20 +31,32 @@ const ExamDivision = () => {
         >
           {/* Welcome Message */}
           <motion.div
-            className="mb-4 sm:mb-6 md:mb-8"
+            className="mb-1 sm:mb-2"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800 mb-1 sm:mb-2 truncate">
-              Welcome, {user?.name || 'Exam Officer'}
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600">Exam Division Home Page Overview</p>
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-4 sm:p-5 text-white shadow-xl">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1">
+                Welcome back, {user?.name || 'Exam Officer'}! 👋
+              </h1>
+              <p className="text-blue-100 text-sm sm:text-base">Here's what's happening in your exam division today</p>
+            </div>
+          </motion.div>
+
+          {/* Statistics Overview */}
+          <motion.div
+            className="mb-6 sm:mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <ExamDivisionStats isLoading={isLoading} />
           </motion.div>
 
           {/* Quick Actions Panel */}
           <motion.div
-            className="mb-4 sm:mb-6 md:mb-8"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -52,43 +66,59 @@ const ExamDivision = () => {
 
           {/* Last Updated Results - Full Width */}
           <motion.div
-            className="mb-4 sm:mb-6 md:mb-8"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 sm:p-5 md:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Last Updated Results</h2>
-              <LastUpdatedResults isLoading={isLoading} />
+            <div className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
+                <h2 className="text-xl font-bold text-white flex items-center">
+                  <DocumentTextIcon className="w-6 h-6 mr-3" />
+                  Last Updated Results
+                </h2>
+                <p className="text-blue-100 mt-1">Recently uploaded result sheets</p>
+              </div>
+              <div className="p-6">
+                <LastUpdatedResults isLoading={isLoading} />
+              </div>
             </div>
           </motion.div>
 
           {/* Recent Activities Section */}
           <motion.div
-            className="mb-4 sm:mb-6 md:mb-8"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 sm:p-5 md:p-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-3 sm:mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Recent Activities</h2>
-                <button
-                  onClick={() => navigate('/exam/activities')}
-                  className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200 w-full sm:w-auto"
-                >
-                  <span className="truncate">View All Activities</span>
-                  <svg className="ml-2 w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+            <div className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                  <div>
+                    <h2 className="text-xl font-bold text-white flex items-center">
+                      <BoltIcon className="w-6 h-6 mr-3" />
+                      Recent Activities
+                    </h2>
+                    <p className="text-blue-100 mt-1">Your latest exam division activities</p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/exam/activities')}
+                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <span>View All Activities</span>
+                    <ArrowRightIcon className="ml-2 w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <RecentActivities 
-                isLoading={isLoading} 
-                filter="myActivities"
-                userId={user?.id}
-                limit={5}
-              />
+              <div className="p-6">
+                <RecentActivities
+                  isLoading={isLoading}
+                  filter="myActivities"
+                  userId={user?.id}
+                  limit={5}
+                />
+              </div>
             </div>
           </motion.div>
         </motion.div>
