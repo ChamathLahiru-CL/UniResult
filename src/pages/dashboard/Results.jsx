@@ -232,20 +232,42 @@ const Results = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
         {/* Page Header */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6 sm:p-8">
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 dark:border-slate-700/50 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] mb-8 animate-slide-up">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+          <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6 sm:p-8 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                   <AcademicCapIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-white">Academic Results</h1>
-                  <p className="text-blue-100 text-sm sm:text-base mt-1">Review your academic performance</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
+                    Academic Results
+                  </h1>
+                  <p className="text-blue-100 text-sm sm:text-base mt-1">Review your academic performance and achievements</p>
                 </div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center min-w-[200px]">
+                <div className="text-lg font-semibold text-white">
+                  {new Date().toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </div>
+                <div className="text-xs text-blue-100 mt-1">Today's Results</div>
               </div>
             </div>
           </div>
@@ -253,24 +275,30 @@ const Results = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading your results...</p>
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:bg-white/90 dark:hover:bg-slate-800/90 animate-slide-up">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          <div className="absolute top-2 right-2 w-8 h-8 bg-blue-400/20 rounded-full blur-sm group-hover:blur-md transition-all duration-300 pointer-events-none"></div>
+          <div className="relative p-12 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-300 font-medium">Loading your results...</p>
+          </div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 sm:p-12 text-center">
-            <div className="p-4 bg-red-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-              <ExclamationTriangleIcon className="h-10 w-10 text-red-600" />
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:bg-white/90 dark:hover:bg-slate-800/90 animate-slide-up">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          <div className="absolute top-2 right-2 w-8 h-8 bg-red-400/20 rounded-full blur-sm group-hover:blur-md transition-all duration-300 pointer-events-none"></div>
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800/50 rounded-2xl p-8 sm:p-12 text-center relative z-10">
+            <div className="p-4 bg-red-100 dark:bg-red-800/30 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <ExclamationTriangleIcon className="h-10 w-10 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-xl font-semibold text-red-800 mb-2">Error Loading Results</h3>
-            <p className="text-red-600 mb-6">{error}</p>
+            <h3 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">Error Loading Results</h3>
+            <p className="text-red-600 dark:text-red-300 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200 font-medium shadow-lg"
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors duration-200 font-medium shadow-lg hover:shadow-xl active:scale-95"
             >
               Try Again
             </button>
@@ -283,7 +311,9 @@ const Results = () => {
         <div className="space-y-6">
           {Object.entries(resultData).map(([level, levelData]) => (
             <div key={level} 
-              className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-blue-300 hover:scale-[1.01]">
+              className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:bg-white/90 dark:hover:bg-slate-800/90 animate-slide-up">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              <div className="absolute top-2 right-2 w-8 h-8 bg-blue-400/20 rounded-full blur-sm group-hover:blur-md transition-all duration-300 pointer-events-none"></div>
               {/* Level Header */}
               <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -328,7 +358,9 @@ const Results = () => {
                     
                     return (
                       <div key={semesterId} 
-                        className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                        className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.005] hover:bg-white/90 dark:hover:bg-slate-800/90">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <div className="absolute top-1 right-1 w-6 h-6 bg-indigo-400/20 rounded-full blur-sm group-hover:blur-md transition-all duration-300 pointer-events-none"></div>
                         {/* Semester Header */}
                         <button
                           onClick={() => toggleSemester(semesterId)}
@@ -372,11 +404,12 @@ const Results = () => {
                               {/* Table Rows - Card Style */}
                               {semesterData.subjects.map((subject, index) => (
                                 <div key={subject.code || index} 
-                                  className={`grid grid-cols-1 lg:grid-cols-6 gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
+                                  className={`group relative overflow-hidden grid grid-cols-1 lg:grid-cols-6 gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
                                     highlightedSubject === subject.code 
                                       ? 'bg-yellow-50 border-yellow-300 shadow-lg' 
                                       : 'bg-white border-gray-200 hover:bg-gray-50'
                                   }`}>
+                                  <div className="absolute inset-0 bg-gradient-to-br from-slate-500/5 to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                   {/* Mobile Labels */}
                                   <div className="lg:col-span-1 flex items-center gap-2">
                                     <span className="text-xs text-blue-600 font-medium lg:hidden">Code:</span>
@@ -447,9 +480,10 @@ const Results = () => {
                             )}
 
                             {!canDownload(semesterData.subjects) && (
-                              <div className="flex items-center space-x-2 pt-6 border-t-2 border-gray-200 text-sm text-amber-700 bg-amber-50 p-4 rounded-xl border border-amber-200">
-                                <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
-                                <span className="font-medium">Download will be available when at least 50% of results are published</span>
+                              <div className="group relative overflow-hidden flex items-center space-x-2 pt-6 border-t-2 border-gray-200 text-sm text-amber-700 bg-amber-50/80 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 transition-all duration-300 hover:shadow-md hover:bg-amber-50/90 dark:hover:bg-amber-900/30">
+                                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 relative z-10" />
+                                <span className="font-medium relative z-10">Download will be available when at least 50% of results are published</span>
                               </div>
                             )}
                           </div>
@@ -463,6 +497,7 @@ const Results = () => {
           ))}
         </div>
       )}
+      </div>
       </div>
     </div>
   );

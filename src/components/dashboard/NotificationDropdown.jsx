@@ -110,19 +110,19 @@ const NotificationDropdown = ({ notifications = [], loading = false, onClose, on
   };
 
   return (
-    <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl py-2 z-10 border border-gray-100">
-      <div className="px-4 py-2 border-b border-gray-100">
+    <div className="w-96 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 rounded-xl shadow-2xl py-3 z-50 border border-white/20 dark:border-slate-700/50">
+      <div className="px-4 py-3 border-b border-white/20 dark:border-slate-700/50">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
           <Link 
             to="/dash/notifications" 
-            className="text-xs text-blue-600 hover:text-blue-700"
+            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             onClick={onClose}
           >
             View All
           </Link>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-slate-600 dark:text-slate-200 mt-1">
           {unreadNotifications.length} unread notification{unreadNotifications.length !== 1 ? 's' : ''}
         </p>
       </div>
@@ -138,20 +138,20 @@ const NotificationDropdown = ({ notifications = [], loading = false, onClose, on
         {/* Empty State */}
         {!loading && notifications.length === 0 && (
           <div className="text-center py-8 px-4">
-            <BellIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No notifications yet</p>
+            <BellIcon className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">No notifications yet</p>
           </div>
         )}
 
         {/* Unread Notifications */}
         {!loading && unreadNotifications.length > 0 && (
-          <div className="px-4 py-2">
-            <h4 className="text-xs font-medium text-gray-500 mb-2">NEW</h4>
+          <div className="px-4 py-3">
+            <h4 className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">NEW</h4>
             <div className="space-y-2">
               {unreadNotifications.map((notification) => (
                 <div 
                   key={notification._id} 
-                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg group relative cursor-pointer"
+                  className="flex items-start space-x-3 p-2.5 hover:bg-white/40 dark:hover:bg-slate-700/40 rounded-lg group relative cursor-pointer transition-colors"
                   onClick={() => {
                     if (notification.link) {
                       onClose();
@@ -161,19 +161,19 @@ const NotificationDropdown = ({ notifications = [], loading = false, onClose, on
                 >
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-2">{notification.title}</p>
-                    <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{notification.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatTime(notification.createdAt)}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-2">{notification.title}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-0.5">{notification.message}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{formatTime(notification.createdAt)}</p>
                   </div>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onMarkAsRead(notification._id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-50 rounded-full"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-full"
                     title="Mark as read"
                   >
-                    <CheckCircleIcon className="h-4 w-4 text-blue-600" />
+                    <CheckCircleIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </button>
                 </div>
               ))}
@@ -183,13 +183,13 @@ const NotificationDropdown = ({ notifications = [], loading = false, onClose, on
 
         {/* Read Notifications */}
         {!loading && recentReadNotifications.length > 0 && (
-          <div className="px-4 py-2">
-            <h4 className="text-xs font-medium text-gray-500 mb-2">EARLIER</h4>
+          <div className="px-4 py-3">
+            <h4 className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">EARLIER</h4>
             <div className="space-y-2">
               {recentReadNotifications.map((notification) => (
                 <div 
                   key={notification._id} 
-                  className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer opacity-60"
+                  className="flex items-start space-x-3 p-2.5 hover:bg-white/40 dark:hover:bg-slate-700/40 rounded-lg cursor-pointer opacity-70 transition-colors"
                   onClick={() => {
                     if (notification.link) {
                       onClose();
@@ -199,9 +199,9 @@ const NotificationDropdown = ({ notifications = [], loading = false, onClose, on
                 >
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-2">{notification.title}</p>
-                    <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{notification.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatTime(notification.createdAt)}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-2">{notification.title}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-0.5">{notification.message}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{formatTime(notification.createdAt)}</p>
                   </div>
                 </div>
               ))}

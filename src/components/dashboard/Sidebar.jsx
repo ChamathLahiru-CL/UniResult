@@ -9,6 +9,7 @@ import {
   ClipboardDocumentIcon, NewspaperIcon
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '../../context/NotificationContext';
+import logo from '../../assets/images/logo.png';
 
 /**
  * Sidebar component for dashboard navigation
@@ -116,18 +117,28 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
   };
 
   return (
-    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+    <div className={`h-full bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
       } ${isMobile ? 'shadow-xl' : ''}`}>
 
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-white/20 dark:border-slate-700/50 flex flex-col">
+
       {/* Header with brand logo and mobile close button */}
-      <div className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4">
+      <div className="h-16 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-b border-white/20 dark:border-slate-700/50 flex items-center justify-center px-4 relative">
         {!isCollapsed && (
           <Link
             to="/dash"
             className="flex items-center focus:outline-none"
             onClick={() => isMobile && onCloseMobile && onCloseMobile()}
           >
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold flex items-center">
+              <img src={logo} alt="UniResult Logo" className="h-12 w-12" />
               <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent drop-shadow-md">Uni</span>
               <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-extrabold drop-shadow-md">Result</span>
             </h1>
@@ -152,7 +163,7 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
                 onCloseMobile();
               }
             }}
-            className="p-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="absolute right-4 p-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Close menu"
             type="button"
           >
@@ -168,12 +179,12 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
             <button
               onClick={() => handleNavigation(item.path)}
               className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${isActive(item.path)
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                  ? 'bg-blue-100/80 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-md'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
             >
               <div className="flex items-center justify-center relative">
-                <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-700' : 'text-gray-500 group-hover:text-blue-600'
+                <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'
                   }`} />
                 {item.badge > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-600 text-white text-xs flex items-center justify-center rounded-full">
@@ -206,19 +217,19 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
       </nav>
 
       {/* Footer navigation section */}
-      <div className="mt-auto border-t border-gray-200 bg-gray-50">
+      <div className="mt-auto border-t border-white/20 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
         <div className="px-3 py-4">
           {footerItems.map((item) => (
             <div key={item.name} className="relative group">
               <button
                 onClick={() => handleNavigation(item.path)}
                 className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-2.5 rounded-lg transition-all duration-200 group relative focus:outline-none ${isActive(item.path)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                    ? 'bg-blue-100/80 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-md'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400'
                   } mb-1 last:mb-0`}
               >
                 <div className="flex items-center justify-center">
-                  <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-700' : 'text-gray-500 group-hover:text-blue-600'
+                  <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'
                     }`} />
                 </div>
 
@@ -246,7 +257,8 @@ const Sidebar = ({ isCollapsed, isMobile, onCloseMobile }) => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default Sidebar;

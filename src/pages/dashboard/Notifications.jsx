@@ -191,7 +191,7 @@ const Notifications = () => {
           <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
             Notifications
           </h1>
-          <p className="text-gray-600 text-xs sm:text-sm font-medium">
+          <p className="text-gray-600 dark:text-white text-xs sm:text-sm font-medium">
             Stay updated with your latest academic activities
           </p>
         </div>
@@ -226,19 +226,47 @@ const Notifications = () => {
   }
 
   return (
-    <>
-      <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
         {/* Page Header */}
-        <div className="relative mb-6 sm:mb-8">
-          <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-          <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-          <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-          <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
-            Notifications
-          </h1>
-          <p className="text-gray-600 text-xs sm:text-sm font-medium">
-            Stay updated with your latest academic activities
-          </p>
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                <BellIcon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Notifications
+                </h1>
+                <p className="text-gray-600 dark:text-white text-xs sm:text-sm font-medium">
+                  Stay updated with your latest academic activities
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-md border border-white/20">
+              <div className="text-center">
+                <div className="text-lg font-bold text-blue-600">{unreadCount}</div>
+                <div className="text-[11px] text-gray-600">Unread</div>
+              </div>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-1 rounded-lg shadow-sm hover:opacity-95"
+                >
+                  Mark all
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -383,7 +411,7 @@ const Notifications = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

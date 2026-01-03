@@ -92,25 +92,34 @@ export const markAllAsRead = asyncHandler(async (req, res) => {
         }
     }
     
+    // Build the same query as getForUser method
     const query = {
         isActive: true,
         $or: [
-            { 'recipients.faculty': userWithFaculty.faculty },
-            { 'recipients.faculty': null } // Notifications for all faculties
+            // Role-specific notifications
+            { 'recipients.role': userWithFaculty.role },
+            { 'recipients.role': null }, // For backward compatibility
+            // Faculty-specific notifications (for students)
+            { 
+                'recipients.role': { $in: [null, 'student'] },
+                $or: [
+                    { 'recipients.faculty': userWithFaculty.faculty },
+                    { 'recipients.faculty': null }
+                ]
+            }
         ]
     };
     
-    if (userWithFaculty.year) {
+    // For students, filter by year if specified in recipients
+    if (userWithFaculty.role === 'student' && userWithFaculty.year) {
         const yearCondition = [
             { 'recipients.year': userWithFaculty.year },
             { 'recipients.year': null }
         ];
-        // Combine with existing $or condition
         query.$and = [
-            { $or: query.$or },
+            query,
             { $or: yearCondition }
         ];
-        delete query.$or;
     }
     
     const notifications = await Notification.find(query);

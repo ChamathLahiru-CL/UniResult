@@ -270,17 +270,36 @@ const CompliancePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-6 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-3 sm:mb-4">
-            <ClipboardDocumentIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <ClipboardDocumentIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-cyan-800 dark:from-slate-200 dark:via-blue-200 dark:to-cyan-200 bg-clip-text text-transparent">
+                    Compliance Center
+                  </h1>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+                    Submit new compliance or view your submission history
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Compliance Center</h2>
-          <p className="text-sm sm:text-base text-gray-600 max-w-lg mx-auto">
-            Submit new compliance or view your submission history
-          </p>
         </div>
 
         {/* Tabs */}
@@ -777,6 +796,7 @@ const CompliancePage = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

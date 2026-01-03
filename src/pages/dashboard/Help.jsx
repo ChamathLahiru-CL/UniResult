@@ -98,7 +98,7 @@ const Help = () => {
 
       {/* Help Search Section */}
       <div className="mb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-100 mb-8 text-center">
           How can we help you?
         </h1>
         <HelpSearch onSearch={handleSearch} query={searchQuery} />
@@ -106,19 +106,19 @@ const Help = () => {
 
       {/* Quick Help Section */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Quick Help</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-6">Quick Help</h2>
         <QuickHelp />
       </section>
 
       {/* FAQ Section */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-6">Frequently Asked Questions</h2>
         <FAQ />
       </section>
 
       {/* Contact Support Section */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Need More Help?</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-6">Need More Help?</h2>
         <ContactSupport />
       </section>
 

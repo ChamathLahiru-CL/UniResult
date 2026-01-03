@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopBar from '../components/dashboard/TopBar';
 import Footer from '../components/dashboard/Footer';
 import { NotificationProvider } from '../context/NotificationContext';
+import logo from '../assets/images/logo.png';
 
 /**
  * Main Dashboard Layout component
@@ -37,19 +38,29 @@ const DashboardLayout = () => {
   };
 
   // Toggle sidebar collapse (minimized state) - for desktop only
-  const toggleCollapse = () => {
+  const toggleCollapse = useCallback(() => {
     if (!isMobile) {
-      setIsCollapsed(!isCollapsed);
+      setIsCollapsed(prev => !prev);
     }
-  };
+  }, [isMobile]);
+
+  // Listen for sidebar toggle events from the sidebar button
+  useEffect(() => {
+    const handleToggleSidebar = () => {
+      toggleCollapse();
+    };
+
+    window.addEventListener('toggleSidebar', handleToggleSidebar);
+    return () => window.removeEventListener('toggleSidebar', handleToggleSidebar);
+  }, [toggleCollapse]);
 
   return (
     <NotificationProvider>
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/30 to-white">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         {/* Mobile backdrop */}
         {isMobile && isMobileMenuOpen && (
           <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
@@ -78,15 +89,17 @@ const DashboardLayout = () => {
           {/* Top bar with toggle buttons for sidebar */}
           <TopBar 
             toggleMobileMenu={toggleMobileMenu}
-            toggleCollapse={toggleCollapse}
-            isCollapsed={isCollapsed}
             isMobile={isMobile}
             isMobileMenuOpen={isMobileMenuOpen}
           />
           
           {/* Page content - rendered via React Router outlet */}
-          <main className="flex-grow p-6 overflow-y-auto bg-[#f1f9ff]">
-            <div className="max-w-full">
+          <main className="flex-grow p-6 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative">
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none"
+              style={{ backgroundImage: `url(${logo})` }}
+            ></div>
+            <div className="max-w-full relative z-10">
               <Outlet />
             </div>
           </main>

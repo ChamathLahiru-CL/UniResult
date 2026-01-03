@@ -29,7 +29,7 @@ import NotificationDropdown from './NotificationDropdown';
  * - Responsive design
  * - Click-outside behavior for dropdowns
  */
-const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMobileMenuOpen }) => {
+const TopBar = ({ toggleMobileMenu, isMobile, isMobileMenuOpen }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { unreadCount, decreaseCount } = useNotifications();
@@ -225,8 +225,8 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
 
   return (
     <>
-      <header className="bg-white border-b border-gray-100">
-        <div className="flex justify-between items-center h-14 px-3">
+      <header className="bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-b border-white/20 dark:border-slate-700/50">
+        <div className="flex justify-between items-center h-16 px-4 sm:px-6 lg:px-8">
           {/* Left section with logo and toggle buttons */}
           <div className="flex items-center space-x-3">
             {/* Mobile menu button */}
@@ -243,24 +243,7 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                   <Bars3Icon className="h-6 w-6" />
                 )}
               </button>
-            ) : (
-              // Desktop collapse button
-              <button
-                type="button"
-                className="group flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 border border-blue-100 hover:border-blue-200 focus:outline-none transition-all duration-200 hover:shadow-md relative"
-                onClick={toggleCollapse}
-                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-              >
-                <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 rounded-lg transition-opacity duration-200"></div>
-                <div className="flex flex-col items-center">
-                  {isCollapsed ? (
-                    <ChevronRightIcon className="h-5 w-5 text-blue-600" />
-                  ) : (
-                    <ChevronLeftIcon className="h-5 w-5 text-blue-600" />
-                  )}
-                </div>
-              </button>
-            )}
+            ) : null}
 
             {/* Logo */}
             <Link to="/dash" className="flex items-center ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200">
@@ -275,18 +258,18 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
           <div className="flex items-center space-x-4">
             {/* Date and Time Display - Hidden on mobile */}
             <div className="hidden md:flex items-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-5 w-5 text-gray-100">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
               </svg>
-              <span className="text-sm">{formatDateTime(currentDateTime).formattedDate}</span>
-              <span className="text-sm">|</span>
-              <span className="text-sm">{formatDateTime(currentDateTime).formattedTime}</span>
+              <span className="text-sm text-gray-100">{formatDateTime(currentDateTime).formattedDate}</span>
+              <span className="text-sm text-gray-100">|</span>
+              <span className="text-sm text-gray-100">{formatDateTime(currentDateTime).formattedTime}</span>
             </div>
 
             {/* Notification button */}
             <div className="relative">
               <button 
-                className="notification-button p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 relative"
+                className="notification-button p-1.5 text-gray-100 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 relative"
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               >
                 <BellIcon className="h-5 w-5" />
@@ -299,7 +282,7 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
               
               {/* Notification Dropdown */}
               {isNotificationOpen && (
-                <div className="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-10">
+                <div className="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl z-50 top-full">
                   <NotificationDropdown 
                     notifications={notifications}
                     loading={loadingNotifications}
@@ -313,7 +296,7 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
             {/* User profile button and dropdown */}
             <div className="relative">
               <button 
-                className="user-button flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="user-button flex items-center space-x-2 p-2 hover:bg-gray-600 rounded-lg transition-colors duration-200"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
                 {userData.avatar ? (
@@ -324,20 +307,20 @@ const TopBar = ({ toggleMobileMenu, toggleCollapse, isCollapsed, isMobile, isMob
                   />
                 ) : (
                   <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <UserCircleIcon className="h-7 w-7 text-blue-600" />
+                    <UserCircleIcon className="h-7 w-7 text-gray-100" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700 hidden sm:block truncate max-w-[120px]">
+                <span className="text-sm font-medium text-gray-200 hidden sm:block truncate max-w-[120px]">
                   {isLoadingUser ? 'Loading...' : userData.name}
                 </span>
-                <svg className="h-5 w-5 text-gray-500 hidden sm:block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-gray-200 hidden sm:block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
               {/* User Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="user-dropdown absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-10">
+                <div className="user-dropdown absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl py-2 z-50 top-full">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-sm font-medium text-gray-800">{userData.name}</p>
                     <p className="text-xs text-gray-500 truncate">{userData.email}</p>
