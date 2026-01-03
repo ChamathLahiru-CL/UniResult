@@ -50,7 +50,7 @@ const notificationSchema = new mongoose.Schema({
         },
         role: {
             type: String,
-            enum: ['student', 'admin', 'examDiv', 'examdivision'],
+            enum: ['student', 'admin', 'examDiv', 'examdivision', null],
             default: null // null means for students
         }
     },

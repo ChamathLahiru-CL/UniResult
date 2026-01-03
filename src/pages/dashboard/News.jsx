@@ -348,21 +348,30 @@ const News = () => {
 
     if (loading) {
         return (
-            <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
-                <div className="relative mb-6 sm:mb-8">
-                    <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-                    <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-                    <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-                    <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
-                        News & Announcements
-                    </h1>
-                    <p className="text-gray-600 text-xs sm:text-sm font-medium">
-                        Stay informed with the latest updates from Admin and Exam Division
-                    </p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+                {/* Animated Background Elements */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
                 </div>
-                <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                    <span className="ml-3 text-gray-600">Loading news...</span>
+
+                <div className="relative z-10 p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+                    <div className="relative mb-6 sm:mb-8">
+                        <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+                        <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+                        <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+                        <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+                            News & Announcements
+                        </h1>
+                        <p className="text-gray-600 dark:text-white text-xs sm:text-sm font-medium">
+                            Stay informed with the latest updates from Admin and Exam Division
+                        </p>
+                    </div>
+                    <div className="flex justify-center items-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <span className="ml-3 text-gray-600 dark:text-white">Loading news...</span>
+                    </div>
                 </div>
             </div>
         );
@@ -370,7 +379,59 @@ const News = () => {
 
     if (error) {
         return (
-            <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+                {/* Animated Background Elements */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+                </div>
+
+                <div className="relative z-10 p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+                    <div className="relative mb-6 sm:mb-8">
+                        <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+                        <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+                        <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+                        <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+                            News & Announcements
+                        </h1>
+                        <p className="text-gray-600 dark:text-white text-xs sm:text-sm font-medium">
+                            Stay informed with the latest updates from Admin and Exam Division
+                        </p>
+                    </div>
+                    <div className="text-center py-12 px-4 rounded-2xl bg-red-50 border-2 border-red-200">
+                        <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-red-100 mb-3 sm:mb-4">
+                            <svg className="h-7 w-7 sm:h-8 sm:w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-base sm:text-lg font-semibold text-red-900 mb-2">Error Loading News</h3>
+                        <p className="text-xs sm:text-sm text-red-700 max-w-sm mx-auto mb-4">
+                            {error}
+                        </p>
+                        <button
+                            onClick={loadNews}
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+            {/* Animated Background Elements */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-4000"></div>
+            </div>
+
+            <div className="relative z-10 p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+                {/* Page Header */}
                 <div className="relative mb-6 sm:mb-8">
                     <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
                     <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
@@ -378,45 +439,10 @@ const News = () => {
                     <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                         News & Announcements
                     </h1>
-                    <p className="text-gray-600 text-xs sm:text-sm font-medium">
+                    <p className="text-gray-600 dark:text-white text-xs sm:text-sm font-medium">
                         Stay informed with the latest updates from Admin and Exam Division
                     </p>
                 </div>
-                <div className="text-center py-12 px-4 rounded-2xl bg-red-50 border-2 border-red-200">
-                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-red-100 mb-3 sm:mb-4">
-                        <svg className="h-7 w-7 sm:h-8 sm:w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                    </div>
-                    <h3 className="text-base sm:text-lg font-semibold text-red-900 mb-2">Error Loading News</h3>
-                    <p className="text-xs sm:text-sm text-red-700 max-w-sm mx-auto mb-4">
-                        {error}
-                    </p>
-                    <button
-                        onClick={loadNews}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200"
-                    >
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="animate-fadeIn p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
-            {/* Page Header */}
-            <div className="relative mb-6 sm:mb-8">
-                <div className="absolute top-0 left-0 w-12 sm:w-16 h-12 sm:h-16 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-                <div className="absolute top-4 right-16 w-16 sm:w-20 h-12 sm:h-16 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-                <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-                <h1 className="relative text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">
-                    News & Announcements
-                </h1>
-                <p className="text-gray-600 text-xs sm:text-sm font-medium">
-                    Stay informed with the latest updates from Admin and Exam Division
-                </p>
-            </div>
 
             {/* Back to Dashboard Link */}
             <div className="mb-4">
@@ -632,6 +658,7 @@ const News = () => {
                         </p>
                     </div>
                 )}
+            </div>
             </div>
         </div>
     );
